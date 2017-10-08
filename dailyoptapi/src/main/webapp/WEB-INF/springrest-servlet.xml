@@ -7,6 +7,7 @@
 
  <mvc:annotation-driven/>
 <context:component-scan base-package="test" />
-
+<context:component-scan base-package="routingdelivery" />
+<context:component-scan base-package="tourrecommendation" />
 </beans>
 
