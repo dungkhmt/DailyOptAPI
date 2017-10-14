@@ -13,7 +13,7 @@ import tourrecommendation.service.TourRecommender;
 
 @RestController
 public class TourRecommendationController {
-	@RequestMapping(value = "/basic", method = RequestMethod.POST)
+	@RequestMapping(value = "/compute-tour", method = RequestMethod.POST)
 	public TourSolution getFields(HttpServletRequest request, @RequestBody TourInput input) {
 		// TODO
 		TourRecommender solver = new TourRecommender();
