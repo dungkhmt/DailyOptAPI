@@ -19,6 +19,6 @@ public class Utility {
 	
 	
 	public static void main(String[] args){
-		System.out.println(distance("2015-12-22","2015-12-21"));
+		//System.out.println(distance("2015-12-22","2015-12-21"));
 	}
 }

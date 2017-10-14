@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import com.dailyopt.VRPLoad3D.service.RoutingLoad3DSolver;
-
 import localsearch.domainspecific.packing.models.Model3D;
 import localsearch.domainspecific.packing.entities.*;
 
