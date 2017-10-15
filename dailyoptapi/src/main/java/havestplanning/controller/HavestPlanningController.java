@@ -41,6 +41,7 @@ import havestplanning.model.vn.MachineSettingVN;
 import havestplanning.model.vn.PlantStandardVN;
 import havestplanning.model.vn.ReturnAddFieldsVN;
 import havestplanning.model.vn.ReturnSetPlantStandardVN;
+import havestplanning.model.vn.RunParametersVN;
 import havestplanning.solver.Solver;
 import havestplanning.solver.multistepsplitfield.SolutionChecker;
 import havestplanning.solver.multistepsplitfield.SolverMultiStepSplitFields;
@@ -422,9 +423,9 @@ public class HavestPlanningController {
 				FieldVN f = fieldList.getFields()[j];
 				if (FL.getFields() != null)
 					for (int i = 0; i < FL.getFields().length; i++) {
-						if (f.getMA_RUONGMIA().equals(FL.getFields()[i].getMA_RUONGMIA())) {
+						if (f.getMa_ruongmia().equals(FL.getFields()[i].getMa_ruongmia())) {
 							duplication = true;
-							codes += f.getMA_RUONGMIA() + ", ";
+							codes += f.getMa_ruongmia() + ", ";
 							break;
 						}
 					}
@@ -493,7 +494,7 @@ public class HavestPlanningController {
 				FieldVN f = FL.getFields()[i];
 				boolean exists = false;
 				for (int j = 0; j < fieldList.getFields().length; j++) {
-					if (fieldList.getFields()[j].getCode().equals(f.getMA_RUONGMIA())) {
+					if (fieldList.getFields()[j].getCode().equals(f.getMa_ruongmia())) {
 						exists = true;
 						break;
 					}
@@ -580,14 +581,14 @@ public class HavestPlanningController {
 		}
 		for (int i = 0; i < input.getFields().length; i++) {
 			FieldVN f = input.getFields()[i];
-			if (f.getMA_GIONGMIA() == null || f.getMA_GIONGMIA().equals(""))
-				f.setMA_GIONGMIA("-");
-			if (f.getMA_LOAIDAT() == null || f.getMA_LOAIDAT().equals(""))
-				f.setMA_LOAIDAT("-");
-			if (f.getMA_GOCMIA() == null || f.getMA_GOCMIA().equals(""))
-				f.setMA_GOCMIA("-");
-			if (f.getMA_LOAIMIA() == null || f.getMA_LOAIMIA().equals(""))
-				f.setMA_LOAIMIA("-");
+			if (f.getMa_giongmia() == null || f.getMa_giongmia().equals(""))
+				f.setMa_giongmia("-");
+			if (f.getMa_loaidat() == null || f.getMa_loaidat().equals(""))
+				f.setMa_loaidat("-");
+			if (f.getMa_gocmia() == null || f.getMa_gocmia().equals(""))
+				f.setMa_gocmia("-");
+			if (f.getMa_loaimia() == null || f.getMa_loaimia().equals(""))
+				f.setMa_loaimia("-");
 		}
 		try {
 			PrintWriter out = new PrintWriter(path);
@@ -638,7 +639,7 @@ public class HavestPlanningController {
 			out.print(gson.toJson(input));
 			out.close();
 
-			return new ReturnSetPlantStandardVN(input.getSUGAR_TIEUCHUAN_CCS().length);
+			return new ReturnSetPlantStandardVN(input.getSugar_tieuchuan_ccs().length);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -681,6 +682,8 @@ public class HavestPlanningController {
 			out.print(gson.toJson(input));
 			out.close();
 
+			System.out.println(gson.toJson(input));
+			
 			return input;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -773,7 +776,7 @@ public class HavestPlanningController {
 
 	@RequestMapping(value = "/havest-plan/compute-vn", method = RequestMethod.POST)
 	public HavestPlanningSolutionVN computeVN(HttpServletRequest request
-	 , @RequestBody RunParameters param
+	 , @RequestBody RunParametersVN param
 	) {
 		String path = request.getServletContext().getRealPath(
 				"ezRoutingAPIROOT");
@@ -792,8 +795,8 @@ public class HavestPlanningController {
 			ex.printStackTrace();
 		}
 
-		int timeLimit = param.getTimeLimit();
-		int maxNbSteps = param.getNbSteps();
+		int timeLimit = param.getThoi_gian_chay();
+		int maxNbSteps = 1;//param.getNbSteps();
 		Gson gson = new Gson();
 		try {
 			FieldListVN fieldListVN = gson.fromJson(new FileReader(fieldFilename),
@@ -809,14 +812,14 @@ public class HavestPlanningController {
 			}
 			FieldList fieldList = new FieldList(fields);
 			
-			PlantStandardElement[] pse = new PlantStandardElement[PSVN.getSUGAR_TIEUCHUAN_CCS().length];
+			PlantStandardElement[] pse = new PlantStandardElement[PSVN.getSugar_tieuchuan_ccs().length];
 			for(int i = 0; i < pse.length; i++){
-				pse[i] = PSVN.getSUGAR_TIEUCHUAN_CCS()[i].convert();
+				pse[i] = PSVN.getSugar_tieuchuan_ccs()[i].convert();
 			}
 			PlantStandard ps = new PlantStandard(pse);
 			
-			int int_min_load = (int)MSVN.getCONGSUAT_MIN();
-			int int_max_load = (int)MSVN.getCONGSUAT_MAX();
+			int int_min_load = (int)MSVN.getCongsuat_min();
+			int int_max_load = (int)MSVN.getCongsuat_max();
 			MachineSetting ms = new MachineSetting(int_min_load, int_max_load);
 			
 			HavestPlanningInput input = new HavestPlanningInput(
@@ -830,11 +833,13 @@ public class HavestPlanningController {
 			String des = input.checkConsistency(); 
 			if(!des.equals("OK")){
 				HavestPlanningSolutionVN ret_sol = new HavestPlanningSolutionVN();
-				ret_sol.setMO_TA(des);
+				ret_sol.setMo_ta(des);
 				return ret_sol;
 			}
-			HavestPlanningSolution sol = solver.solve(input, maxNbSteps, timeLimit,param.getDeltaPlantDateLeft(),
-					param.getDeltaPlantDateRight(), param.getStartDatePlan());
+			int delta_left = 20;
+			int delta_right = 20;
+			HavestPlanningSolution sol = solver.solve(input, maxNbSteps, timeLimit,delta_left,
+					delta_right, param.getNgay_dat_dau());
 			
 			
 			HavestPlanningSolutionVN solvn = new HavestPlanningSolutionVN();

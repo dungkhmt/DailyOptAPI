@@ -1,20 +1,24 @@
 package havestplanning.model.vn;
 
 public class PlantStandardVN {
-	private PlantStandardElementVN[] SUGAR_TIEUCHUAN_CCS;
+	private PlantStandardElementVN[] sugar_tieuchuan_ccs;
 
-	public PlantStandardElementVN[] getSUGAR_TIEUCHUAN_CCS() {
-		return SUGAR_TIEUCHUAN_CCS;
+
+	public PlantStandardElementVN[] getSugar_tieuchuan_ccs() {
+		return sugar_tieuchuan_ccs;
 	}
 
-	public void setSUGAR_TIEUCHUAN_CCS(PlantStandardElementVN[] sUGAR_TIEUCHUAN_CCS) {
-		SUGAR_TIEUCHUAN_CCS = sUGAR_TIEUCHUAN_CCS;
+
+	public void setSugar_tieuchuan_ccs(PlantStandardElementVN[] sugar_tieuchuan_ccs) {
+		this.sugar_tieuchuan_ccs = sugar_tieuchuan_ccs;
 	}
 
-	public PlantStandardVN(PlantStandardElementVN[] sUGAR_TIEUCHUAN_CCS) {
+
+	public PlantStandardVN(PlantStandardElementVN[] sugar_tieuchuan_ccs) {
 		super();
-		SUGAR_TIEUCHUAN_CCS = sUGAR_TIEUCHUAN_CCS;
+		this.sugar_tieuchuan_ccs = sugar_tieuchuan_ccs;
 	}
+
 
 	public PlantStandardVN() {
 		super();

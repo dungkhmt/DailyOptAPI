@@ -3,64 +3,66 @@ package havestplanning.model.vn;
 import havestplanning.model.PlantStandardElement;
 
 public class PlantStandardElementVN {
-	private String GIONG_MIA;
-	private String GOC_MIA;
-	private String LOAI_MIA;
-	private String LOAI_DAT;
-	private int SONGAY_TRONGDON;
-	private float CCS;
+	private String giong_mia;
+	private String goc_mia;
+	private String loai_mia;
+	private String loai_dat;
+	private int songay_trongdon;
+	private float ccs;
 	
 	public String convertCategory(){
-		return GIONG_MIA + "-" + GOC_MIA + "-" + LOAI_MIA;
+		return giong_mia + "-" + goc_mia + "-" + loai_mia;
 	}
 	public PlantStandardElement convert(){
-		return new PlantStandardElement(convertCategory(), LOAI_DAT, SONGAY_TRONGDON, CCS);
+		return new PlantStandardElement(convertCategory(), loai_dat, songay_trongdon, ccs);
 	}
-	public String getLOAI_MIA() {
-		return LOAI_MIA;
-	}
-	public void setLOAI_MIA(String lOAI_MIA) {
-		LOAI_MIA = lOAI_MIA;
-	}
-	public String getLOAI_DAT() {
-		return LOAI_DAT;
-	}
-	public void setLOAI_DAT(String lOAI_DAT) {
-		LOAI_DAT = lOAI_DAT;
-	}
-	public int getSONGAY_TRONGDON() {
-		return SONGAY_TRONGDON;
-	}
-	public void setSONGAY_TRONGDON(int sONGAY_TRONGDON) {
-		SONGAY_TRONGDON = sONGAY_TRONGDON;
-	}
-	public float getCCS() {
-		return CCS;
-	}
-	public void setCCS(float cCS) {
-		CCS = cCS;
-	}
-	public String getGIONG_MIA() {
-		return GIONG_MIA;
-	}
-	public void setGIONG_MIA(String gIONG_MIA) {
-		GIONG_MIA = gIONG_MIA;
-	}
-	public String getGOC_MIA() {
-		return GOC_MIA;
-	}
-	public void setGOC_MIA(String gOC_MIA) {
-		GOC_MIA = gOC_MIA;
-	}
-	public PlantStandardElementVN(String gIONG_MIA, String gOC_MIA,
-			String lOAI_MIA, String lOAI_DAT, int sONGAY_TRONGDON, float cCS) {
+
+	
+	public PlantStandardElementVN(String giong_mia, String goc_mia,
+			String loai_mia, String loai_dat, int songay_trongdon, float ccs) {
 		super();
-		GIONG_MIA = gIONG_MIA;
-		GOC_MIA = gOC_MIA;
-		LOAI_MIA = lOAI_MIA;
-		LOAI_DAT = lOAI_DAT;
-		SONGAY_TRONGDON = sONGAY_TRONGDON;
-		CCS = cCS;
+		this.giong_mia = giong_mia;
+		this.goc_mia = goc_mia;
+		this.loai_mia = loai_mia;
+		this.loai_dat = loai_dat;
+		this.songay_trongdon = songay_trongdon;
+		this.ccs = ccs;
+	}
+	public String getGiong_mia() {
+		return giong_mia;
+	}
+	public void setGiong_mia(String giong_mia) {
+		this.giong_mia = giong_mia;
+	}
+	public String getGoc_mia() {
+		return goc_mia;
+	}
+	public void setGoc_mia(String goc_mia) {
+		this.goc_mia = goc_mia;
+	}
+	public String getLoai_mia() {
+		return loai_mia;
+	}
+	public void setLoai_mia(String loai_mia) {
+		this.loai_mia = loai_mia;
+	}
+	public String getLoai_dat() {
+		return loai_dat;
+	}
+	public void setLoai_dat(String loai_dat) {
+		this.loai_dat = loai_dat;
+	}
+	public int getSongay_trongdon() {
+		return songay_trongdon;
+	}
+	public void setSongay_trongdon(int songay_trongdon) {
+		this.songay_trongdon = songay_trongdon;
+	}
+	public float getCcs() {
+		return ccs;
+	}
+	public void setCcs(float ccs) {
+		this.ccs = ccs;
 	}
 	public PlantStandardElementVN() {
 		super();

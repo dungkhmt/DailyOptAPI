@@ -3,50 +3,74 @@ package havestplanning.model.vn;
 import java.util.Date;
 
 public class HavestPlanningClusterVN {
-	private String KH_NGAYDON;
-	private int KH_SAN_LUONG;
-	private int KH_SO_RUONG_MIA;
+	private String kh_ngaydon;
+	private int kh_san_luong;
+	private int kh_so_ruong_mia;
 	private HavestPlanningFieldVN[] fields;
-	private double KH_CCS;
-	public String getKH_NGAYDON() {
-		return KH_NGAYDON;
+	private double kh_ccs;
+
+	
+	public String getKh_ngaydon() {
+		return kh_ngaydon;
 	}
-	public void setKH_NGAYDON(String kH_NGAYDON) {
-		KH_NGAYDON = kH_NGAYDON;
+
+
+	public void setKh_ngaydon(String kh_ngaydon) {
+		this.kh_ngaydon = kh_ngaydon;
 	}
-	public int getKH_SAN_LUONG() {
-		return KH_SAN_LUONG;
+
+
+	public int getKh_san_luong() {
+		return kh_san_luong;
 	}
-	public void setKH_SAN_LUONG(int kH_SAN_LUONG) {
-		KH_SAN_LUONG = kH_SAN_LUONG;
+
+
+	public void setKh_san_luong(int kh_san_luong) {
+		this.kh_san_luong = kh_san_luong;
 	}
-	public int getKH_SO_RUONG_MIA() {
-		return KH_SO_RUONG_MIA;
+
+
+	public int getKh_so_ruong_mia() {
+		return kh_so_ruong_mia;
 	}
-	public void setKH_SO_RUONG_MIA(int kH_SO_RUONG_MIA) {
-		KH_SO_RUONG_MIA = kH_SO_RUONG_MIA;
+
+
+	public void setKh_so_ruong_mia(int kh_so_ruong_mia) {
+		this.kh_so_ruong_mia = kh_so_ruong_mia;
 	}
+
+
 	public HavestPlanningFieldVN[] getFields() {
 		return fields;
 	}
+
+
 	public void setFields(HavestPlanningFieldVN[] fields) {
 		this.fields = fields;
 	}
-	public double getKH_CCS() {
-		return KH_CCS;
+
+
+	public double getKh_ccs() {
+		return kh_ccs;
 	}
-	public void setKH_CCS(double kH_CCS) {
-		KH_CCS = kH_CCS;
+
+
+	public void setKh_ccs(double kh_ccs) {
+		this.kh_ccs = kh_ccs;
 	}
-	public HavestPlanningClusterVN(String kH_NGAYDON, int kH_SAN_LUONG,
-			int kH_SO_RUONG_MIA, HavestPlanningFieldVN[] fields, double kH_CCS) {
+
+
+	public HavestPlanningClusterVN(String kh_ngaydon, int kh_san_luong,
+			int kh_so_ruong_mia, HavestPlanningFieldVN[] fields, double kh_ccs) {
 		super();
-		KH_NGAYDON = kH_NGAYDON;
-		KH_SAN_LUONG = kH_SAN_LUONG;
-		KH_SO_RUONG_MIA = kH_SO_RUONG_MIA;
+		this.kh_ngaydon = kh_ngaydon;
+		this.kh_san_luong = kh_san_luong;
+		this.kh_so_ruong_mia = kh_so_ruong_mia;
 		this.fields = fields;
-		KH_CCS = kH_CCS;
+		this.kh_ccs = kh_ccs;
 	}
+
+
 	public HavestPlanningClusterVN() {
 		super();
 		// TODO Auto-generated constructor stub

@@ -1,25 +1,37 @@
 package havestplanning.model.vn;
 
 public class MachineSettingVN {
-	private float CONGSUAT_MIN;
-	private float CONGSUAT_MAX;
-	public float getCONGSUAT_MIN() {
-		return CONGSUAT_MIN;
-	}
-	public void setCONGSUAT_MIN(float cONGSUAT_MIN) {
-		CONGSUAT_MIN = cONGSUAT_MIN;
-	}
-	public float getCONGSUAT_MAX() {
-		return CONGSUAT_MAX;
-	}
-	public void setCONGSUAT_MAX(float cONGSUAT_MAX) {
-		CONGSUAT_MAX = cONGSUAT_MAX;
-	}
-	public MachineSettingVN(float cONGSUAT_MIN, float cONGSUAT_MAX) {
+	private float congsuat_min;
+	private float congsuat_max;
+
+	
+	public MachineSettingVN(float congsuat_min, float congsuat_max) {
 		super();
-		CONGSUAT_MIN = cONGSUAT_MIN;
-		CONGSUAT_MAX = cONGSUAT_MAX;
+		this.congsuat_min = congsuat_min;
+		this.congsuat_max = congsuat_max;
 	}
+
+
+	public float getCongsuat_min() {
+		return congsuat_min;
+	}
+
+
+	public void setCongsuat_min(float congsuat_min) {
+		this.congsuat_min = congsuat_min;
+	}
+
+
+	public float getCongsuat_max() {
+		return congsuat_max;
+	}
+
+
+	public void setCongsuat_max(float congsuat_max) {
+		this.congsuat_max = congsuat_max;
+	}
+
+
 	public MachineSettingVN() {
 		super();
 		// TODO Auto-generated constructor stub

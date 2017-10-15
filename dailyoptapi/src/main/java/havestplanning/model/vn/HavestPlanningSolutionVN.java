@@ -5,8 +5,8 @@ import havestplanning.model.HavestPlanningField;
 import havestplanning.model.HavestPlanningSolution;
 
 public class HavestPlanningSolutionVN {
-	private double TONG_LUONG_DUONG;
-	private String MO_TA;
+	private double tong_luong_duong;
+	private String mo_ta;
 	
 	
 	// statistics information 
@@ -33,8 +33,8 @@ public class HavestPlanningSolutionVN {
 	private HavestPlanningClusterVN[] clusters;
 
 	public void convertFrom(HavestPlanningSolution s){
-		TONG_LUONG_DUONG = s.getQuality();
-		MO_TA = s.getDescription();
+		tong_luong_duong = s.getQuality();
+		mo_ta = s.getDescription();
 		numberOfFieldsInPlan = s.getNumberOfFieldsInPlan();
 		numberOfDatesInPlan = s.getNumberOfDatesInPlan();
 		numberOfDatesInPlantStandard = s.getNumberOfDatesInPlantStandard();
@@ -73,20 +73,20 @@ public class HavestPlanningSolutionVN {
 					fields, s.getClusters()[i].getSugarQuantity());
 		}
 	}
-	public double getTONG_LUONG_DUONG() {
-		return TONG_LUONG_DUONG;
+	public double getTong_luong_duong() {
+		return tong_luong_duong;
 	}
 
-	public void setTONG_LUONG_DUONG(double tONG_LUONG_DUONG) {
-		TONG_LUONG_DUONG = tONG_LUONG_DUONG;
+	public void setTong_luong_duong(double tong_luong_duong) {
+		tong_luong_duong = tong_luong_duong;
 	}
 
-	public String getMO_TA() {
-		return MO_TA;
+	public String getMo_ta() {
+		return mo_ta;
 	}
 
-	public void setMO_TA(String mO_TA) {
-		MO_TA = mO_TA;
+	public void setMo_ta(String mo_ta) {
+		mo_ta = mo_ta;
 	}
 
 	public int getNumberOfFieldsInPlan() {
@@ -249,7 +249,7 @@ public class HavestPlanningSolutionVN {
 		this.clusters = clusters;
 	}
 
-	public HavestPlanningSolutionVN(double tONG_LUONG_DUONG, String mO_TA,
+	public HavestPlanningSolutionVN(double tong_luong_duong, String mo_ta,
 			int numberOfFieldsInPlan, int numberOfDatesInPlan,
 			int numberOfDatesInPlantStandard, int initMinQuantityDay,
 			int initMaxQuantityDay, int computedMinQuantityDay,
@@ -260,8 +260,8 @@ public class HavestPlanningSolutionVN {
 			int maxDaysLate, int maxDaysEarly, int numberOfDaysOverLoad,
 			int numberOfDaysUnderLoad, HavestPlanningClusterVN[] clusters) {
 		super();
-		TONG_LUONG_DUONG = tONG_LUONG_DUONG;
-		MO_TA = mO_TA;
+		tong_luong_duong = tong_luong_duong;
+		mo_ta = mo_ta;
 		this.numberOfFieldsInPlan = numberOfFieldsInPlan;
 		this.numberOfDatesInPlan = numberOfDatesInPlan;
 		this.numberOfDatesInPlantStandard = numberOfDatesInPlantStandard;

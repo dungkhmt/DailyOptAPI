@@ -3,67 +3,115 @@ package havestplanning.model.vn;
 import java.util.Date;
 
 public class HavestPlanningFieldVN {
-	private String MA_RUONGMIA;
-	private String NGAY_TRONGDON;
-	private float DIEN_TICH;
-	private float NANG_SUAT;
-	private float SAN_LUONG;
-	private String KH_NGAYDON;
-	private float KH_CCS;
-	public String getMA_RUONGMIA() {
-		return MA_RUONGMIA;
-	}
-	public void setMA_RUONGMIA(String mA_RUONGMIA) {
-		MA_RUONGMIA = mA_RUONGMIA;
-	}
-	public String getNGAY_TRONGDON() {
-		return NGAY_TRONGDON;
-	}
-	public void setNGAY_TRONGDON(String nGAY_TRONGDON) {
-		NGAY_TRONGDON = nGAY_TRONGDON;
-	}
-	public float getDIEN_TICH() {
-		return DIEN_TICH;
-	}
-	public void setDIEN_TICH(float dIEN_TICH) {
-		DIEN_TICH = dIEN_TICH;
-	}
-	public float getNANG_SUAT() {
-		return NANG_SUAT;
-	}
-	public void setNANG_SUAT(float nANG_SUAT) {
-		NANG_SUAT = nANG_SUAT;
-	}
-	public float getSAN_LUONG() {
-		return SAN_LUONG;
-	}
-	public void setSAN_LUONG(float sAN_LUONG) {
-		SAN_LUONG = sAN_LUONG;
-	}
-	public String getKH_NGAYDON() {
-		return KH_NGAYDON;
-	}
-	public void setKH_NGAYDON(String kH_NGAYDON) {
-		KH_NGAYDON = kH_NGAYDON;
-	}
-	public float getKH_CCS() {
-		return KH_CCS;
-	}
-	public void setKH_CCS(float kH_CCS) {
-		KH_CCS = kH_CCS;
-	}
-	public HavestPlanningFieldVN(String mA_RUONGMIA, String nGAY_TRONGDON,
-			float dIEN_TICH, float nANG_SUAT, float sAN_LUONG,
-			String kH_NGAYDON, float kH_CCS) {
+	private String ma_ruongmia;
+	private String ngay_trongdon;
+	private float dien_tich;
+	private float nang_suat;
+	private float san_luong;
+	private String kh_ngaydon;
+	private float kh_ccs;
+
+	
+	
+	public HavestPlanningFieldVN(String ma_ruongmia, String ngay_trongdon,
+			float dien_tich, float nang_suat, float san_luong,
+			String kh_ngaydon, float kh_ccs) {
 		super();
-		MA_RUONGMIA = mA_RUONGMIA;
-		NGAY_TRONGDON = nGAY_TRONGDON;
-		DIEN_TICH = dIEN_TICH;
-		NANG_SUAT = nANG_SUAT;
-		SAN_LUONG = sAN_LUONG;
-		KH_NGAYDON = kH_NGAYDON;
-		KH_CCS = kH_CCS;
+		this.ma_ruongmia = ma_ruongmia;
+		this.ngay_trongdon = ngay_trongdon;
+		this.dien_tich = dien_tich;
+		this.nang_suat = nang_suat;
+		this.san_luong = san_luong;
+		this.kh_ngaydon = kh_ngaydon;
+		this.kh_ccs = kh_ccs;
 	}
+
+
+
+	public String getMa_ruongmia() {
+		return ma_ruongmia;
+	}
+
+
+
+	public void setMa_ruongmia(String ma_ruongmia) {
+		this.ma_ruongmia = ma_ruongmia;
+	}
+
+
+
+	public String getNgay_trongdon() {
+		return ngay_trongdon;
+	}
+
+
+
+	public void setNgay_trongdon(String ngay_trongdon) {
+		this.ngay_trongdon = ngay_trongdon;
+	}
+
+
+
+	public float getDien_tich() {
+		return dien_tich;
+	}
+
+
+
+	public void setDien_tich(float dien_tich) {
+		this.dien_tich = dien_tich;
+	}
+
+
+
+	public float getNang_suat() {
+		return nang_suat;
+	}
+
+
+
+	public void setNang_suat(float nang_suat) {
+		this.nang_suat = nang_suat;
+	}
+
+
+
+	public float getSan_luong() {
+		return san_luong;
+	}
+
+
+
+	public void setSan_luong(float san_luong) {
+		this.san_luong = san_luong;
+	}
+
+
+
+	public String getKh_ngaydon() {
+		return kh_ngaydon;
+	}
+
+
+
+	public void setKh_ngaydon(String kh_ngaydon) {
+		this.kh_ngaydon = kh_ngaydon;
+	}
+
+
+
+	public float getKh_ccs() {
+		return kh_ccs;
+	}
+
+
+
+	public void setKh_ccs(float kh_ccs) {
+		this.kh_ccs = kh_ccs;
+	}
+
+
+
 	public HavestPlanningFieldVN() {
 		super();
 		// TODO Auto-generated constructor stub
