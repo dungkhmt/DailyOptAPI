@@ -186,8 +186,8 @@ public class SolverMultiStepSplitFields extends Solver {
 					+ f.getCategory() + ", plantType = " + f.getPlantType() + ", minDate = " + (minDate[i] - plantStart)
 					+ ", maxDate = " + (maxDate[i] - plantStart));
 			
-			System.out.println(name() + "::search, plantStandard = "
-					+ input.getPlantStandard());
+			//System.out.println(name() + "::search, plantStandard = "
+			//		+ input.getPlantStandard());
 			
 		}
 		int totalQuantity = 0;
