@@ -163,6 +163,9 @@ public class Solver {
 	public void mapDates() {
 		System.out.println(name() + "::mapDates, dates.length = " + dates.length + ", dates[0] = " + 
 	Utility.dateMonthYear(dates[0]) + ", dates[" + (dates.length-1) + "] = " + Utility.dateMonthYear(dates[dates.length-1]));
+		log.println(name() + "::mapDates, dates.length = " + dates.length + ", dates[0] = " + 
+				Utility.dateMonthYear(dates[0]) + ", dates[" + (dates.length-1) + "] = " + Utility.dateMonthYear(dates[dates.length-1]));
+					
 		Date lastDate = Utility.next(dates[dates.length-1],input.getPlantStandard().getMaxPeriod() + 1);
 		ArrayList<Date> dateList = new ArrayList<Date>();
 		dateList.add(dates[0]);

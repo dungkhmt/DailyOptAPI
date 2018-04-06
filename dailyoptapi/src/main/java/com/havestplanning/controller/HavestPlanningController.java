@@ -52,7 +52,8 @@ import com.google.gson.Gson;
 @RestController
 public class HavestPlanningController {
 	public static String ROOT = "C:/ezRoutingAPIROOT/havestplanning";
-
+	//public static String ROOT = "/home/tmp";
+	
 	public String name() {
 		return "HavestPlanningController";
 	}
@@ -210,6 +211,39 @@ public class HavestPlanningController {
 			//sol.sort();
 
 			return sol;
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return null;
+	}
+	@RequestMapping(value = "/havest-plan/get-fields-vn", method = RequestMethod.POST)
+	public ReturnAddFieldsVN getFieldsVN(HttpServletRequest request) {
+		String path = request.getServletContext().getRealPath(
+				"ezRoutingAPIROOT");
+
+		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
+		path = ROOT + "/fields-vn.json";
+		try {
+			String fieldFilename = path;
+			Gson gson = new Gson();
+
+			FieldListVN FL = gson.fromJson(new FileReader(fieldFilename),
+					FieldListVN.class);
+			String max_date = "0000-00-00";
+			String min_date = "3000-00-00";
+			for(FieldVN f: FL.getFields()){
+				String d = f.getNgay_trongdon();
+				if(min_date.compareTo(d) > 0) min_date = d;
+				if(max_date.compareTo(d) < 0) max_date = d;
+			}
+			System.out.println(name() + "::getFieldsVN, fieldList.sz = "
+					+ FL.getFields().length);
+
+
+			String des = "ngay_trong_don: " + min_date + " --> " + max_date;
+			return new ReturnAddFieldsVN(FL.getFields().length,
+					des, FL);
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -656,6 +690,7 @@ public class HavestPlanningController {
 		path = ROOT + "/machine-setting.json";
 
 		try {
+			System.out.println("set-machine to " + path);
 			PrintWriter out = new PrintWriter(path);
 			Gson gson = new Gson();
 			out.print(gson.toJson(input));
@@ -839,7 +874,7 @@ public class HavestPlanningController {
 			int delta_left = 20;
 			int delta_right = 20;
 			HavestPlanningSolution sol = solver.solve(input, maxNbSteps, timeLimit,delta_left,
-					delta_right, param.getNgay_dat_dau());
+					delta_right, param.getNgay_bat_dau());
 			
 			
 			HavestPlanningSolutionVN solvn = new HavestPlanningSolutionVN();
