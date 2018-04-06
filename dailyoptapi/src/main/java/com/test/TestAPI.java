@@ -15,6 +15,7 @@ public class TestAPI {
 	@RequestMapping(value = "/basic", method = RequestMethod.POST)
 	public TestSolution getFields(HttpServletRequest request, @RequestBody TestInput input) {
 		int c = input.getA() + input.getB();
+		c = c * 1000;
 		return new TestSolution(c);
 	}
 
