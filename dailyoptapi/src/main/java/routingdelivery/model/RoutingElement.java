@@ -4,7 +4,21 @@ public class RoutingElement {
 	private String code;
 	private String address;
 	private String latlng;
+	private double lat;
+	private double lng;
 	
+	public double getLat() {
+		return lat;
+	}
+	public void setLat(double lat) {
+		this.lat = lat;
+	}
+	public double getLng() {
+		return lng;
+	}
+	public void setLng(double lng) {
+		this.lng = lng;
+	}
 	public String getLatlng() {
 		return latlng;
 	}
@@ -28,6 +42,16 @@ public class RoutingElement {
 		this.code = code;
 		this.address = address;
 		this.latlng = latlng;
+	}
+	
+	public RoutingElement(String code, String address, String latlng,
+			double lat, double lng) {
+		super();
+		this.code = code;
+		this.address = address;
+		this.latlng = latlng;
+		this.lat = lat;
+		this.lng = lng;
 	}
 	public RoutingElement() {
 		super();

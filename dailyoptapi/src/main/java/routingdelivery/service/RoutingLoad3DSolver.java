@@ -96,7 +96,8 @@ public class RoutingLoad3DSolver {
 				idxVehicle++;
 				repli_vehicles[idxVehicle] = new Vehicle(input.getVehicles()[j].getWidth(), 
 						input.getVehicles()[j].getLength(), 
-						input.getVehicles()[j].getHeight(), input.getVehicles()[j].getCode());
+						input.getVehicles()[j].getHeight(), input.getVehicles()[j].getCode(),
+						input.getVehicles()[j].getLat(),input.getVehicles()[j].getLng());
 			}
 		}
 		

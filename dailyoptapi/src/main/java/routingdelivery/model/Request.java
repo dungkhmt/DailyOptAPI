@@ -11,7 +11,21 @@ public class Request {
 	
 	private String orderID;
 	private Item[] items;
+	private String earlyDeliveryTime;
+	private String lateDeliveryTime;
 	
+	public String getEarlyDeliveryTime() {
+		return earlyDeliveryTime;
+	}
+	public void setEarlyDeliveryTime(String earlyDeliveryTime) {
+		this.earlyDeliveryTime = earlyDeliveryTime;
+	}
+	public String getLateDeliveryTime() {
+		return lateDeliveryTime;
+	}
+	public void setLateDeliveryTime(String lateDeliveryTime) {
+		this.lateDeliveryTime = lateDeliveryTime;
+	}
 	public String getAddr() {
 		return addr;
 	}
@@ -30,13 +44,17 @@ public class Request {
 	public void setItems(Item[] items) {
 		this.items = items;
 	}
-	public Request(String addr, double lat, double lng, String orderID, Item[] items) {
+	
+	public Request(String addr, double lat, double lng, String orderID,
+			Item[] items, String earlyDeliveryTime, String lateDeliveryTime) {
 		super();
 		this.addr = addr;
 		this.lat = lat;
 		this.lng = lng;
 		this.orderID = orderID;
 		this.items = items;
+		this.earlyDeliveryTime = earlyDeliveryTime;
+		this.lateDeliveryTime = lateDeliveryTime;
 	}
 	public Request() {
 		super();
