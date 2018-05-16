@@ -9,6 +9,9 @@ public class Position3D {
 	private int dl;
 	private int dh;
 	
+	public boolean equals(int xw, int xl, int xh){
+		return x_w == xw && x_l == xl && x_h == xh; 
+	}
 	public String toString(){
 		return "(" + x_w + "," + x_l + "," + x_h + ")";
 	}

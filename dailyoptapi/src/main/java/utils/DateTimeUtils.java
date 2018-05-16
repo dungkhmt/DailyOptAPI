@@ -188,5 +188,11 @@ public class DateTimeUtils {
 		System.out.println(DT);
 		
 		System.out.println(DateTimeUtils.currentDate());
+		
+		System.out.println(DateTimeUtils.distanceDateTime("2018-07-10 12:02:00", "2018-05-10 10:00:30"));
+		
+		int a = (int)DateTimeUtils.dateTime2Int("2028-07-10 08:00:00");
+		System.out.println(a);
+		System.out.println(DateTimeUtils.dateTime2Int("2018-07-10 08:10:00"));
 	}
 }

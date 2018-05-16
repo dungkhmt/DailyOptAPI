@@ -43,8 +43,8 @@ import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.Gre
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.INeighborhoodExplorer;
 import localsearch.domainspecific.vehiclerouting.vrp.search.GenericLocalSearch;
 
-class MySearch extends GenericLocalSearch{
-	public MySearch(VRManager mgr){
+class CVRPSearch extends GenericLocalSearch{
+	public CVRPSearch(VRManager mgr){
 		super(mgr);
 	}
 	public String name(){
@@ -172,7 +172,7 @@ public class CVRPSolver {
 		NE.add(new GreedyCrossExchangeMoveExplorer(XR, F));
 		// NE.add(new GreedyAddOnePointMoveExplorer(XR, F));
 
-		MySearch se = new MySearch(mgr);
+		CVRPSearch se = new CVRPSearch(mgr);
 		se.setNeighborhoodExplorer(NE);
 		se.setObjectiveFunction(F);
 		se.setMaxStable(50);

@@ -6,7 +6,23 @@ public class Move3D {
 	private int l;
 	private int h;
 	private int itemID;
+	private Item3D item;
 	
+	
+	public Move3D(Position3D p, Item3D item){
+		this.position = p;
+		setItem(item);
+	}
+	public Item3D getItem() {
+		return item;
+	}
+	public void setItem(Item3D item) {
+		this.item = item;
+		this.w = item.getWidth();
+		this.l = item.getLength();
+		this.h = item.getHeight();
+		this.itemID = item.getItemID();
+	}
 	public int getItemID() {
 		return itemID;
 	}
