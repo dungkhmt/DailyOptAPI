@@ -55,19 +55,19 @@ public class MaxVR implements IFunctionVR {
 		
 		functions.get(0).getVRManager().post(this);
 	}
-	
+	@Override
 	public VRManager getVRManager() {
 		// TODO Auto-generated method stub
 		return functions.get(0).getVRManager();
 	}
 
-	
+	@Override
 	public double getValue() {
 		// TODO Auto-generated method stub
 		return value;
 	}
 
-	
+	@Override
 	public double evaluateOnePointMove(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -79,7 +79,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateTwoPointsMove(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -91,7 +91,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateTwoOptMove1(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -103,7 +103,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateTwoOptMove2(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -115,7 +115,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateTwoOptMove3(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -127,7 +127,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateTwoOptMove4(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -139,7 +139,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateTwoOptMove5(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -151,7 +151,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateTwoOptMove6(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -163,7 +163,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateTwoOptMove7(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -175,7 +175,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateTwoOptMove8(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -187,7 +187,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateOrOptMove1(Point x1, Point x2, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -199,7 +199,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateOrOptMove2(Point x1, Point x2, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -211,7 +211,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateThreeOptMove1(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -223,7 +223,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateThreeOptMove2(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -235,7 +235,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateThreeOptMove3(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -247,7 +247,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateThreeOptMove4(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -259,7 +259,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateThreeOptMove5(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -271,7 +271,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateThreeOptMove6(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -283,7 +283,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateThreeOptMove7(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -295,7 +295,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateThreeOptMove8(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -307,7 +307,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public double evaluateCrossExchangeMove(Point x1, Point y1, Point x2, Point y2) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -319,7 +319,7 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 
-	
+	@Override
 	public void initPropagation() {
 		// TODO Auto-generated method stub
 		value = 1-CBLSVR.MAX_INT;
@@ -330,164 +330,177 @@ public class MaxVR implements IFunctionVR {
 		//System.exit(-1);
 	}
 
-	
+	@Override
 	public void propagateOnePointMove(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateTwoPointsMove(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateTwoOptMove1(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateTwoOptMove2(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateTwoOptMove3(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateTwoOptMove4(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateTwoOptMove5(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateTwoOptMove6(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateTwoOptMove7(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateTwoOptMove8(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateOrOptMove1(Point x1, Point x2, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateOrOptMove2(Point x1, Point x2, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateThreeOptMove1(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateThreeOptMove2(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateThreeOptMove3(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateThreeOptMove4(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateThreeOptMove5(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateThreeOptMove6(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateThreeOptMove7(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateThreeOptMove8(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public void propagateCrossExchangeMove(Point x1, Point y1, Point x2, Point y2) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 
-	
+	@Override
 	public String name(){
 		return "Max";
 	}
-	
+	@Override
 	public void propagateTwoPointsMove(Point x1, Point x2, Point y1, Point y2) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
-	
+	@Override
 	public void propagateThreePointsMove(Point x1, Point x2, Point x3, Point y1,
 			Point y2, Point y3) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
-	
+	@Override
 	public void propagateFourPointsMove(Point x1, Point x2, Point x3, Point x4, Point y1,
 			Point y2, Point y3, Point y4) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
-	
+	@Override
 	public void propagateAddOnePoint(Point x, Point y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
-	
+	@Override
 	public void propagateRemoveOnePoint(Point x) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 	
+	@Override
+	public void propagateAddTwoPoints(Point x1, Point y1, Point x2, Point y2) {
+		// TODO Auto-generated method stub
+		initPropagation();
+	}
+	
+	@Override
+	public void propagateRemoveTwoPoints(Point x1, Point x2) {
+		// TODO Auto-generated method stub
+		initPropagation();
+	}
+	
+	@Override
 	public double evaluateTwoPointsMove(Point x1, Point x2, Point y1, Point y2) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -498,7 +511,7 @@ public class MaxVR implements IFunctionVR {
 		}
 		return nMax - value;
 	}
-	
+	@Override
 	public double evaluateThreePointsMove(Point x1, Point x2, Point x3, Point y1,
 			Point y2, Point y3) {
 		// TODO Auto-generated method stub
@@ -510,7 +523,7 @@ public class MaxVR implements IFunctionVR {
 		}
 		return nMax - value;
 	}
-	
+	@Override
 	public double evaluateFourPointsMove(Point x1, Point x2, Point x3, Point x4,
 			Point y1, Point y2, Point y3, Point y4) {
 		// TODO Auto-generated method stub
@@ -522,7 +535,7 @@ public class MaxVR implements IFunctionVR {
 		}
 		return nMax - value;
 	}
-	
+	@Override
 	public double evaluateAddOnePoint(Point x, Point y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -533,7 +546,7 @@ public class MaxVR implements IFunctionVR {
 		}
 		return nMax - value;
 	}
-	
+	@Override
 	public double evaluateRemoveOnePoint(Point x) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -545,11 +558,35 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 	
+	@Override
+	public double evaluateAddTwoPoints(Point x1, Point y1, Point x2, Point y2) {
+		// TODO Auto-generated method stub
+		double nMax = 1-CBLSVR.MAX_INT;
+		for(IFunctionVR f : functions){
+			double v = f.evaluateAddTwoPoints(x1, y1, x2, y2)
+					+ f.getValue();
+			nMax = nMax > v ? nMax : v;
+		}
+		return nMax - value;
+	}
+	@Override
+	public double evaluateRemoveTwoPoints(Point x1, Point x2) {
+		// TODO Auto-generated method stub
+		double nMax = 1-CBLSVR.MAX_INT;
+		for(IFunctionVR f : functions){
+			double v = f.evaluateRemoveTwoPoints(x1, x2)
+					+ f.getValue();
+			nMax = nMax > v ? nMax : v;
+		}
+		return nMax - value;
+	}
+	
+	@Override
 	public void propagateAddRemovePoints(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
-	
+	@Override
 	public double evaluateAddRemovePoints(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;
@@ -561,13 +598,13 @@ public class MaxVR implements IFunctionVR {
 		return nMax - value;
 	}
 	
-	
+	@Override
 	public void propagateKPointsMove(ArrayList<Point> x, ArrayList<Point> y) {
 		// TODO Auto-generated method stub
 		initPropagation();
 	}
 	
-	
+	@Override
 	public double evaluateKPointsMove(ArrayList<Point> x, ArrayList<Point> y) {
 		// TODO Auto-generated method stub
 		double nMax = 1-CBLSVR.MAX_INT;

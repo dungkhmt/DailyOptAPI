@@ -48,7 +48,7 @@ public class GreedyTwoOptMove8Explorer implements INeighborhoodExplorer {
 	public void exploreNeighborhood(Neighborhood N, LexMultiValues bestEval) {
 		// TODO Auto-generated method stub 
 		if(firstImprovement && N.hasImprovement()){
-			//System.out.println(name() + "::exploreNeighborhood, has improvement --> RETURN");
+			System.out.println(name() + "::exploreNeighborhood, has improvement --> RETURN");
 			return;
 		}
 		for (int i = 1; i <= XR.getNbRoutes(); i++) {
@@ -59,10 +59,10 @@ public class GreedyTwoOptMove8Explorer implements INeighborhoodExplorer {
 							LexMultiValues eval = F.evaluateTwoOptMove8(x, y);
 							if (eval.lt(bestEval)){
 								N.clear();
-								N.add(new TwoOptMove8(mgr, eval, x, y));
+								N.add(new TwoOptMove8(mgr, eval, x, y,this));
 								bestEval.set(eval);
 							} else if (eval.eq(bestEval)) {
-								N.add(new TwoOptMove8(mgr, eval, x, y));
+								N.add(new TwoOptMove8(mgr, eval, x, y,this));
 							}
 							if(firstImprovement){
 								if(eval.lt(0)) return;

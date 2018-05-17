@@ -166,7 +166,6 @@ public class VarRoutesVR{
 	
 	public void setValue(ValueRoutesVR val){
 		copySolution();
-		System.out.println(name() + "::setValue, val = " + val.toString());
 		for (Point p : allPoints) {
 			int x = getIndex(p);
 			if (val.next(p) != null) {
@@ -180,6 +179,7 @@ public class VarRoutesVR{
 		for(int k= 1; k <= getNbRoutes(); k++){
 			update(k);
 		}
+		
 		mgr.initPropagation();
 	}
 	
@@ -194,6 +194,14 @@ public class VarRoutesVR{
 			}
 			s = s + x.getID() + "\n";
 		}
+		return s;
+	}
+	public String routeString(int k){
+		String s = "";
+		for(Point p = startPoint(k); p != endPoint(k); p = next(p)){
+			s += p.ID + " -> ";
+		}
+		s += endPoint(k).ID;
 		return s;
 	}
 	// return the number of points
@@ -1612,6 +1620,14 @@ public class VarRoutesVR{
     			isStartingPoint(y)) && route[getIndex(y)] != Constants.NULL_POINT);
     }
     
+    public boolean checkPerformAddTwoPoints(Point x1, Point y1, Point x2, Point y2) {
+    	return (route[getIndex(x1)] == Constants.NULL_POINT && isClientPoint(x1) && (isClientPoint(y1) || 
+    			isStartingPoint(y1)) && route[getIndex(y1)] != Constants.NULL_POINT
+    			&& route[getIndex(x2)] == Constants.NULL_POINT && isClientPoint(x2) && (isClientPoint(y2) || 
+    	    	isStartingPoint(y2)) && route[getIndex(y2)] != Constants.NULL_POINT
+    	    	&& route[getIndex(y1)] == route[getIndex(y2)] && index[getIndex(y1)] <= index[getIndex(y2)]);
+    }
+    
     public void performAddOnePoint(Point x, Point y){
     	// add point x between y and next[y]
     	if (!checkPerformAddOnePoint(x, y)) {
@@ -1633,8 +1649,32 @@ public class VarRoutesVR{
     	update(route[x]);
     }
     
+    public void performAddTwoPoints(Point x1, Point y1, Point x2, Point y2){
+    	if (!checkPerformAddTwoPoints(x1, y1, x2, y2)) {
+    		System.out.println(name() + ":: Error performAddTwoPoints: " + x1 + " " + y1 + " " + x2 + " " + y2 + "\n" + toString());
+    		System.exit(-1);
+    	}
+    	performAddOnePoint(x1, y1);
+    	if(y1 != y2)
+    		performAddOnePoint(x2, y2);
+    	else
+    		performAddOnePoint(x2, x1);
+    }
+    
     public boolean checkPerformRemoveOnePoint(Point x) {
+    	if(route[getIndex(x)] == Constants.NULL_POINT){
+    		System.out.println("Null point");
+    	}
+    	if(!isClientPoint(x)){
+    		System.out.println("not client point");
+    	}
     	return (route[getIndex(x)] != Constants.NULL_POINT && isClientPoint(x));
+    }
+    
+    public boolean checkPerformRemoveTwoPoints(Point x1, Point x2) {
+    	return (route[getIndex(x1)] != Constants.NULL_POINT && isClientPoint(x1)
+    			&& route[getIndex(x2)] != Constants.NULL_POINT && isClientPoint(x2)
+    			&& index[getIndex(x1)] < index[getIndex(x2)]);
     }
     
     public void performRemoveOnePoint(Point x){
@@ -1650,6 +1690,16 @@ public class VarRoutesVR{
     	next[idx] = prev[idx] = route[idx] = Constants.NULL_POINT;
     	update(old_route[idx]);
     	index[idx] = Constants.NULL_POINT;
+    }
+    
+    public void performRemoveTwoPoints(Point x1, Point x2){
+    	// remove x from its current route
+    	if (!checkPerformRemoveTwoPoints(x1, x2)) {
+    		System.out.println(name() + ":: Error performRemoveTwoPoints: " + x1 + " " + x2 + "\n" + toString());
+    		System.exit(-1);
+    	}
+    	performRemoveOnePoint(x2);
+    	performRemoveOnePoint(x1);
     }
     
     public boolean checkPerformAddRemovePoints(Point x, Point y, Point z){
@@ -1749,11 +1799,9 @@ public class VarRoutesVR{
     	}
     	HashSet<Point> set = new HashSet<Point>(y);
     	for (Point p : x) {
-    		if ((!isClientPoint(p)) 
-    				//|| set.contains(p))
-    				)
+    		if ((!isClientPoint(p)) || set.contains(p)) {
     			return false;
-    		
+    		}
     	}
     	for(int i = 0; i < x.size(); i++){
     		Point px = x.get(i);
@@ -1761,7 +1809,7 @@ public class VarRoutesVR{
     		int ix = getIndex(px);
     		int iy = getIndex(py);
     		if(ix == Constants.NULL_POINT && iy == Constants.NULL_POINT) return false;
-    		//if(next(py) == px) return false;
+    		if(next(py) == px) return false;
     		
     		//if(route[ix] == Constants.NULL_POINT && route[iy] == Constants.NULL_POINT) return false;
     	}

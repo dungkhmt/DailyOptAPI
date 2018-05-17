@@ -18,8 +18,8 @@ public class PickupDeliveryController {
 	public PickupDeliverySolution computePickupDeliverySolution(HttpServletRequest request, 
 			@RequestBody PickupDeliveryInput input){
 		
-		//PickupDeliverySolver solver = new PickupDeliverySolver();
-		CVRPTWSolver solver = new CVRPTWSolver();
+		PickupDeliverySolver solver = new PickupDeliverySolver();
+		//CVRPTWSolver solver = new CVRPTWSolver();
 		return solver.compute(input);
 		
 	}

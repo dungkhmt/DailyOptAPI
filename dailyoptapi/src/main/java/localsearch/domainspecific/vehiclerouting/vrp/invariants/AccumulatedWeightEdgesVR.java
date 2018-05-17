@@ -47,7 +47,7 @@ public class AccumulatedWeightEdgesVR implements InvariantVR {
 	}
 	
 	protected int getIndex(Point p) {
-		//System.out.println(name() +p);
+		//System.out.println(name() + "::getIndex(" + p.ID + ")");
 		return map.get(p);
 	}
 	
@@ -320,6 +320,18 @@ public class AccumulatedWeightEdgesVR implements InvariantVR {
 		// TODO Auto-generated method stub
 		update(XR.oldRoute(x));
 		costRight[getIndex(x)] = costLeft[getIndex(x)] = 0;
+	}
+	
+	public void propagateAddTwoPoints(Point x1, Point y1, Point x2, Point y2) {
+		// TODO Auto-generated method stub
+		update(XR.route(y1));
+	}
+
+	
+	public void propagateRemoveTwoPoints(Point x1, Point x2) {
+		// TODO Auto-generated method stub
+		update(XR.oldRoute(x1));
+		costRight[getIndex(x1)] = costLeft[getIndex(x1)] = costRight[getIndex(x2)] = costLeft[getIndex(x2)] = 0;
 	}
 	
 	public void propagateAddRemovePoints(Point x, Point y, Point z) {

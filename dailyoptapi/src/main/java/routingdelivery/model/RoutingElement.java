@@ -6,7 +6,62 @@ public class RoutingElement {
 	private String latlng;
 	private double lat;
 	private double lng;
+	private String arrivalTime;
+	private String departureTime;
+	private String description;
+	private String orderId;
 	
+	public String getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+	public RoutingElement(String code, String address, String latlng,
+			double lat, double lng, String arrivalTime, String departureTime,
+			String description, String orderId) {
+		super();
+		this.code = code;
+		this.address = address;
+		this.latlng = latlng;
+		this.lat = lat;
+		this.lng = lng;
+		this.arrivalTime = arrivalTime;
+		this.departureTime = departureTime;
+		this.description = description;
+		this.orderId = orderId;
+	}
+	public RoutingElement(String code, String address, String latlng,
+			double lat, double lng, String arrivalTime, String departureTime,
+			String description) {
+		super();
+		this.code = code;
+		this.address = address;
+		this.latlng = latlng;
+		this.lat = lat;
+		this.lng = lng;
+		this.arrivalTime = arrivalTime;
+		this.departureTime = departureTime;
+		this.description = description;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public String getArrivalTime() {
+		return arrivalTime;
+	}
+	public void setArrivalTime(String arrivalTime) {
+		this.arrivalTime = arrivalTime;
+	}
+	public String getDepartureTime() {
+		return departureTime;
+	}
+	public void setDepartureTime(String departureTime) {
+		this.departureTime = departureTime;
+	}
 	public double getLat() {
 		return lat;
 	}
@@ -44,6 +99,17 @@ public class RoutingElement {
 		this.latlng = latlng;
 	}
 	
+	public RoutingElement(String code, String address, String latlng,
+			double lat, double lng, String arrivalTime, String departureTime) {
+		super();
+		this.code = code;
+		this.address = address;
+		this.latlng = latlng;
+		this.lat = lat;
+		this.lng = lng;
+		this.arrivalTime = arrivalTime;
+		this.departureTime = departureTime;
+	}
 	public RoutingElement(String code, String address, String latlng,
 			double lat, double lng) {
 		super();

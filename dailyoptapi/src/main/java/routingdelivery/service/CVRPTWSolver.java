@@ -96,7 +96,8 @@ public class CVRPTWSolver {
 	private VRManager mgr;
 	private VarRoutesVR XR;
 	private ConstraintSystemVR CS;
-	public CEarliestArrivalTimeVR ceat;
+	private CEarliestArrivalTimeVR ceat;
+	private EarliestArrivalTimeVR eat;
 	private IFunctionVR cost;
 	private IFunctionVR[] load;
 	private LexMultiFunctions F;
@@ -215,7 +216,7 @@ public class CVRPTWSolver {
 		CS = new ConstraintSystemVR(mgr);
 		AccumulatedWeightNodesVR awn = new AccumulatedWeightNodesVR(XR, nwm);
 		AccumulatedWeightEdgesVR awe = new AccumulatedWeightEdgesVR(XR, awm);
-		EarliestArrivalTimeVR eat = new EarliestArrivalTimeVR(XR, travelTime, earliestAllowedArrivalTime, serviceDuration);
+		eat = new EarliestArrivalTimeVR(XR, travelTime, earliestAllowedArrivalTime, serviceDuration);
 		ceat = new CEarliestArrivalTimeVR(eat, lastestAllowedArrivalTime);
 		
 		load = new IFunctionVR[XR.getNbRoutes()];
@@ -262,7 +263,7 @@ public class CVRPTWSolver {
 		se.setObjectiveFunction(F);
 		se.setMaxStable(50);
 
-		se.search(1000, 100);
+		se.search(100000, input.getParams().getTimeLimit());
 
 		System.out.println("solution XR = " + XR.toString() + ", cost = " + cost.getValue());
 		for(int k = 1; k <= XR.getNbRoutes(); k++){
@@ -298,6 +299,7 @@ public class CVRPTWSolver {
 			if(XR.next(XR.startPoint(k)) != XR.endPoint(k)){
 				nbr++;
 				ArrayList<RoutingElement> lst = new ArrayList<RoutingElement>();
+				double distance = 0;
 				for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
 					int ip = mPoint2Index.get(p);
 					RoutingElement e = null;
@@ -305,13 +307,24 @@ public class CVRPTWSolver {
 						// depot
 						double d_lat = vehicles[0].getLat();
 						double d_lng = vehicles[0].getLng();
-						e = new RoutingElement(vehicles[0].getStartLocationCode(), "-", d_lat + "," + d_lng, d_lat, d_lng);
+						e = new RoutingElement(vehicles[0].getStartLocationCode(), "-", d_lat + "," + d_lng, d_lat, d_lng,"-","-");
+						
 					}else{
 						int ir = mOrderItem2Request.get(ip);
 						double lat = requests[ir].getDeliveryLat();
 						double lng = requests[ir].getDeliveryLng();
-						e = new RoutingElement(requests[ir].getDeliveryLocationCode(), "-", lat + "," + lng,lat,lng);
+						long at = (long)eat.getEarliestArrivalTime(p);
+						if(at < earliestAllowedArrivalTime.get(p)) at = earliestAllowedArrivalTime.get(p);
+						long dt = at + serviceDuration.get(p);
+						String s_at = DateTimeUtils.unixTimeStamp2DateTime(at);
+						String s_dt = DateTimeUtils.unixTimeStamp2DateTime(dt);
+						
+						e = new RoutingElement(requests[ir].getDeliveryLocationCode(), "-", lat + "," + lng,lat,lng, s_at, s_dt);
+						//e = new RoutingElement(requests[ir].getOrderID(), "-", lat + "," + lng,lat,lng, s_at, s_dt);
+						e.setDescription("orderID: " + requests[ir].getOrderID() + ", amount: " + demand[ip]);
+						e.setOrderId(requests[ir].getOrderID());
 					}
+					distance += awm.getWeight(p, XR.next(p));
 					lst.add(e);
 				}
 				double d_lat = vehicles[0].getLat();
@@ -322,7 +335,8 @@ public class CVRPTWSolver {
 				RoutingElement[] a_route = new RoutingElement[lst.size()];
 				for(int j = 0; j < lst.size(); j++)
 					a_route[j] = lst.get(j);
-				routes[nbr] = new RoutingSolution(a_route);
+				//routes[nbr] = new RoutingSolution(a_route);
+				routes[nbr] = new RoutingSolution(vehicles[k-1], a_route, load[k-1].getValue(), distance);
 			}
 		}
 		for(int i = 0; i < requests.length; i++){

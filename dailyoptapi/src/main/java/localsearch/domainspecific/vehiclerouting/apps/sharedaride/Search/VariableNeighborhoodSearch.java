@@ -1,5 +1,7 @@
 package localsearch.domainspecific.vehiclerouting.apps.sharedaride.Search;
 
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,9 +98,12 @@ public class VariableNeighborhoodSearch implements ISearch {
 	}
 @Override 
 public void search(int maxIter, int timeLimit){
+	
+}
+public void search(int maxIter, int timeLimit, String outDir){
 	bestSolution = new ValueRoutesVR(XR);
 	currentIter = 0;
-	XR.setRandom();
+	//XR.setRandom();
 	bestSolution.store();
 	nic = 0;
 	Neighborhood N = new Neighborhood(mgr);
@@ -109,7 +114,6 @@ public void search(int maxIter, int timeLimit){
 	System.out.println(XR.toString());
 	double previous = t0;
 	LexMultiValues bestCurTurn = F.getValues();
-	
 	cntTimeRestart = 0;
 	int km4 = 0;
 	int km2 = 0;
@@ -131,12 +135,13 @@ public void search(int maxIter, int timeLimit){
 			//System.out.println(t+"  -  "+timeLimit);
 			break;
 		}
-		System.out.println(t/1000+"    "+(curTime-previous)/1000+"   "+t/(currentIter*1000));
+		//System.out.println(t/1000+"    "+(curTime-previous)/1000+"   "+t/(currentIter*1000));
 		previous = curTime;
 		
 		N.clear();
 		LexMultiValues bestEval = new LexMultiValues();
-		bestEval.fill(F.size(), CBLSVR.MAX_INT);
+		//bestEval.fill(F.size(), Double.MAX_VALUE);//search min violation.
+		bestEval.fill(F.size(), 0);//vio = 0,cost = current cost.
 		
 		LexMultiValues curValue = F.getValues();
 		for(int turn = 0; turn < listNeighborhoodExplorer.size(); ++ turn)
@@ -145,7 +150,8 @@ public void search(int maxIter, int timeLimit){
 			ArrayList<INeighborhoodExplorer> neighborhoodExplorer = listNeighborhoodExplorer.get(turn);
 			for(INeighborhoodExplorer NI : neighborhoodExplorer)
 			{
-				NI.exploreNeighborhood(N, bestEval);
+				//NI.exploreNeighborhood(N, bestEval); 
+				NI.exploreNeighborhood(N, bestEval); 
 			}
 			
 			if(isBetter(bestEval))
@@ -212,19 +218,27 @@ public void search(int maxIter, int timeLimit){
 			}
 			else{
 				nic++;
-				if(nic > maxStable){
-					restart();
-					nic = 0;
-					bestCurTurn = F.getValues();
-				}
+//				if(nic > maxStable){
+//					restart();
+//					nic = 0;
+//					bestCurTurn = F.getValues();
+//				}
+			}
+			try{
+				PrintWriter out = new PrintWriter(new FileOutputStream(outDir, true));
+				out.println("ShareARide::search vio = " + F.getValues().get(0) + ", obj = " + F.getValues().get(1) + ", iter = " + currentIter + ", time = " + t);
+				out.close();
+			}catch(Exception e){
+				
 			}
 		} else {
 			System.out.println(name()
 					+ "::search --> no move available, break");
 			break;
 		}
-		if(currentIter%40==0)
-			System.out.println(XR.toString());
+//		if(currentIter%40==0)
+//			System.out.println(XR.toString());
+		//System.out.println("currentIter = " + currentIter);
 		currentIter++;
 	}
 

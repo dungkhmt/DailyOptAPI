@@ -1,24 +1,23 @@
 package localsearch.domainspecific.vehiclerouting.apps.sharedaride;
 
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Constraint.CPickupDeliveryOfGoodVR;
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Constraint.CPickupDeliveryOfPeopleVR;
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Constraint.ScaleConstraint;
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Neighborhood.GreedyCrossExchangeMoveExplorerLimit;
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Neighborhood.GreedyOnePointMoveExplorerLimit;
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Neighborhood.GreedyOneRequestMoveExplorerLimit;
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Neighborhood.GreedyOrOptMove1ExplorerLimit;
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Neighborhood.GreedyTwoPointsMoveExplorerLimit;
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Neighborhood.GreedyTwoRequestMoveExplorerLimit;
-import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Search.VariableNeighborhoodSearch;
+import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Search.ALNSwithSA;
+import localsearch.domainspecific.vehiclerouting.vrp.Constants;
 import localsearch.domainspecific.vehiclerouting.vrp.ConstraintSystemVR;
-import localsearch.domainspecific.vehiclerouting.vrp.IConstraintVR;
 import localsearch.domainspecific.vehiclerouting.vrp.IFunctionVR;
 import localsearch.domainspecific.vehiclerouting.vrp.VRManager;
 import localsearch.domainspecific.vehiclerouting.vrp.VarRoutesVR;
@@ -26,70 +25,65 @@ import localsearch.domainspecific.vehiclerouting.vrp.constraints.timewindows.CEa
 import localsearch.domainspecific.vehiclerouting.vrp.entities.ArcWeightsManager;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.LexMultiValues;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.Point;
-import localsearch.domainspecific.vehiclerouting.vrp.functions.ConstraintViolationsVR;
-import localsearch.domainspecific.vehiclerouting.vrp.functions.LexMultiFunctions;
+import localsearch.domainspecific.vehiclerouting.vrp.functions.AccumulatedEdgeWeightsOnPathVR;
 import localsearch.domainspecific.vehiclerouting.vrp.functions.TotalCostVR;
+import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightEdgesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.EarliestArrivalTimeVR;
-import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyCrossExchangeMoveExplorer;
-import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyOnePointMoveExplorer;
-import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyOrOptMove1Explorer;
-import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoPointsMoveExplorer;
-import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.INeighborhoodExplorer;
-
+import localsearch.domainspecific.vehiclerouting.vrp.invariants.RelatedPointBuckets;
 
 
 public class ShareARide{
+	
+	public static final Logger LOGGER = Logger.getLogger("Logger");
+	
 	public static int PEOPLE =1 ;
 	public static int GOOD = 0;
 	int scale = 100000;
 	ArrayList<Point> points;
-	ArrayList<Point> pickupPoints;
-	ArrayList<Point> deliveryPoints;
+	public ArrayList<Point> pickupPoints;
+	public ArrayList<Point> deliveryPoints;
 	ArrayList<Integer> type;
 	ArrayList<Point> startPoints;
 	ArrayList<Point> stopPoints;
 	
-	HashMap<Point, Integer> earliestAllowedArrivalTime;
-	HashMap<Point, Integer> serviceDuration;
-	HashMap<Point, Integer> lastestAllowedArrivalTime;
+	public ArrayList<Point> rejectPoints;
+	public ArrayList<Point> rejectPickupGoods;
+	public ArrayList<Point> rejectPickupPeoples;
+	public HashMap<Point, Integer> earliestAllowedArrivalTime;
+	public HashMap<Point, Integer> serviceDuration;
+	public HashMap<Point, Integer> lastestAllowedArrivalTime;
+	public HashMap<Point,Point> pickup2DeliveryOfGood;
+	public HashMap<Point,Point> pickup2DeliveryOfPeople;
+	public HashMap<Point, Point> pickup2Delivery;
+	public HashMap<Point,Point> delivery2Pickup;
+	public int nVehicle;
+	public static int nRequest;
+	public static double MAX_DISTANCE;
+	
+	
+	HashMap<Point, Double> scoreReq;
+	Point badPick;
+	HashMap<Integer, ArrayList<Point>> bestS;
+	
 	ArcWeightsManager awm;
-	
-	
-	int nVehicle;
-	int nRequest;
-	
 	VRManager mgr;
 	VarRoutesVR XR;
 	ConstraintSystemVR S;
-	IFunctionVR objective;
+	public IFunctionVR objective;
 	public CEarliestArrivalTimeVR ceat;
 	LexMultiValues valueSolution;
+	EarliestArrivalTimeVR eat;
+	CEarliestArrivalTimeVR cEarliest;
+	RelatedPointBuckets buckets;
+	
+	AccumulatedWeightEdgesVR accDisInvr;
+	HashMap<Point, IFunctionVR> accDisF;
 	
 	int cntTimeRestart;
 	int cntInteration;
-	public int calVioNow()
-	{
-		int vio = 0;
-		int nr = XR.getNbRoutes();
-		for(int k=1;k<=nr;++k)
-		{
-			Point s = XR.startPoint(k);
-			int t = earliestAllowedArrivalTime.get(s) + serviceDuration.get(s);
-			while(s != XR.endPoint(k))
-			{
-				Point ns = XR.next(s);
-				int tt = (int)(t + awm.getDistance(s, ns));
-				int q = Math.max(tt, earliestAllowedArrivalTime.get(ns));
-				if( q > lastestAllowedArrivalTime.get(ns))
-					vio += q - lastestAllowedArrivalTime.get(ns);
-				t = q + serviceDuration.get(ns);
-				s = ns;
-			}
-		}
-		return vio;
-	}
-	public ShareARide(Info info)
-	{
+	
+	public ShareARide(Info info){
+		
 		this.nVehicle = info.nbVehicle;
 		this.nRequest = info.nRequest;
 		points = new ArrayList<Point>();
@@ -97,11 +91,18 @@ public class ShareARide{
 		serviceDuration = new HashMap<Point, Integer>();
 		lastestAllowedArrivalTime = new HashMap<Point, Integer>();
 		
+		scoreReq = new HashMap<Point, Double>();
 		pickupPoints = new ArrayList<Point>();
 		deliveryPoints = new ArrayList<Point>();
 		startPoints = new ArrayList<Point>();
 		stopPoints = new ArrayList<Point>();
 		type = new ArrayList<>();
+		
+		rejectPoints = new ArrayList<Point>();
+		rejectPickupGoods = new ArrayList<Point>();
+		rejectPickupPeoples = new ArrayList<Point>();
+		
+		bestS = new HashMap<Integer, ArrayList<Point>>();
 		for(int i=1; i <= info.nbVehicle; ++i)
 		{
 			int startPointId = i+info.nRequest*2;
@@ -144,305 +145,749 @@ public class ShareARide{
 			lastestAllowedArrivalTime.put(delivery,(int)( info.lastest[2*i+2]));
 			
 			type.add(info.type[i*2+1]);
+			
+			scoreReq.put(pickup, 0.0);
 		}
 		awm = new ArcWeightsManager(points);
+		double max_dist = Double.MIN_VALUE;
 		for(Point px: points){
 			for(Point py: points){
-				awm.setWeight(px, py, info.cost[px.getID()][py.getID()]);
-				
+				double tmp_cost = info.cost[px.getID()][py.getID()];
+				awm.setWeight(px, py, tmp_cost*3600/70000);
+				max_dist = tmp_cost > max_dist ? tmp_cost : max_dist;
 			}
 		}
+		MAX_DISTANCE = max_dist;
 	}
 
-public void stateModel() {
-	HashMap<Point,Point> pickup2DeliveryOfGood = new HashMap<Point, Point>();
-	HashMap<Point,Point> pickup2DeliveryOfPeople = new HashMap<Point, Point>();
-	for(int i=0; i < nRequest; ++i)
-	{
-		Point pickup = pickupPoints.get(i);
-		Point delivery = deliveryPoints.get(i);
-		if(type.get(i)==PEOPLE)
+	public void stateModel() {
+		pickup2DeliveryOfGood = new HashMap<Point, Point>();
+		pickup2DeliveryOfPeople = new HashMap<Point, Point>();
+		pickup2Delivery = new HashMap<Point, Point>();
+		delivery2Pickup = new HashMap<Point, Point>();
+		for(int i=0; i < nRequest; ++i)
 		{
-			pickup2DeliveryOfPeople.put(pickup, delivery);
+			Point pickup = pickupPoints.get(i);
+			Point delivery = deliveryPoints.get(i);
+			pickup2Delivery.put(pickup, delivery);
+			delivery2Pickup.put(delivery, pickup);
+			if(type.get(i)==PEOPLE)
+			{
+				pickup2DeliveryOfPeople.put(pickup, delivery);
+			}
+			else{
+				pickup2DeliveryOfGood.put(pickup, delivery);
+			}
 		}
-		else{
-			pickup2DeliveryOfGood.put(pickup, delivery);
-		}
-	}
-	mgr = new VRManager();
-	XR = new VarRoutesVR(mgr);
-	S = new ConstraintSystemVR(mgr);
-	for(int i=0;i<nVehicle;++i)
-		XR.addRoute(startPoints.get(i), stopPoints.get(i));
-	for(int i=0;i<nRequest; ++i)
-	{
-		Point pickup = pickupPoints.get(i);
-		Point delivery = deliveryPoints.get(i);
-		XR.addClientPoint(pickup);
-		XR.addClientPoint(delivery);
-		/*
-		IFunctionVR indexP = new IndexOnRoute(XR, pickup);
-		IFunctionVR indexD = new IndexOnRoute(XR,delivery);
-		IFunctionVR routeP = new RouteIndex(XR,pickup);
-		IFunctionVR routeD = new RouteIndex(XR,delivery);
-		IConstraintVR pBeforeD =  new LeqFunctionFunction(indexP, indexD);
-		S.post(new ScaleConstraint(pBeforeD,scale));
-		IConstraintVR pAndDInSameRoute = new EquFunctionFunction(routeP,routeD);
-		S.post(new ScaleConstraint(pAndDInSameRoute, scale));
-		if(type.get(i)==PEOPLE)
+		mgr = new VRManager();
+		XR = new VarRoutesVR(mgr);
+		S = new ConstraintSystemVR(mgr);
+		for(int i=0;i<nVehicle;++i)
+			XR.addRoute(startPoints.get(i), stopPoints.get(i));
+		
+		for(int i=0;i<nRequest; ++i)
 		{
-			IFunctionVR disPAndDIndex =  new MinusFunctionFunctionVR(indexD, indexP);
-			IConstraintVR dIsNextOfP = new EquFunctionConstantVR(disPAndDIndex,1); 
-			//= new LeqFunctionConstant(disPAndDIndex, M);
-			S.post(new ScaleConstraint(dIsNextOfP,scale));
-		}
-		*/
-	}
-	
-	IConstraintVR goodC = new CPickupDeliveryOfGoodVR(XR, pickup2DeliveryOfGood);
-	IConstraintVR peopleC = new CPickupDeliveryOfPeopleVR(XR, pickup2DeliveryOfPeople);
-	S.post(new ScaleConstraint(goodC, scale));
-	S.post(new ScaleConstraint(peopleC, scale));
-
-	EarliestArrivalTimeVR eat = new EarliestArrivalTimeVR(XR,awm,earliestAllowedArrivalTime,serviceDuration);
-	CEarliestArrivalTimeVR cEarliest = new CEarliestArrivalTimeVR(eat, lastestAllowedArrivalTime);
-	S.post(cEarliest);
-	objective = new TotalCostVR(XR,awm);
-	mgr.close();
-}
-
-
-
-ArrayList<ArrayList<INeighborhoodExplorer>>search1(LexMultiFunctions F)
-{
-	ArrayList<ArrayList<INeighborhoodExplorer>> listNE = new ArrayList<>();
-	ArrayList<INeighborhoodExplorer> NE = new ArrayList<>();
-	NE.add(new GreedyOnePointMoveExplorer(XR, F)); 
-	NE.add(new GreedyTwoPointsMoveExplorer(XR, F));
-	listNE.add(NE);
-	return listNE;
-}
-
-ArrayList<ArrayList<INeighborhoodExplorer>>search2(LexMultiFunctions F)
-{
-	ArrayList<ArrayList<INeighborhoodExplorer>>listNE = new ArrayList<>();
-	ArrayList<INeighborhoodExplorer> NE = new ArrayList<>();
-	NE.add(new GreedyCrossExchangeMoveExplorer(XR, F));
-	listNE.add(NE);
-	return listNE;
-}
-
-
-ArrayList<ArrayList<INeighborhoodExplorer>>search3(LexMultiFunctions F)
-{
-	System.out.println("search 3");
-	ArrayList<ArrayList<INeighborhoodExplorer>>listNE = new ArrayList<>();
-	ArrayList<INeighborhoodExplorer> NE = new ArrayList<>();
-	NE.add(new GreedyOrOptMove1Explorer(XR, F));
-	listNE.add(NE);
-	return listNE;
-}
-
-ArrayList<ArrayList<INeighborhoodExplorer>>search4(LexMultiFunctions F)
-{
-	ArrayList<ArrayList<INeighborhoodExplorer>> listNE = new ArrayList<>();
-	ArrayList<INeighborhoodExplorer> NE = new ArrayList<>();
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOnePointMoveExplorer(XR, F));  
-	NE.add(new GreedyTwoPointsMoveExplorer(XR, F));		
-	listNE.add(NE);
-	NE = new ArrayList<>();
-	NE.add(new GreedyOrOptMove1Explorer(XR, F));
-	listNE.add(NE);
-	
-	return listNE;
-}
-
-ArrayList<ArrayList<INeighborhoodExplorer>>search5(LexMultiFunctions F)
-{
-	ArrayList<ArrayList<INeighborhoodExplorer>> listNE = new ArrayList<>();
-	ArrayList<INeighborhoodExplorer> NE = new ArrayList<>();
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOnePointMoveExplorerLimit(XR, F, 4));  // 2
-	NE.add(new GreedyTwoPointsMoveExplorerLimit(XR, F,4));		//2
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 2));
-	listNE.add(NE);
-	NE = new ArrayList<>();
-	NE.add(new GreedyOnePointMoveExplorer(XR, F));  // 2
-	NE.add(new GreedyTwoPointsMoveExplorer(XR, F));		//2
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 5));
-	
-	listNE.add(NE);
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOrOptMove1Explorer(XR, F));
-	listNE.add(NE);
-	
-	return listNE;
-}
-
-ArrayList<ArrayList<INeighborhoodExplorer>>search6(LexMultiFunctions F)
-{
-	ArrayList<ArrayList<INeighborhoodExplorer>> listNE = new ArrayList<>();
-	ArrayList<INeighborhoodExplorer> NE = new ArrayList<>();
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOnePointMoveExplorerLimit(XR, F, 4));  
-	NE.add(new GreedyTwoPointsMoveExplorerLimit(XR, F, 4));	
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 2));
-	listNE.add(NE);
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOnePointMoveExplorer(XR, F));  // 2
-	NE.add(new GreedyTwoPointsMoveExplorer(XR, F));		//2
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 5));
-	listNE.add(NE);
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOrOptMove1Explorer(XR, F));
-	listNE.add(NE);
-
-	NE = new ArrayList<>();
-    NE.add(new GreedyOneRequestMoveExplorerLimit(XR, F, 2, pickupPoints, deliveryPoints));
-	NE.add(new GreedyTwoRequestMoveExplorerLimit(XR, F, pickupPoints, deliveryPoints));
-	NE.add(new GreedyCrossExchangeMoveExplorerLimit(XR, F, 4));
-	listNE.add(NE);
-	return listNE;
-}
-ArrayList<ArrayList<INeighborhoodExplorer>>search7(LexMultiFunctions F)
-{
-	ArrayList<ArrayList<INeighborhoodExplorer>> listNE = new ArrayList<>();
-	ArrayList<INeighborhoodExplorer> NE = new ArrayList<>();
-	
-	NE = new ArrayList<>();
-
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 1));
-	listNE.add(NE);
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyTwoRequestMoveExplorerLimit(XR, F,0.25, pickupPoints, deliveryPoints));
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 3));
-	listNE.add(NE);
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyTwoRequestMoveExplorerLimit(XR, F,1, pickupPoints, deliveryPoints));
-	NE.add(new GreedyCrossExchangeMoveExplorerLimit(XR, F, 2, pickupPoints, deliveryPoints));
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 5 , pickupPoints, deliveryPoints));
-	
-	listNE.add(NE);
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOneRequestMoveExplorerLimit(XR, F, 2, pickupPoints, deliveryPoints));
-	NE.add(new GreedyCrossExchangeMoveExplorerLimit(XR, F, 6, pickupPoints, deliveryPoints));
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 10 , pickupPoints, deliveryPoints));
-	listNE.add(NE);
-
-	return listNE;
-}
-ArrayList<ArrayList<INeighborhoodExplorer>>search8(LexMultiFunctions F)
-{
-	ArrayList<ArrayList<INeighborhoodExplorer>> listNE = new ArrayList<>();
-	ArrayList<INeighborhoodExplorer> NE = new ArrayList<>();
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOnePointMoveExplorerLimit(XR, F, 4));  
-	NE.add(new GreedyTwoPointsMoveExplorerLimit(XR, F, 4));	
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 2));
-	listNE.add(NE);
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOnePointMoveExplorerLimit(XR, F, 7)); 
-	NE.add(new GreedyTwoPointsMoveExplorerLimit(XR, F, 7));		
-	NE.add(new GreedyTwoRequestMoveExplorerLimit(XR, F,0.25, pickupPoints, deliveryPoints));
-	NE.add(new GreedyOneRequestMoveExplorerLimit(XR, F, 0.1 , 3, pickupPoints, deliveryPoints));
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 3));
-	listNE.add(NE);
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyTwoRequestMoveExplorerLimit(XR, F, 1, pickupPoints, deliveryPoints));
-	NE.add(new GreedyCrossExchangeMoveExplorerLimit(XR, F, 2, pickupPoints, deliveryPoints));
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 5 , pickupPoints, deliveryPoints));
-	NE.add(new GreedyOneRequestMoveExplorerLimit(XR, F, 0.3 , 3, pickupPoints, deliveryPoints));
-	
-	listNE.add(NE);
-	
-	NE = new ArrayList<>();
-	NE.add(new GreedyOneRequestMoveExplorerLimit(XR, F, 0.6 , 3, pickupPoints, deliveryPoints));
-	NE.add(new GreedyCrossExchangeMoveExplorerLimit(XR, F, 6, pickupPoints, deliveryPoints));
-	NE.add(new GreedyOrOptMove1ExplorerLimit(XR, F, 10 , pickupPoints, deliveryPoints));
-	listNE.add(NE);
-
-	return listNE;
-}
-
-    VarRoutesVR search(int maxIter, int timeLimit, int searchMethod)
-    {
-    	LexMultiFunctions F;
-		F = new LexMultiFunctions();
-		F.add(new ConstraintViolationsVR(S));
-		F.add(objective);
-		ArrayList<ArrayList<INeighborhoodExplorer>> listNE = null;;
-		switch(searchMethod)
-		{
-		case 1:
-			listNE = search1(F);
-			break;
-		case 2:
-			listNE  = search2(F);
-			break;
-		case 3:
-			listNE = search3(F); 
-			break;
-		case 4:
-			listNE = search4(F); 
-			break;
-		case 5:
-			listNE = search5(F); 
-			break;
-		case 6:
-			listNE = search6(F); 
-			break;
-		case 7:
-			listNE = search7(F);
-			break;
-		case 8:
-			listNE = search8(F);
-			break;
+			Point pickup = pickupPoints.get(i);
+			Point delivery = deliveryPoints.get(i);
+			XR.addClientPoint(pickup);
+			XR.addClientPoint(delivery);
 		}
 		
-		VariableNeighborhoodSearch vns = new VariableNeighborhoodSearch(mgr, F, listNE, pickupPoints, deliveryPoints);
-		vns.search(maxIter, timeLimit);
-		valueSolution =vns.getIncumbentValue();
-		cntInteration = vns.getCurrentIteration();
-		cntTimeRestart = vns.getCntRestart();
-		return XR;
+		//IConstraintVR goodC = new CPickupDeliveryOfGoodVR(XR, pickup2DeliveryOfGood);
+		//IConstraintVR peopleC = new CPickupDeliveryOfPeopleVR(XR, pickup2DeliveryOfPeople);
+		//S.post(goodC);
+		//S.post(peopleC);
+	
+		//time windows
+		eat = new EarliestArrivalTimeVR(XR,awm,earliestAllowedArrivalTime,serviceDuration);
+		cEarliest = new CEarliestArrivalTimeVR(eat, lastestAllowedArrivalTime);
+		
+		// new accumulated distance
+		accDisInvr = new AccumulatedWeightEdgesVR(XR, awm);
+		//function mapping a point to F calculate distance when route exchanged
+		accDisF = new HashMap<Point, IFunctionVR>();
+		for(Point p: XR.getAllPoints()){
+			IFunctionVR f =new AccumulatedEdgeWeightsOnPathVR(accDisInvr, p);
+			accDisF.put(p, f);
+		}
+		S.post(cEarliest);
+		buckets = new RelatedPointBuckets(XR, eat.getEarliestArrivalTime(), lastestAllowedArrivalTime, serviceDuration, 7200);
+		objective = new TotalCostVR(XR,awm);
+		valueSolution = new LexMultiValues();
+		valueSolution.add(S.violations());
+		valueSolution.add(objective.getValue());
+		
+		mgr.close();
+	}
+	
+	/*
+	 * Init
+	 */
+	public void greedyInitSolution(){
+		double currtime = System.currentTimeMillis();
+		for(int i = 0; i < pickupPoints.size(); i++){
+			Point pickup = pickupPoints.get(i);
+			if(XR.route(pickup) != Constants.NULL_POINT)
+				continue;
+			Point delivery = deliveryPoints.get(i);
+			//add the request to route
+			Point pre_pick = null;
+			Point pre_delivery = null;
+			double best_objective = Double.MAX_VALUE; 
+			
+			boolean isPeople = pickup2DeliveryOfPeople.containsKey(pickup);
+			
+			int minRelatedBucketId = (int)(earliestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			int maxRelatedBucketId = (int)(lastestAllowedArrivalTime.get(pickup) / buckets.getDelta());;
+			ArrayList<Point> marks = new ArrayList<Point>();
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+				//maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(minRelatedBucketId <= maxRelatedBucketId){
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(minRelatedBucketId));
+				//System.out.println("minRB = " + minRelatedBucketId + ", bk size = " + bk.size());
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(pickup2DeliveryOfPeople.containsKey(p) || S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					
+					if(isPeople){
+						//check constraint
+						if(S.evaluateAddTwoPoints(pickup, p, delivery, p) == 0){
+							//cost improve
+							double cost = objective.evaluateAddTwoPoints(pickup, p, delivery, p);
+							if( cost < best_objective){
+								best_objective = cost;
+								pre_pick = p;
+								pre_delivery = p;
+							}
+						}
+					}
+					//point is good
+					else{
+						int r = XR.route(p);
+						for(Point q = p; q != XR.getTerminatingPointOfRoute(r); q = XR.next(q)){
+							if(pickup2DeliveryOfPeople.containsKey(q) || S.evaluateAddOnePoint(delivery, q) > 0)
+								continue;
+							if(S.evaluateAddTwoPoints(pickup, p, delivery, q) == 0){
+								double cost = objective.evaluateAddTwoPoints(pickup, p, delivery, q);
+								if(cost < best_objective){
+									best_objective = cost;
+									pre_pick = p;
+									pre_delivery = q;
+								}
+							}
+						}
+					}
+				}
+				minRelatedBucketId++;
+			}
+			
+			if((pre_pick == null || pre_delivery == null) && !rejectPoints.contains(pickup)){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				
+				if(isPeople){
+					rejectPickupPeoples.add(pickup);
+				}else{
+					rejectPickupGoods.add(pickup);
+				}
+				//rejectPickup.add(pickup);
+				//rejectDelivery.add(delivery);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+			else if(pre_pick != null && pre_delivery != null){
+				mgr.performAddTwoPoints(pickup, pre_pick, delivery, pre_delivery);
+			}
+		}
+		LOGGER.log(Level.INFO,"people reject = " + rejectPoints.size()/2 + ", time for inserting reqs = " + (System.currentTimeMillis() - currtime)/1000);
+	}
+    
+	public void InitSolutionByInsertGoodFirst(){
+		
+		/*
+		 * Insert good first
+		 * 		find best route and best position in route to insert
+		 */
+		double currtime = System.currentTimeMillis();
+		LOGGER.log(Level.INFO,"Insert good to route");
+		Iterator<Map.Entry<Point, Point>> it = pickup2DeliveryOfGood.entrySet().iterator();
+		
+		while(it.hasNext()){
+			Map.Entry<Point,Point> requestOfGood = it.next();
+			Point pickup = requestOfGood.getKey();
+			Point delivery = requestOfGood.getValue();
+			
+			Point pre_pick = null;
+			Point pre_delivery = null;
+			double best_objective = Double.MAX_VALUE; 
+			
+			int minRelatedBucketId = (int)(earliestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			int maxRelatedBucketId = (int)(lastestAllowedArrivalTime.get(pickup) / buckets.getDelta());;
+			ArrayList<Point> marks = new ArrayList<Point>();
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+				//maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(minRelatedBucketId <= maxRelatedBucketId){
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(minRelatedBucketId));
+				//System.out.println("minRB = " + minRelatedBucketId + ", bk size = " + bk.size());
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					int r = XR.route(p);
+					for(Point q = p; q != XR.getTerminatingPointOfRoute(r); q = XR.next(q)){
+						if(S.evaluateAddOnePoint(delivery, q) > 0)
+							continue;
+						if(S.evaluateAddTwoPoints(pickup, p, delivery, q) == 0){
+							double cost = objective.evaluateAddTwoPoints(pickup, p, delivery, q);
+							if(cost < best_objective){
+								best_objective = cost;
+								pre_pick = p;
+								pre_delivery = q;
+							}
+						}
+					}
+				}
+				minRelatedBucketId++;
+			}
+			if(pre_pick == null || pre_delivery == null){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				rejectPickupGoods.add(pickup);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+			else if(pre_pick != null && pre_delivery != null){
+				mgr.performAddTwoPoints(pickup, pre_pick, delivery, pre_delivery);
+			}
+		}
+		
+		LOGGER.log(Level.INFO,"good reject = " + rejectPoints.size()/2 + ", time for inserting good reqs = " + (System.currentTimeMillis() - currtime)/1000);
+		currtime = System.currentTimeMillis();
+		
+		/*
+		 * Insert people
+		 * 		find best route and best position in route to insert
+		 */
+		
+		LOGGER.log(Level.INFO,"Insert people to route");
+		Iterator<Map.Entry<Point, Point>> it2 = pickup2DeliveryOfPeople.entrySet().iterator();
+
+		while(it2.hasNext()){
+			Map.Entry<Point,Point> requestOfPeople = it2.next();
+			Point pickup = requestOfPeople.getKey();
+			Point delivery = requestOfPeople.getValue();
+			
+			Point pre_pick = null;
+			Point pre_delivery = null;
+			double best_objective = Double.MAX_VALUE; 
+			
+			int minRelatedBucketId = (int)(earliestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			int maxRelatedBucketId = (int)(lastestAllowedArrivalTime.get(pickup) / buckets.getDelta());;
+			ArrayList<Point> marks = new ArrayList<Point>();
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+				//maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(minRelatedBucketId <= maxRelatedBucketId){
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(minRelatedBucketId));
+				//System.out.println("minRB = " + minRelatedBucketId + ", bk size = " + bk.size());
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					
+					if(S.evaluateAddTwoPoints(pickup, p, delivery, p) == 0){
+						//cost improve
+						double cost = objective.evaluateAddTwoPoints(pickup, p, delivery, p);
+						if( cost < best_objective){
+							best_objective = cost;
+							pre_pick = p;
+							pre_delivery = p;
+						}
+					}
+				}
+				minRelatedBucketId++;
+			}
+			if(pre_pick == null || pre_delivery == null){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				rejectPickupPeoples.add(pickup);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+			else if(pre_pick != null && pre_delivery != null){
+				mgr.performAddTwoPoints(pickup, pre_pick, delivery, pre_delivery);
+			}
+		}
+		LOGGER.log(Level.INFO,"time for inserting people reqs = " + (System.currentTimeMillis() - currtime)/1000);
+	}
+	
+	public void InitSolutionByInsertPeopleFirst(){
+		/*
+		 * Insert people
+		 * 		find best route and best position in route to insert
+		 */
+		double currtime = System.currentTimeMillis();
+		LOGGER.log(Level.INFO,"Insert people to route");
+		Iterator<Map.Entry<Point, Point>> it2 = pickup2DeliveryOfPeople.entrySet().iterator();
+
+		while(it2.hasNext()){
+			Map.Entry<Point,Point> requestOfPeople = it2.next();
+			Point pickup = requestOfPeople.getKey();
+			Point delivery = requestOfPeople.getValue();
+			
+			Point pre_pick = null;
+			Point pre_delivery = null;
+			double best_objective = Double.MAX_VALUE;
+			
+			int ear = earliestAllowedArrivalTime.get(pickup);
+			int late = lastestAllowedArrivalTime.get(pickup);
+			int i = (int)(ear / buckets.getDelta());
+			int maxRelatedBucketId = (int)(late / buckets.getDelta());;
+			ArrayList<Point> marks = new ArrayList<Point>();
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+				//maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(i <= maxRelatedBucketId){
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(i));
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					
+					if(S.evaluateAddTwoPoints(pickup, p, delivery, p) == 0){
+						//cost improve
+						double cost = objective.evaluateAddTwoPoints(pickup, p, delivery, p);
+						if( cost < best_objective){
+							best_objective = cost;
+							pre_pick = p;
+							pre_delivery = p;
+						}
+					}
+				}
+				i++;
+			}
+			if(pre_pick == null || pre_delivery == null){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				rejectPickupPeoples.add(pickup);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+			else if(pre_pick != null && pre_delivery != null){
+				mgr.performAddTwoPoints(pickup, pre_pick, delivery, pre_delivery);
+			}
+		}
+		LOGGER.log(Level.INFO,"people reject = " + rejectPoints.size()/2 + ", time for inserting people reqs = " + (System.currentTimeMillis() - currtime)/1000);
+		currtime = System.currentTimeMillis();
+		/*
+		 * Insert good
+		 * 		find best route and best position in route to insert
+		 */
+		LOGGER.log(Level.INFO,"Insert good to route");
+		Iterator<Map.Entry<Point, Point>> it = pickup2DeliveryOfGood.entrySet().iterator();
+		
+		while(it.hasNext()){
+			Map.Entry<Point,Point> requestOfGood = it.next();
+			Point pickup = requestOfGood.getKey();
+			Point delivery = requestOfGood.getValue();
+			
+			Point pre_pick = null;
+			Point pre_delivery = null;
+			double best_objective = Double.MAX_VALUE;
+			int i = (int)(earliestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			int maxRelatedBucketId = (int)(lastestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			ArrayList<Point> marks = new ArrayList<Point>();
+			
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+			//	maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(i <= maxRelatedBucketId){
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(i));
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					int r = XR.route(p);
+					for(Point q = p; q != XR.getTerminatingPointOfRoute(r); q = XR.next(q)){
+						if(S.evaluateAddOnePoint(delivery, q) > 0)
+							continue;
+						if(S.evaluateAddTwoPoints(pickup, p, delivery, q) == 0){
+							double cost = objective.evaluateAddTwoPoints(pickup, p, delivery, q);
+							if(cost < best_objective){
+								best_objective = cost;
+								pre_pick = p;
+								pre_delivery = q;
+							}
+						}
+					}
+				}
+				i++;
+			}
+			if(pre_pick == null || pre_delivery == null){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				rejectPickupGoods.add(pickup);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+			else if(pre_pick != null && pre_delivery != null){
+				mgr.performAddTwoPoints(pickup, pre_pick, delivery, pre_delivery);
+			}
+		}
+		LOGGER.log(Level.INFO,"time for inserting good reqs = " + (System.currentTimeMillis() - currtime)/1000);
+	}
+
+	public void firstPossibleInit(){
+		double currtime = System.currentTimeMillis();
+		for(int i = 0; i < pickupPoints.size(); i++){
+			Point pickup = pickupPoints.get(i);
+			if(XR.route(pickup) != Constants.NULL_POINT)
+				continue;
+			Point delivery = deliveryPoints.get(i);
+			//add the request to route
+			
+			boolean isPeople = pickup2DeliveryOfPeople.containsKey(pickup);
+			boolean finded = false;
+			
+			int minbkId = (int)(earliestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			int maxRelatedBucketId = (int)(lastestAllowedArrivalTime.get(pickup) / buckets.getDelta());;
+			ArrayList<Point> marks = new ArrayList<Point>();
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+				//maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(minbkId <= maxRelatedBucketId){
+				if(finded)
+					break;
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(minbkId));
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(finded)
+						break;
+					
+					if(pickup2DeliveryOfPeople.containsKey(p) || S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					
+					if(isPeople){
+						//check constraint
+						if(S.evaluateAddTwoPoints(pickup, p, delivery, p) == 0){
+							//cost improve
+							mgr.performAddTwoPoints(pickup, p, delivery, p);
+							finded = true;
+						}
+					}
+					//point is good
+					else{
+						int r = XR.route(p);
+						for(Point q = p; q != XR.getTerminatingPointOfRoute(r); q = XR.next(q)){
+							if(pickup2DeliveryOfPeople.containsKey(q) || S.evaluateAddOnePoint(delivery, q) > 0)
+								continue;
+							if(S.evaluateAddTwoPoints(pickup, p, delivery, q) == 0){
+								mgr.performAddTwoPoints(pickup, p, delivery, q);
+								finded = true;
+								break;
+							}
+						}
+					}
+				}
+				minbkId++;
+			}
+			
+			if(!finded){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				
+				if(isPeople){
+					rejectPickupPeoples.add(pickup);
+				}else{
+					rejectPickupGoods.add(pickup);
+				}
+				//rejectPickup.add(pickup);
+				//rejectDelivery.add(delivery);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+		}
+		LOGGER.log(Level.INFO,"time for inserting reqs = " + (System.currentTimeMillis() - currtime)/1000);
+	}
+	
+	public void firstPossible_insertGoodFirst_init(){
+		/*
+		 * Insert good first
+		 * 		find best route and best position in route to insert
+		 */
+		double currtime = System.currentTimeMillis();
+		LOGGER.log(Level.INFO,"Insert good to route");
+		Iterator<Map.Entry<Point, Point>> it = pickup2DeliveryOfGood.entrySet().iterator();
+		
+		while(it.hasNext()){
+			Map.Entry<Point,Point> requestOfGood = it.next();
+			Point pickup = requestOfGood.getKey();
+			Point delivery = requestOfGood.getValue();
+			boolean finded = false;
+			
+			int minRelatedBucketId = (int)(earliestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			int maxRelatedBucketId = (int)(lastestAllowedArrivalTime.get(pickup) / buckets.getDelta());;
+			ArrayList<Point> marks = new ArrayList<Point>();
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+				//maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(minRelatedBucketId <= maxRelatedBucketId){
+				if(finded)
+					break;
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(minRelatedBucketId));
+				//System.out.println("minRB = " + minRelatedBucketId + ", bk size = " + bk.size());
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(finded)
+						break;
+					
+					if(S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					int r = XR.route(p);
+					for(Point q = p; q != XR.getTerminatingPointOfRoute(r); q = XR.next(q)){
+						if(S.evaluateAddOnePoint(delivery, q) > 0)
+							continue;
+						if(S.evaluateAddTwoPoints(pickup, p, delivery, q) == 0){
+							mgr.performAddTwoPoints(pickup, p, delivery, q);
+							finded = true;
+							break;
+						}
+					}
+				}
+				minRelatedBucketId++;
+			}
+			if(!finded){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				rejectPickupGoods.add(pickup);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+		}
+		LOGGER.log(Level.INFO,"good reject = " + rejectPoints.size()/2 + ", time for inserting good reqs = " + (System.currentTimeMillis() - currtime)/1000);
+		currtime = System.currentTimeMillis();
+		/*
+		 * Insert people
+		 * 		find best route and best position in route to insert
+		 */
+
+		LOGGER.log(Level.INFO,"Insert people to route");
+		Iterator<Map.Entry<Point, Point>> it2 = pickup2DeliveryOfPeople.entrySet().iterator();
+
+		while(it2.hasNext()){
+			Map.Entry<Point,Point> requestOfPeople = it2.next();
+			Point pickup = requestOfPeople.getKey();
+			Point delivery = requestOfPeople.getValue();
+			
+			boolean finded = false;
+			
+			int minRelatedBucketId = (int)(earliestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			int maxRelatedBucketId = (int)(lastestAllowedArrivalTime.get(pickup) / buckets.getDelta());;
+			ArrayList<Point> marks = new ArrayList<Point>();
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+				//maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(minRelatedBucketId <= maxRelatedBucketId){
+				if(finded)
+					break;
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(minRelatedBucketId));
+				//System.out.println("minRB = " + minRelatedBucketId + ", bk size = " + bk.size());
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					
+					if(S.evaluateAddTwoPoints(pickup, p, delivery, p) == 0){
+						mgr.performAddTwoPoints(pickup, p, delivery, p);
+						finded = true;
+						break;
+					}
+				}
+			}
+			if(!finded){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				rejectPickupPeoples.add(pickup);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+		}
+		LOGGER.log(Level.INFO,"time for inserting people reqs = " + (System.currentTimeMillis() - currtime)/1000);
+	}
+	
+	public void firstPossible_insertPeopleFirst_init(){
+		
+		/*
+		 * Insert people
+		 * 		find best route and best position in route to insert
+		 */
+		double currtime = System.currentTimeMillis();
+		LOGGER.log(Level.INFO,"Insert people to route");
+		Iterator<Map.Entry<Point, Point>> it2 = pickup2DeliveryOfPeople.entrySet().iterator();
+
+		while(it2.hasNext()){
+			Map.Entry<Point,Point> requestOfPeople = it2.next();
+			Point pickup = requestOfPeople.getKey();
+			Point delivery = requestOfPeople.getValue();
+			
+			boolean finded = false;
+			
+			int minRelatedBucketId = (int)(earliestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			int maxRelatedBucketId = (int)(lastestAllowedArrivalTime.get(pickup) / buckets.getDelta());;
+			ArrayList<Point> marks = new ArrayList<Point>();
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+				//maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(minRelatedBucketId <= maxRelatedBucketId){
+				if(finded)
+					break;
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(minRelatedBucketId));
+				//System.out.println("minRB = " + minRelatedBucketId + ", bk size = " + bk.size());
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					
+					if(S.evaluateAddTwoPoints(pickup, p, delivery, p) == 0){
+						mgr.performAddTwoPoints(pickup, p, delivery, p);
+						finded = true;
+						break;
+					}
+				}
+				minRelatedBucketId++;
+			}
+			if(!finded){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				rejectPickupPeoples.add(pickup);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+		}
+		LOGGER.log(Level.INFO,"people reject = " + rejectPoints.size()/2 + ", time for inserting people reqs = " + (System.currentTimeMillis() - currtime)/1000);
+		currtime = System.currentTimeMillis();
+		/*
+		 * Insert good
+		 * 		find best route and best position in route to insert
+		 */
+		LOGGER.log(Level.INFO,"Insert good to route");
+		Iterator<Map.Entry<Point, Point>> it = pickup2DeliveryOfGood.entrySet().iterator();
+		
+		while(it.hasNext()){
+			Map.Entry<Point,Point> requestOfGood = it.next();
+			Point pickup = requestOfGood.getKey();
+			Point delivery = requestOfGood.getValue();
+			boolean finded = false;
+			
+			int minRelatedBucketId = (int)(earliestAllowedArrivalTime.get(pickup) / buckets.getDelta());
+			int maxRelatedBucketId = (int)(lastestAllowedArrivalTime.get(pickup) / buckets.getDelta());;
+			ArrayList<Point> marks = new ArrayList<Point>();
+			//if(maxRelatedBucketId >= buckets.nbBuckets)
+				//maxRelatedBucketId = buckets.nbBuckets - 1;
+			while(minRelatedBucketId <= maxRelatedBucketId){
+				if(finded)
+					break;
+				ArrayList<Point> bk = new ArrayList<Point>(buckets.getBucketWithIndex(minRelatedBucketId));
+				//System.out.println("minRB = " + minRelatedBucketId + ", bk size = " + bk.size());
+				for(Point p : bk){
+					if(marks.contains(p))
+						continue;
+					marks.add(p);
+					if(finded)
+						break;
+					
+					if(S.evaluateAddOnePoint(pickup, p) > 0)
+						continue;
+					int r = XR.route(p);
+					for(Point q = p; q != XR.getTerminatingPointOfRoute(r); q = XR.next(q)){
+						if(S.evaluateAddOnePoint(delivery, q) > 0)
+							continue;
+						if(S.evaluateAddTwoPoints(pickup, p, delivery, q) == 0){
+							mgr.performAddTwoPoints(pickup, p, delivery, q);
+							finded = true;
+							break;
+						}
+					}
+				}
+				minRelatedBucketId++;
+			}
+			if(!finded){
+				rejectPoints.add(pickup);
+				rejectPoints.add(delivery);
+				rejectPickupGoods.add(pickup);
+				//System.out.println("reject request: " + i + "reject size = " + rejectPickup.size());
+			}
+		}
+		LOGGER.log(Level.INFO,"time for inserting good reqs = " + (System.currentTimeMillis() - currtime)/1000);
+	}
+	
+	public SolutionShareARide search(int maxIter, int timeLimit, int i_remove, int i_insert, SearchInput si){
+		ALNSwithSA alns = new ALNSwithSA(buckets, mgr, objective, S, eat, awm, si);
+		return alns.search(maxIter, timeLimit, i_remove, i_insert);
+	}
+	
+	public static void main(String []args){
+    	try {		
+			for(int i=0; i<1; i++){
+				for(int j=0; j<1; j++){
+		    		String inData = "data/SARP-offline/n12335r100_1.txt";
+		        	
+		        	int timeLimit = 36000000;
+		        	int nIter = 300;
+		        	
+		        	Handler fileHandler;
+		        	Formatter simpleFormater;
+					DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+					Date date = new Date();
+					System.out.println(dateFormat.format(date));
+					
+					fileHandler = new FileHandler("data/output/SARP-offline/n12335r100/" + dateFormat.format(date) + "greedyInit_12Removal_12Insertion.txt");
+					simpleFormater = new SimpleFormatter();
+					
+					LOGGER.addHandler(fileHandler);
+			    	
+					fileHandler.setFormatter(simpleFormater);
+					
+//					String description = "\n\n\t RUN WITH 13 REMOVAL AND 14 INSERTION (3,1,-5,1) \n\n";
+//					LOGGER.log(Level.INFO, description);
+					
+					LOGGER.log(Level.INFO, "Read data");
+					Info info = new Info(inData);
+					ShareARide sar = new ShareARide(info);
+						
+					LOGGER.log(Level.INFO, "Read data done --> Create model");
+					sar.stateModel();
+
+					LOGGER.log(Level.INFO, "Create model done --> Init solution");
+					double currTime = System.currentTimeMillis();
+					//sar.InitSolutionByInsertGoodFirst();
+					//sar.greedyInitSolution();
+					//sar.firstPossibleInit();
+					//sar.firstPossible_insertGoodFirst_init();
+					sar.InitSolutionByInsertPeopleFirst();
+					//sar.InitSolutionByInsertPeopleFirstGreedyLoopAll();
+					
+					LOGGER.log(Level.INFO,"Init solution done. At start search number of reject points = "+sar.rejectPoints.size()/2
+							+"    violations = "+sar.S.violations()+"   cost = "+sar.objective.getValue() + ", init time = " + (System.currentTimeMillis() - currTime)/1000);
+					SearchInput si = new SearchInput(sar.pickupPoints, sar.deliveryPoints, sar.rejectPoints, 
+							sar.rejectPickupGoods, sar.rejectPickupPeoples, sar.earliestAllowedArrivalTime, sar.serviceDuration, 
+							sar.lastestAllowedArrivalTime, sar.pickup2DeliveryOfGood, sar.pickup2DeliveryOfPeople, sar.pickup2Delivery, sar.delivery2Pickup);
+					SolutionShareARide best_solution = sar.search(nIter, timeLimit,0,0,si);
+						
+					LOGGER.log(Level.INFO,"Search done. At end search number of reject points = "+best_solution.get_rejectPoints().size()/2+"   cost = "+best_solution.get_cost());
+					
+					LOGGER.log(Level.INFO,best_solution.toString());
+					
+					fileHandler.close();
+				}
+			}			
+		} catch (SecurityException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
-    
-    public static void main(String []args) throws FileNotFoundException
-    {
-    	int S = 7;
-    	for(int data = 1; data <= 10; ++data)
-    	{
-			Info info = new Info("data/sharedaride/n100r10_"+data+".txt");
-	    	
-	    	PrintWriter out = new PrintWriter(new File("out/S"+S+"/N100_R10_D"+data+"_S"+S+".txt"));
-	    	for(int turn = 0; turn < 10; ++turn)
-	    	{
-	    		ShareARide sar = new ShareARide(info);
-	        	sar.stateModel();
-	        	sar.search(20000, 300000, S);
-	        	LexMultiValues v = sar.valueSolution;
-	        	out.println(v.get(0)+"  "+v.get(1)*50/3600.0);
-	        	out.flush();
-	    	}
-	    	out.close();
-    	}
-    }
-    
-    
-   
-    
 }
 

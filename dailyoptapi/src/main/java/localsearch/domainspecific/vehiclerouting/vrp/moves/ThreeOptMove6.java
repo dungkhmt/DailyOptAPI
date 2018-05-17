@@ -37,7 +37,7 @@ public class ThreeOptMove6 implements IVRMove {
 	
 	
 	public void move() {
-		//System.out.println(name() + "::move(" + x + "," + y + "," + z + ") " + eval);
+		System.out.println(name() + "::move(" + x + "," + y + "," + z + ") " + eval);
 		mgr.performThreeOptMove6(x, y, z);
 		if(NE != null) NE.performMove(this);
 	}

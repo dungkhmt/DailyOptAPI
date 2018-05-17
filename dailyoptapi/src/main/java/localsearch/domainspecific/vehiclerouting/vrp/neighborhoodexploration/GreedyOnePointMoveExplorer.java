@@ -47,7 +47,7 @@ public class GreedyOnePointMoveExplorer implements INeighborhoodExplorer {
 		// TODO Auto-generated method stub
 		
 		if(firstImprovement && N.hasImprovement()){
-			//System.out.println(name() + "::exploreNeighborhood, has improvement --> RETURN");
+			System.out.println(name() + "::exploreNeighborhood, has improvement --> RETURN");
 			return;
 		}
 
