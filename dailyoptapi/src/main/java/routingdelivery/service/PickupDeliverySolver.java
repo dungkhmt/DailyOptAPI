@@ -2,6 +2,7 @@ package routingdelivery.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import localsearch.domainspecific.vehiclerouting.apps.sharedaride.Constraint.CPickupDeliveryOfGoodVR;
 import localsearch.domainspecific.vehiclerouting.vrp.ConstraintSystemVR;
@@ -81,11 +82,51 @@ class PickupDeliveryTWSearch extends GenericLocalSearch{
 	public String name(){
 		return "MySearch";
 	}
+	private void greedyConstructMaintainConstraint(){
+		HashSet<Integer> cand = new HashSet<Integer>();
+		for(int i = 0; i < pickupPoints.size(); i++) cand.add(i);
+		
+		while(cand.size() > 0){
+			Point sel_pickup = null;
+			Point sel_delivery = null;
+			double eval_violations = Integer.MAX_VALUE;
+			double eval_cost = Integer.MAX_VALUE;
+			Point sel_p = null;
+			Point sel_d = null;
+			for(int i : cand){
+				Point pickup = pickupPoints.get(i);
+				Point delivery = deliveryPoints.get(i);
+				for(int k = 1; k <= XR.getNbRoutes(); k++){
+					for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
+						for(Point d = p; d != XR.endPoint(k); d = XR.next(d)){
+							double ec = CS.evaluateAddTwoPoints(pickup, p, delivery, d);
+							double ef = cost.evaluateAddTwoPoints(pickup, p, delivery, d);
+							if(ec < eval_violations){
+								eval_violations = ec;
+								eval_cost = ef;
+								sel_p = p; sel_d = d;
+								sel_pickup = pickup;
+								sel_delivery = delivery;
+							}else if(ec == eval_violations && ef < eval_cost){
+								eval_cost = ef;
+								sel_p = p; sel_d = d;
+								sel_pickup = pickup;
+								sel_delivery = delivery;
+							}
+						}
+					}
+				}
+				
+			}
+		}
+	}
+	
 	@Override
 	public void generateInitialSolution(){
 		System.out.println(name() + "::generateInitialSolution.....");
 		//super.generateInitialSolution();
 		//System.exit(-1);
+		/*
 		for(int i = 0; i < pickupPoints.size(); i++){
 			Point pickup = pickupPoints.get(i);
 			Point delivery = deliveryPoints.get(i);
@@ -118,6 +159,7 @@ class PickupDeliveryTWSearch extends GenericLocalSearch{
 						", XR = " + XR.toString() + ", CS = " + CS.violations() + ", cost = " + cost.getValue());
 			}
 		}
+		*/
 	}
 	public void search(int maxIter, int timeLimit){
 		bestSolution = new ValueRoutesVR(XR);
@@ -177,6 +219,64 @@ public class PickupDeliverySolver {
 	private String code(String from, String to){
 		return from + "-" + to;
 	}
+	private void greedyConstructMaintainConstraint(){
+		HashSet<Integer> cand = new HashSet<Integer>();
+		for(int i = 0; i < pickupPoints.size(); i++) cand.add(i);
+		
+		while(cand.size() > 0){
+			Point sel_pickup = null;
+			Point sel_delivery = null;
+			double eval_violations = Integer.MAX_VALUE;
+			double eval_cost = Integer.MAX_VALUE;
+			Point sel_p = null;
+			Point sel_d = null;
+			int sel_i = -1;
+			for(int i : cand){
+				Point pickup = pickupPoints.get(i);
+				Point delivery = deliveryPoints.get(i);
+				for(int k = 1; k <= XR.getNbRoutes(); k++){
+					for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
+						
+						for(Point d = p; d != XR.endPoint(k); d = XR.next(d)){					
+							boolean ok = true;
+							for(Point tmp = p; tmp != XR.next(d); tmp = XR.next(tmp)){
+								if(nwm.getWeight(pickup) + awn.getSumWeights(tmp) > cap[k-1]){
+									ok = false; break;
+								}
+							}
+							if(!ok) continue;
+							
+							double ec = CS.evaluateAddTwoPoints(pickup, p, delivery, d);
+							double ef = cost.evaluateAddTwoPoints(pickup, p, delivery, d);
+							if(ec < eval_violations){
+								eval_violations = ec;
+								eval_cost = ef;
+								sel_p = p; sel_d = d;
+								sel_pickup = pickup;
+								sel_delivery = delivery;
+								sel_i = i;
+							}else if(ec == eval_violations && ef < eval_cost){
+								eval_cost = ef;
+								sel_p = p; sel_d = d;
+								sel_pickup = pickup;
+								sel_delivery = delivery;
+								sel_i = i;
+							}
+						}
+					}
+				}
+				
+			}
+			if(sel_i != -1){
+				mgr.performAddOnePoint(sel_delivery, sel_d);
+				mgr.performAddOnePoint(sel_pickup, sel_p);
+				System.out.println("init addOnePoint(" + sel_pickup.ID + ","+ sel_p.ID + "), and (" + sel_delivery.ID + "," + sel_d.ID + 
+						", XR = " + XR.toString() + ", CS = " + CS.violations() + ", cost = " + cost.getValue());
+				cand.remove(sel_i);
+			}
+		}
+	}
+
 	private void mapData(){
 		mDistance = new HashMap<String, Double>();
 		for(int i = 0; i < distances.length; i++){
@@ -342,18 +442,19 @@ public class PickupDeliverySolver {
 		eat = new EarliestArrivalTimeVR(XR, travelTime, earliestAllowedArrivalTime, serviceDuration);
 		ceat = new CEarliestArrivalTimeVR(eat, lastestAllowedArrivalTime);
 		
-		IConstraintVR goodC = new CPickupDeliveryOfGoodVR(XR, pickup2DeliveryOfGood);
-		CS.post(goodC);
+		//IConstraintVR goodC = new CPickupDeliveryOfGoodVR(XR, pickup2DeliveryOfGood);
+		//CS.post(goodC);
 		
-		load = new IFunctionVR[XR.getNbRoutes()];
-		IFunctionVR[] routeIndex = new IFunctionVR[allPoints.size()];
-		for(Point p: allPoints){
-			routeIndex[mPoint2Index.get(p)] = new RouteIndex(XR, p);
-			IFunctionVR ld = new AccumulatedNodeWeightsOnPathVR(awn, p);
-			for(int k = 1; k <= M; k++){
-				CS.post(new Implicate(new Eq(routeIndex[mPoint2Index.get(p)], k), new Leq(ld, cap[k-1])));
-			}
-		}
+		//load = new IFunctionVR[XR.getNbRoutes()];
+		//IFunctionVR[] routeIndex = new IFunctionVR[allPoints.size()];
+		//for(Point p: allPoints){
+			//routeIndex[mPoint2Index.get(p)] = new RouteIndex(XR, p);
+			//IFunctionVR ld = new AccumulatedNodeWeightsOnPathVR(awn, p);
+			//for(int k = 1; k <= M; k++){
+			//	CS.post(new Implicate(new Eq(routeIndex[mPoint2Index.get(p)], k), new Leq(ld, cap[k-1])));
+			//}
+		//}
+		
 		CS.post(ceat);
 		
 		cost = new TotalCostVR(XR, awm);
@@ -363,7 +464,9 @@ public class PickupDeliverySolver {
 		F.add(cost);
 		
 		mgr.close();
-	
+		
+		if(true) return;
+		
 		ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
 		/*
 		NE.add(new GreedyOnePointMoveExplorer(XR, F));
@@ -411,6 +514,22 @@ public class PickupDeliverySolver {
 		}
 
 	}
+	private void search(){
+		greedyConstructMaintainConstraint();
+		
+		System.out.println("solution XR = " + XR.toString() + ", cost = " + cost.getValue());
+		for(int k = 1; k <= XR.getNbRoutes(); k++){
+			System.out.println("Route[" + k + "]");
+			for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
+				Point np = XR.next(p);
+				double tt = travelTime.getWeight(p,np);
+				long at = (long)eat.getEarliestArrivalTime(p);
+				System.out.println("point " + p.getID() + ", demand = " + nwm.getWeight(p) + ", t2n = " + tt + ", eat = " + DateTimeUtils.unixTimeStamp2DateTime(at));
+			}
+			//System.out.println(", load = " + load[k-1].getValue() + ", cap = " + cap[k-1]);
+			System.out.println("------------------------------------");
+		}
+	}
 	public PickupDeliverySolution compute(PickupDeliveryInput input){
 		this.input = input;
 		this.requests = input.getRequests();
@@ -418,6 +537,8 @@ public class PickupDeliverySolver {
 		this.distances = input.getDistances();
 		
 		mapData();
+		
+		search();
 		
 		int nbr = 0;
 		for(int k = 1; k <= XR.getNbRoutes(); k++)

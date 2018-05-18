@@ -14,6 +14,7 @@ import routingdelivery.service.PickupDeliverySolver;
 
 @RestController
 public class PickupDeliveryController {
+	/*
 	@RequestMapping(value = "/pickup-delivery", method = RequestMethod.POST)
 	public PickupDeliverySolution computePickupDeliverySolution(HttpServletRequest request, 
 			@RequestBody PickupDeliveryInput input){
@@ -23,4 +24,5 @@ public class PickupDeliveryController {
 		return solver.compute(input);
 		
 	}
+	*/
 }
