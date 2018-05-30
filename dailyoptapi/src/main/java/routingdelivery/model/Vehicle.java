@@ -14,6 +14,34 @@ public class Vehicle {
 	private String endLocationCode;
 	private String startWorkingTime;
 	private String endWorkingTime;
+	private int cost;// chi phi thue xe
+	
+	public Vehicle(int width, int length, int height, String code, double lat,
+			double lng, double endLat, double endLng, double weight,
+			String startLocationCode, String endLocationCode,
+			String startWorkingTime, String endWorkingTime, int cost) {
+		super();
+		this.width = width;
+		this.length = length;
+		this.height = height;
+		this.code = code;
+		this.lat = lat;
+		this.lng = lng;
+		this.endLat = endLat;
+		this.endLng = endLng;
+		this.weight = weight;
+		this.startLocationCode = startLocationCode;
+		this.endLocationCode = endLocationCode;
+		this.startWorkingTime = startWorkingTime;
+		this.endWorkingTime = endWorkingTime;
+		this.cost = cost;
+	}
+	public int getCost() {
+		return cost;
+	}
+	public void setCost(int cost) {
+		this.cost = cost;
+	}
 	public Vehicle(int width, int length, int height, String code,
 			double lat, double lng, double endLat, double endLng,
 			double weight, String startLocationCode, String endLocationCode,

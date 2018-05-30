@@ -10,6 +10,7 @@ public class PickupDeliveryRequest {
 	private double pickupLng;
 	private String earlyPickupTime;
 	private String latePickupTime;
+	private int pickupDuration;
 
 	private String deliveryLocationCode;
 	private String deliveryAddr;
@@ -17,6 +18,45 @@ public class PickupDeliveryRequest {
 	private double deliveryLng;
 	private String earlyDeliveryTime;
 	private String lateDeliveryTime;
+	private int deliveryDuration;
+	
+	public PickupDeliveryRequest(String orderID, Item[] items,
+			String pickupLocationCode, String pickupAddr, double pickupLat,
+			double pickupLng, String earlyPickupTime, String latePickupTime,
+			int pickupDuration, String deliveryLocationCode,
+			String deliveryAddr, double deliveryLat, double deliveryLng,
+			String earlyDeliveryTime, String lateDeliveryTime,
+			int deliveryDuration) {
+		super();
+		this.orderID = orderID;
+		this.items = items;
+		this.pickupLocationCode = pickupLocationCode;
+		this.pickupAddr = pickupAddr;
+		this.pickupLat = pickupLat;
+		this.pickupLng = pickupLng;
+		this.earlyPickupTime = earlyPickupTime;
+		this.latePickupTime = latePickupTime;
+		this.pickupDuration = pickupDuration;
+		this.deliveryLocationCode = deliveryLocationCode;
+		this.deliveryAddr = deliveryAddr;
+		this.deliveryLat = deliveryLat;
+		this.deliveryLng = deliveryLng;
+		this.earlyDeliveryTime = earlyDeliveryTime;
+		this.lateDeliveryTime = lateDeliveryTime;
+		this.deliveryDuration = deliveryDuration;
+	}
+	public int getPickupDuration() {
+		return pickupDuration;
+	}
+	public void setPickupDuration(int pickupDuration) {
+		this.pickupDuration = pickupDuration;
+	}
+	public int getDeliveryDuration() {
+		return deliveryDuration;
+	}
+	public void setDeliveryDuration(int deliveryDuration) {
+		this.deliveryDuration = deliveryDuration;
+	}
 	public String getOrderID() {
 		return orderID;
 	}

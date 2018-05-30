@@ -1,5 +1,7 @@
 package routingdelivery.service;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,17 +60,20 @@ import routingdelivery.model.PickupDeliverySolution;
 import routingdelivery.model.RoutingElement;
 import routingdelivery.model.RoutingSolution;
 import routingdelivery.model.Vehicle;
+import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
+import routingdelivery.smartlog.brenntag.model.ExclusiveItem;
+import routingdelivery.smartlog.brenntag.model.ExclusiveVehicleLocation;
 import utils.DateTimeUtils;
 
 class PickupDeliveryTWSearch extends GenericLocalSearch{
-	//private PickupDeliveryInput input;
-	//private PickupDeliveryRequest[] req;
-	private ArrayList<Point> pickupPoints;
-	private ArrayList<Point> deliveryPoints;
-	private LexMultiFunctions F;
-	private IConstraintVR CS;
-	private IFunctionVR cost;
-	private VarRoutesVR XR;
+	//protected PickupDeliveryInput input;
+	//protected PickupDeliveryRequest[] req;
+	protected ArrayList<Point> pickupPoints;
+	protected ArrayList<Point> deliveryPoints;
+	protected LexMultiFunctions F;
+	protected IConstraintVR CS;
+	protected IFunctionVR cost;
+	protected VarRoutesVR XR;
 	public PickupDeliveryTWSearch(VRManager mgr, LexMultiFunctions F, IConstraintVR CS, IFunctionVR cost,
 			VarRoutesVR XR, ArrayList<Point> pickupPoints, ArrayList<Point> deliveryPoints){
 		super(mgr);
@@ -82,7 +87,7 @@ class PickupDeliveryTWSearch extends GenericLocalSearch{
 	public String name(){
 		return "MySearch";
 	}
-	private void greedyConstructMaintainConstraint(){
+	protected void greedyConstructMaintainConstraint(){
 		HashSet<Integer> cand = new HashSet<Integer>();
 		for(int i = 0; i < pickupPoints.size(); i++) cand.add(i);
 		
@@ -173,53 +178,62 @@ class PickupDeliveryTWSearch extends GenericLocalSearch{
 
 public class PickupDeliverySolver {
 	public static final String module = PickupDeliverySolver.class.getName();
-	private PickupDeliveryInput input;
-	private PickupDeliveryRequest[] requests;
-	private Vehicle[] vehicles;
-	private DistanceElement[] distances;
+	protected BrennTagPickupDeliveryInput input;
+	protected PickupDeliveryRequest[] requests;
+	protected Vehicle[] vehicles;
+	protected DistanceElement[] distances;
+	protected DistanceElement[] travelTimes;
 	
-	private HashMap<String, Double> mDistance;
-	private int N;// pickup points: 0, 1, 2, ..., N-1 delivery points: N,...,N+N-1
-	private int M;// start points of vehicles 2N,...,2N+M-1, end points of vehicles are 2N+M,..., 2N+2M-1
-	private double[][] dis;// dis[i][j] is the distance from point i to point j
-	private double[] cap;// capacity of vehicles
-	private HashMap<Integer, Integer> mOrderItem2Request;
-	private HashMap<Point, Vehicle> mPoint2Vehicle;
-	private HashMap<Point, PickupDeliveryRequest> mPoint2Request;
-	private HashMap<Point, String> mPoint2Type;// "S": start, "P": pickup, "D": delivery, "T": terminate 
+	protected HashMap<String, Double> mDistance;
+	protected HashMap<String, Double> mTravelTime;
+	protected int N;// pickup points: 0, 1, 2, ..., N-1 delivery points: N,...,N+N-1
+	protected int M;// start points of vehicles 2N,...,2N+M-1, end points of vehicles are 2N+M,..., 2N+2M-1
+	protected double[][] dis;// dis[i][j] is the distance from point i to point j
+	protected double[] cap;// capacity of vehicles
+	protected HashMap<Integer, Integer> mOrderItem2Request;
+	protected HashMap<Point, Vehicle> mPoint2Vehicle;
+	protected HashMap<Point, PickupDeliveryRequest> mPoint2Request;
+	protected HashMap<Point, String> mPoint2Type;// "S": start, "P": pickup, "D": delivery, "T": terminate 
 	
-	private ArrayList<Point> startPoints;
-	private ArrayList<Point> endPoints;
-	private ArrayList<Point> pickupPoints;
-	private ArrayList<Point> deliveryPoints;
+	protected ArrayList<Point> startPoints;
+	protected ArrayList<Point> endPoints;
+	protected ArrayList<Point> pickupPoints;
+	protected ArrayList<Point> deliveryPoints;
 	HashMap<Point,Point> pickup2DeliveryOfGood = new HashMap<Point, Point>();
-	private ArrayList<Point> allPoints;
-	private HashMap<Point, Integer> mPoint2Index;
-	private HashMap<Point, String> mPoint2LocationCode;
-	private HashMap<Point, Double> mPoint2Demand;
+	protected ArrayList<Point> allPoints;
+	protected HashMap<Point, Integer> mPoint2Index;
+	protected HashMap<Point, String> mPoint2LocationCode;
+	protected HashMap<Point, Double> mPoint2Demand;
+	protected HashMap<Point, HashSet<Integer>> mPoint2PossibleVehicles;
+	protected HashMap<String, HashSet<String>> mItem2ExclusiveItems;
+	protected HashMap<String, HashSet<String>> mVehicle2NotReachedLocations;
+	
+	
 	HashMap<Point, Integer> earliestAllowedArrivalTime;
 	HashMap<Point, Integer> serviceDuration;
 	HashMap<Point, Integer> lastestAllowedArrivalTime;
-	private ArcWeightsManager awm;
-	private ArcWeightsManager travelTime;
-	private NodeWeightsManager nwm;
-	private VRManager mgr;
-	private VarRoutesVR XR;
+	protected ArcWeightsManager awm;
+	protected ArcWeightsManager travelTime;
+	protected NodeWeightsManager nwm;
+	protected VRManager mgr;
+	protected VarRoutesVR XR;
 	AccumulatedWeightNodesVR awn;
 	AccumulatedWeightEdgesVR awe;
 	
-	private ConstraintSystemVR CS;
-	private CEarliestArrivalTimeVR ceat;
-	private EarliestArrivalTimeVR eat;
-	private IFunctionVR cost;
-	private IFunctionVR[] load;
-	private LexMultiFunctions F;
+	protected ConstraintSystemVR CS;
+	protected CEarliestArrivalTimeVR ceat;
+	protected EarliestArrivalTimeVR eat;
+	protected IFunctionVR cost;
+	protected IFunctionVR[] load;
+	protected LexMultiFunctions F;
 
+	protected HashMap<Point, String>  mPoint2Item;// map a point to the code of an item
+	protected HashMap<Point, HashSet<String>> mPoint2LoadedItems;// mPoint2LoadedItems[p] is the set of codes of items loaded on the vehicle after point p
 	
-	private String code(String from, String to){
+	protected String code(String from, String to){
 		return from + "-" + to;
 	}
-	private void greedyConstructMaintainConstraint(){
+	protected void greedyConstructMaintainConstraint(){
 		HashSet<Integer> cand = new HashSet<Integer>();
 		for(int i = 0; i < pickupPoints.size(); i++) cand.add(i);
 		
@@ -235,7 +249,26 @@ public class PickupDeliverySolver {
 				Point pickup = pickupPoints.get(i);
 				Point delivery = deliveryPoints.get(i);
 				for(int k = 1; k <= XR.getNbRoutes(); k++){
+					String vehicleCode = vehicles[k-1].getCode();
+					String pickupLocation = mPoint2LocationCode.get(pickup);
+					String deliveryLocation = mPoint2LocationCode.get(delivery);
+					
+					// check points cannot be visited
+					//if(!mPoint2PossibleVehicles.get(pickup).contains(k) || 
+					//		!mPoint2PossibleVehicles.get(delivery).contains(k)) continue;
+					if(mVehicle2NotReachedLocations.get(vehicleCode).contains(pickupLocation) ||
+							mVehicle2NotReachedLocations.get(vehicleCode).contains(deliveryLocation)) continue;
+					
 					for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
+						// check exclusive items
+						boolean okExclusiveItems = true;
+						HashSet<String> E = mItem2ExclusiveItems.get(mPoint2Item.get(pickup));
+						for(String I: E){
+							if(mPoint2LoadedItems.get(p).contains(I)){
+								okExclusiveItems = false; break;
+							}
+						}
+						if(!okExclusiveItems) continue;
 						
 						for(Point d = p; d != XR.endPoint(k); d = XR.next(d)){					
 							boolean ok = true;
@@ -273,18 +306,39 @@ public class PickupDeliverySolver {
 				System.out.println("init addOnePoint(" + sel_pickup.ID + ","+ sel_p.ID + "), and (" + sel_delivery.ID + "," + sel_d.ID + 
 						", XR = " + XR.toString() + ", CS = " + CS.violations() + ", cost = " + cost.getValue());
 				cand.remove(sel_i);
+				
+				// update loaded items
+				for(String I: mPoint2LoadedItems.get(sel_p)){
+					mPoint2LoadedItems.get(sel_pickup).add(I);
+				}
+				for(String I: mPoint2LoadedItems.get(sel_d)){
+					mPoint2LoadedItems.get(sel_delivery).add(I);
+				}
+				for(Point p = sel_pickup; p != sel_delivery; p = XR.next(p)){
+					mPoint2LoadedItems.get(p).add(mPoint2Item.get(sel_pickup));
+				}		
+				
 			}
 		}
 	}
 
-	private void mapData(){
+	protected void mapData(){
 		mDistance = new HashMap<String, Double>();
+		mTravelTime = new HashMap<String, Double>();
 		for(int i = 0; i < distances.length; i++){
 			String src = distances[i].getSrcCode();
 			String dest = distances[i].getDestCode();
 			mDistance.put(code(src,dest), distances[i].getDistance());
 			//System.out.println(module + "::mapData, mDistance.put(" + code(src,dest) + "," + distances[i].getDistance() + ")");
 		}
+		for(int i = 0; i < travelTimes.length; i++){
+			String src = travelTimes[i].getSrcCode();
+			String dest = travelTimes[i].getDestCode();
+			mTravelTime.put(code(src,dest), travelTimes[i].getDistance());
+			//System.out.println(module + "::mapData, mDistance.put(" + code(src,dest) + "," + distances[i].getDistance() + ")");
+		}
+		
+		
 		N = requests.length;
 		M = vehicles.length;
 		System.out.println(module + "::mapData, requests = " + N + ", vehicles = " + M);
@@ -342,6 +396,11 @@ public class PickupDeliverySolver {
 		mPoint2Vehicle = new HashMap<Point, Vehicle>();
 		mPoint2Request = new HashMap<Point, PickupDeliveryRequest>();
 		mPoint2Type = new HashMap<Point, String>();
+		mPoint2PossibleVehicles = new HashMap<Point, HashSet<Integer>>();
+		mPoint2Item = new HashMap<Point, String>();
+		mItem2ExclusiveItems = new HashMap<String, HashSet<String>>();
+		mVehicle2NotReachedLocations = new HashMap<String, HashSet<String>>();
+		mPoint2LoadedItems = new HashMap<Point, HashSet<String>>();
 		
 		pickup2DeliveryOfGood = new HashMap<Point, Point>();
 		earliestAllowedArrivalTime = new HashMap<Point, Integer>();
@@ -359,6 +418,10 @@ public class PickupDeliverySolver {
 				mPoint2Demand.put(pickup, requests[i].getItems()[j].getWeight());
 				mPoint2Request.put(pickup, requests[i]);
 				mPoint2Type.put(pickup, "P");
+				mPoint2PossibleVehicles.put(pickup, new HashSet<Integer>());
+				//mPoint2LoadedItems.put(pickup, new HashSet<String>());
+				mPoint2Item.put(pickup, requests[i].getItems()[j].getCode());
+				mItem2ExclusiveItems.put(requests[i].getItems()[j].getCode(), new HashSet<String>());
 				
 				Point delivery = new Point(idxPoint + N);
 				deliveryPoints.add(delivery);
@@ -367,6 +430,8 @@ public class PickupDeliverySolver {
 				mPoint2Demand.put(delivery, -requests[i].getItems()[j].getWeight());
 				mPoint2Request.put(delivery, requests[i]);
 				mPoint2Type.put(delivery, "D");
+				mPoint2PossibleVehicles.put(delivery, new HashSet<Integer>());
+				//mPoint2LoadedItems.put(delivery, new HashSet<String>());
 				
 				pickup2DeliveryOfGood.put(pickup, delivery);
 				allPoints.add(pickup);
@@ -374,10 +439,12 @@ public class PickupDeliverySolver {
 				
 				
 				earliestAllowedArrivalTime.put(pickup, (int)DateTimeUtils.dateTime2Int(requests[i].getEarlyPickupTime()));
-				serviceDuration.put(pickup, 1800);// load-unload is 30 minutes
+				//serviceDuration.put(pickup, 1800);// load-unload is 30 minutes
+				serviceDuration.put(pickup, requests[i].getItems()[j].getPickupDuration());
 				lastestAllowedArrivalTime.put(pickup, (int)DateTimeUtils.dateTime2Int(requests[i].getLatePickupTime()));
 				earliestAllowedArrivalTime.put(delivery, (int)DateTimeUtils.dateTime2Int(requests[i].getEarlyDeliveryTime()));
-				serviceDuration.put(delivery, 1800);// load-unload is 30 minutes
+				//serviceDuration.put(delivery, 1800);// load-unload is 30 minutes
+				serviceDuration.put(delivery, requests[i].getItems()[j].getDeliveryDuration());
 				lastestAllowedArrivalTime.put(delivery, (int)DateTimeUtils.dateTime2Int(requests[i].getLateDeliveryTime()));
 			}
 		}
@@ -397,6 +464,8 @@ public class PickupDeliverySolver {
 			mPoint2Demand.put(t, 0.0);
 			mPoint2Vehicle.put(s,vehicles[k]);
 			mPoint2Vehicle.put(t, vehicles[k]);
+			mVehicle2NotReachedLocations.put(vehicles[k].getCode(), new HashSet<String>());
+			
 			
 			allPoints.add(s);
 			allPoints.add(t);
@@ -408,7 +477,22 @@ public class PickupDeliverySolver {
 			serviceDuration.put(t,0);// load-unload is 30 minutes
 			lastestAllowedArrivalTime.put(t, (int)DateTimeUtils.dateTime2Int(vehicles[k].getEndWorkingTime()));
 		}
-		
+		for(Point p: allPoints){
+			mPoint2LoadedItems.put(p, new HashSet<String>());
+		}
+		ExclusiveItem[] exclusiveItems = input.getExclusiveItemPairs();
+		for(int i = 0; i < exclusiveItems.length; i++){
+			String I1 = exclusiveItems[i].getCode1();
+			String I2 = exclusiveItems[i].getCode2();
+			mItem2ExclusiveItems.get(I1).add(I2);
+			mItem2ExclusiveItems.get(I2).add(I1);
+		}
+		ExclusiveVehicleLocation[] exclusiveVehicleLocations = input.getExclusiveVehicleLocations();
+		for(int i = 0; i < exclusiveVehicleLocations.length; i++){
+			String vehicleCode = exclusiveVehicleLocations[i].getVehicleCode();
+			String locationCode = exclusiveVehicleLocations[i].getLocationCode();
+			mVehicle2NotReachedLocations.get(vehicleCode).add(locationCode);
+		}
 		
 		awm = new ArcWeightsManager(allPoints);
 		nwm = new NodeWeightsManager(allPoints);
@@ -420,7 +504,9 @@ public class PickupDeliverySolver {
 				String lq = mPoint2LocationCode.get(q);
 					double d = mDistance.get(code(lp,lq));
 					awm.setWeight(p, q, d);
-					travelTime.setWeight(p, q, (d*1000)/input.getParams().getAverageSpeed());// meter per second
+					//travelTime.setWeight(p, q, (d*1000)/input.getParams().getAverageSpeed());// meter per second
+					double t = mTravelTime.get(code(lp,lq));
+					travelTime.setWeight(p, q, t);
 			}
 		}
 		for(Point p: allPoints){
@@ -514,7 +600,7 @@ public class PickupDeliverySolver {
 		}
 
 	}
-	private void search(){
+	protected void search(){
 		greedyConstructMaintainConstraint();
 		
 		System.out.println("solution XR = " + XR.toString() + ", cost = " + cost.getValue());
@@ -530,11 +616,12 @@ public class PickupDeliverySolver {
 			System.out.println("------------------------------------");
 		}
 	}
-	public PickupDeliverySolution compute(PickupDeliveryInput input){
+	public PickupDeliverySolution compute(BrennTagPickupDeliveryInput input){
 		this.input = input;
 		this.requests = input.getRequests();
 		this.vehicles = input.getVehicles();
 		this.distances = input.getDistances();
+		this.travelTimes = input.getTravelTime();
 		
 		mapData();
 		
@@ -551,6 +638,7 @@ public class PickupDeliverySolver {
 				nbr++;
 				ArrayList<RoutingElement> lst = new ArrayList<RoutingElement>();
 				double distance = 0;
+				double maxLoad = 0;
 				for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
 					int ip = mPoint2Index.get(p);
 					RoutingElement e = null;
@@ -593,6 +681,7 @@ public class PickupDeliverySolver {
 						//e = new RoutingElement(requests[ir].getOrderID(), "-", lat + "," + lng,lat,lng, s_at, s_dt);
 						e.setDescription("orderID: " + r.getOrderID() + ", type = " + mPoint2Type.get(p) + ", amount: " +
 						mPoint2Demand.get(p) + ", accumulate load = " + awn.getSumWeights(p));
+						if(maxLoad < awn.getSumWeights(p)) maxLoad = awn.getSumWeights(p);
 						e.setOrderId(r.getOrderID());
 					}
 					distance += awm.getWeight(p, XR.next(p));
@@ -609,6 +698,10 @@ public class PickupDeliverySolver {
 				double d_lng = v.getEndLng();
 				RoutingElement e = new RoutingElement(v.getEndLocationCode(), "-", d_lat + "," + d_lng, d_lat, d_lng, s_at,"-");
 				lst.add(e);
+				RoutingElement firstEle = lst.get(0);
+				NumberFormat formatter = new DecimalFormat("#0.00");  
+				String std_d = formatter.format(distance);
+				firstEle.setDescription(firstEle.getDescription() + ", length = " + std_d + " (km)" + ", maxLoad = " + maxLoad + " (kg)");
 				
 				RoutingElement[] a_route = new RoutingElement[lst.size()];
 				for(int j = 0; j < lst.size(); j++)
@@ -628,24 +721,24 @@ public class PickupDeliverySolver {
 	}
 	/*
 	// model
-	private VRManager mgr;
-	private VarRoutesVR XR;
-	private ArrayList<Point> starts;
-	private ArrayList<Point> ends;
-	private ArrayList<Point> pickup;
-	private ArrayList<Point> delivery;
-	private ArrayList<Point> allPoints;
-	private ArrayList<Point> clientPoints;
-	private ArcWeightsManager awm;
-	private HashMap<Point, String> mPoint2GeoPoint;
-	private HashMap<String, Double> mCode2Distance;
-	private HashMap<PickupDeliveryRequest, Point> mReq2PickupPoint;
-	private HashMap<PickupDeliveryRequest, Point> mReq2DeliveryPoint;
-	private HashMap<Point, PickupDeliveryRequest> mPoint2Request;
-	private HashMap<Point, String> mPoint2LatLng;
-	private HashMap<Point, String> mPoint2Code;
+	protected VRManager mgr;
+	protected VarRoutesVR XR;
+	protected ArrayList<Point> starts;
+	protected ArrayList<Point> ends;
+	protected ArrayList<Point> pickup;
+	protected ArrayList<Point> delivery;
+	protected ArrayList<Point> allPoints;
+	protected ArrayList<Point> clientPoints;
+	protected ArcWeightsManager awm;
+	protected HashMap<Point, String> mPoint2GeoPoint;
+	protected HashMap<String, Double> mCode2Distance;
+	protected HashMap<PickupDeliveryRequest, Point> mReq2PickupPoint;
+	protected HashMap<PickupDeliveryRequest, Point> mReq2DeliveryPoint;
+	protected HashMap<Point, PickupDeliveryRequest> mPoint2Request;
+	protected HashMap<Point, String> mPoint2LatLng;
+	protected HashMap<Point, String> mPoint2Code;
 	
-	private IFunctionVR obj;
+	protected IFunctionVR obj;
 	
 	public void greedyConstruct(){
 		for(int i = 0; i < requests.length; i++){

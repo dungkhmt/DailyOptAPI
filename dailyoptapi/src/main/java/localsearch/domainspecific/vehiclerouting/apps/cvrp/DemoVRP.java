@@ -74,9 +74,9 @@ public class DemoVRP {
 	public void readData(String fn){
 		try{
 			Scanner in = new Scanner(new File(fn));
-			N = in.nextInt();
 			K = in.nextInt();
-			capacity = in.nextInt();
+			N = in.nextInt();
+			//capacity = in.nextInt();
 			demand = new int[N+1]; 
 			x = new int[N+1];
 			y = new int[N+1];
@@ -102,6 +102,8 @@ public class DemoVRP {
 		
 		mapPoint2ID = new HashMap<Point, Integer>();
 		// khoi tao cac diem bat dau va ket thuc cua cac xe (route)
+		capacity = demand[0];
+		demand[0] = 0;
 		for(int k = 1; k <= K; k++){
 			Point s = new Point(0);
 			Point t = new Point(0);
@@ -167,16 +169,6 @@ public class DemoVRP {
 		}
 		
 		
-		// demo routeIndex
-		Point pickup = clientPoints.get(3);
-		Point dropoff = clientPoints.get(4);
-		IFunctionVR ip = new RouteIndex(XR, pickup);
-		IFunctionVR id = new RouteIndex(XR,dropoff);
-		CS.post(new Eq(ip,id));
-		
-		
-		
-		
 		obj = new TotalCostVR(XR, awm);// tong khoang cach di chuyen cua K xe (route)
 		F = new LexMultiFunctions();
 		F.add(new ConstraintViolationsVR(CS));
@@ -224,7 +216,7 @@ public class DemoVRP {
 		se.setObjectiveFunction(F);
 		se.setMaxStable(50);
 
-		se.search(10, 3);
+		se.search(1000, 10);
 		
 		
 	}
@@ -233,7 +225,7 @@ public class DemoVRP {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		DemoVRP A = new DemoVRP();
-		A.readData("cvrp.txt");
+		A.readData("data/testdemo/cvrp-2-11.inp");
 		A.mapping();
 		A.stateModel();
 		A.print();
