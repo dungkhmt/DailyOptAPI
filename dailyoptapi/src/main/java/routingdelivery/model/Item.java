@@ -10,7 +10,57 @@ public class Item {
 	private double weight;
 	private int pickupDuration;
 	private int deliveryDuration;
+	private String orderId;
+	private String description;
 	
+	public Item clone(){
+		return new Item(w, l, h, name, code, quantity,
+				weight, pickupDuration, deliveryDuration,
+				orderId, description);
+	}
+	public Item(int w, int l, int h, String name, String code, int quantity,
+			double weight, int pickupDuration, int deliveryDuration,
+			String orderId, String description) {
+		super();
+		this.w = w;
+		this.l = l;
+		this.h = h;
+		this.name = name;
+		this.code = code;
+		this.quantity = quantity;
+		this.weight = weight;
+		this.pickupDuration = pickupDuration;
+		this.deliveryDuration = deliveryDuration;
+		this.orderId = orderId;
+		this.description = description;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public Item(int w, int l, int h, String name, String code, int quantity,
+			double weight, int pickupDuration, int deliveryDuration,
+			String orderId) {
+		super();
+		this.w = w;
+		this.l = l;
+		this.h = h;
+		this.name = name;
+		this.code = code;
+		this.quantity = quantity;
+		this.weight = weight;
+		this.pickupDuration = pickupDuration;
+		this.deliveryDuration = deliveryDuration;
+		this.orderId = orderId;
+	}
+	public String getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
 	public Item(int w, int l, int h, String name, String code, int quantity,
 			double weight, int pickupDuration, int deliveryDuration) {
 		super();

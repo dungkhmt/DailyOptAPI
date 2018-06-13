@@ -10,7 +10,8 @@ public class PickupDeliveryRequest {
 	private double pickupLng;
 	private String earlyPickupTime;
 	private String latePickupTime;
-	private int pickupDuration;
+	private int pickupDuration;// not used case brenntag
+	private int fixLoadTime;
 
 	private String deliveryLocationCode;
 	private String deliveryAddr;
@@ -18,8 +19,98 @@ public class PickupDeliveryRequest {
 	private double deliveryLng;
 	private String earlyDeliveryTime;
 	private String lateDeliveryTime;
-	private int deliveryDuration;
+	private int deliveryDuration;// not use case brenntag
+	private int fixUnloadTime;
 	
+	
+	private String splitDelivery;// "Y" or "N"
+	
+	
+	public PickupDeliveryRequest(String orderID, Item[] items,
+			String pickupLocationCode, String pickupAddr, double pickupLat,
+			double pickupLng, String earlyPickupTime, String latePickupTime,
+			int pickupDuration, int fixLoadTime, String deliveryLocationCode,
+			String deliveryAddr, double deliveryLat, double deliveryLng,
+			String earlyDeliveryTime, String lateDeliveryTime,
+			int deliveryDuration, int fixUnloadTime, String splitDelivery) {
+		super();
+		this.orderID = orderID;
+		this.items = items;
+		this.pickupLocationCode = pickupLocationCode;
+		this.pickupAddr = pickupAddr;
+		this.pickupLat = pickupLat;
+		this.pickupLng = pickupLng;
+		this.earlyPickupTime = earlyPickupTime;
+		this.latePickupTime = latePickupTime;
+		this.pickupDuration = pickupDuration;
+		this.fixLoadTime = fixLoadTime;
+		this.deliveryLocationCode = deliveryLocationCode;
+		this.deliveryAddr = deliveryAddr;
+		this.deliveryLat = deliveryLat;
+		this.deliveryLng = deliveryLng;
+		this.earlyDeliveryTime = earlyDeliveryTime;
+		this.lateDeliveryTime = lateDeliveryTime;
+		this.deliveryDuration = deliveryDuration;
+		this.fixUnloadTime = fixUnloadTime;
+		this.splitDelivery = splitDelivery;
+	}
+	public int getFixLoadTime() {
+		return fixLoadTime;
+	}
+	public void setFixLoadTime(int fixLoadTime) {
+		this.fixLoadTime = fixLoadTime;
+	}
+	public int getFixUnloadTime() {
+		return fixUnloadTime;
+	}
+	public void setFixUnloadTime(int fixUnloadTime) {
+		this.fixUnloadTime = fixUnloadTime;
+	}
+	public PickupDeliveryRequest(String orderID, Item[] items,
+			String pickupLocationCode, String pickupAddr, double pickupLat,
+			double pickupLng, String earlyPickupTime, String latePickupTime,
+			int pickupDuration, String deliveryLocationCode,
+			String deliveryAddr, double deliveryLat, double deliveryLng,
+			String earlyDeliveryTime, String lateDeliveryTime,
+			int deliveryDuration, String splitDelivery) {
+		super();
+		this.orderID = orderID;
+		this.items = items;
+		this.pickupLocationCode = pickupLocationCode;
+		this.pickupAddr = pickupAddr;
+		this.pickupLat = pickupLat;
+		this.pickupLng = pickupLng;
+		this.earlyPickupTime = earlyPickupTime;
+		this.latePickupTime = latePickupTime;
+		this.pickupDuration = pickupDuration;
+		this.deliveryLocationCode = deliveryLocationCode;
+		this.deliveryAddr = deliveryAddr;
+		this.deliveryLat = deliveryLat;
+		this.deliveryLng = deliveryLng;
+		this.earlyDeliveryTime = earlyDeliveryTime;
+		this.lateDeliveryTime = lateDeliveryTime;
+		this.deliveryDuration = deliveryDuration;
+		this.splitDelivery = splitDelivery;
+	}
+	public String getSplitDelivery() {
+		return splitDelivery;
+	}
+	public void setSplitDelivery(String splitDelivery) {
+		this.splitDelivery = splitDelivery;
+	}
+	public PickupDeliveryRequest clone(){
+		Item[] I = new Item[items.length];
+		for(int i = 0; i < items.length; i++){
+			I[i] = items[i].clone();
+		}
+		return new PickupDeliveryRequest(orderID, I,
+				pickupLocationCode, pickupAddr, pickupLat,
+				pickupLng, earlyPickupTime, latePickupTime,
+				pickupDuration, deliveryLocationCode,
+				deliveryAddr, deliveryLat, deliveryLng,
+				earlyDeliveryTime, lateDeliveryTime,
+				deliveryDuration, splitDelivery);
+	}
 	public PickupDeliveryRequest(String orderID, Item[] items,
 			String pickupLocationCode, String pickupAddr, double pickupLat,
 			double pickupLng, String earlyPickupTime, String latePickupTime,

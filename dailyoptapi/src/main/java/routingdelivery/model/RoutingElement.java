@@ -10,7 +10,62 @@ public class RoutingElement {
 	private String departureTime;
 	private String description;
 	private String orderId;
+	private double load;
+	private double distance;
+	private Item[] items;
 	
+	public RoutingElement(String code, String address, String latlng,
+			double lat, double lng, String arrivalTime, String departureTime,
+			String description, String orderId, double load, double distance,
+			Item[] items) {
+		super();
+		this.code = code;
+		this.address = address;
+		this.latlng = latlng;
+		this.lat = lat;
+		this.lng = lng;
+		this.arrivalTime = arrivalTime;
+		this.departureTime = departureTime;
+		this.description = description;
+		this.orderId = orderId;
+		this.load = load;
+		this.distance = distance;
+		this.items = items;
+	}
+	public Item[] getItems() {
+		return items;
+	}
+	public void setItems(Item[] items) {
+		this.items = items;
+	}
+	public RoutingElement(String code, String address, String latlng,
+			double lat, double lng, String arrivalTime, String departureTime,
+			String description, String orderId, double load, double distance) {
+		super();
+		this.code = code;
+		this.address = address;
+		this.latlng = latlng;
+		this.lat = lat;
+		this.lng = lng;
+		this.arrivalTime = arrivalTime;
+		this.departureTime = departureTime;
+		this.description = description;
+		this.orderId = orderId;
+		this.load = load;
+		this.distance = distance;
+	}
+	public double getLoad() {
+		return load;
+	}
+	public void setLoad(double load) {
+		this.load = load;
+	}
+	public double getDistance() {
+		return distance;
+	}
+	public void setDistance(double distance) {
+		this.distance = distance;
+	}
 	public String getOrderId() {
 		return orderId;
 	}
