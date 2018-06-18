@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 //import org.apache.log4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import routingdelivery.model.PickupDeliveryInput;
 import routingdelivery.model.PickupDeliverySolution;
 import routingdelivery.service.PickupDeliverySolver;
 import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
+import routingdelivery.smartlog.brenntag.service.BrenntagPickupDeliverySolver;
 import utils.DateTimeUtils;
 
 
@@ -93,9 +95,10 @@ public class TestAPI {
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
-		PickupDeliverySolver solver = new PickupDeliverySolver();
-		//CVRPTWSolver solver = new CVRPTWSolver();
-		return solver.compute(input);
+		//PickupDeliverySolver solver = new PickupDeliverySolver();
+		BrenntagPickupDeliverySolver solver = new BrenntagPickupDeliverySolver();
+		//return solver.compute(input);
+		return solver.computeNew(input);
 		
 	}
 	

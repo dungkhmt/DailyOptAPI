@@ -1,11 +1,34 @@
 package routingdelivery.model;
 
+import java.util.ArrayList;
+
 public class RoutingSolution {
 	private Vehicle vehicle;
 	private RoutingElement[] elements;
 	private double load;
 	private double distance;
 	
+	public void insertHead(ArrayList<RoutingElement> RE){
+		ArrayList<RoutingElement> tmp = new ArrayList<RoutingElement>();
+		double baseDistance = 0;
+		if(RE.size() > 0)
+			baseDistance = RE.get(RE.size()-1).getDistance();
+		
+		for(int i = 0; i < RE.size(); i++){
+			tmp.add(RE.get(i));
+			
+		}
+		for(int i = 1; i < elements.length; i++){// start from 1 -> ignore the first (start element route which is the depot)
+			tmp.add(elements[i]);
+			elements[i].setDistance(baseDistance + elements[i].getDistance());
+		}
+		
+		elements = new RoutingElement[tmp.size()];
+		for(int i = 0; i < tmp.size(); i++)
+			elements[i] = tmp.get(i);
+	
+		distance += baseDistance;
+	}
 	public Vehicle getVehicle() {
 		return vehicle;
 	}

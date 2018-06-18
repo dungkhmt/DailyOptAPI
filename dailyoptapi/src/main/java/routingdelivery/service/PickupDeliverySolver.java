@@ -71,84 +71,6 @@ import routingdelivery.smartlog.brenntag.model.ExclusiveItem;
 import routingdelivery.smartlog.brenntag.model.ExclusiveVehicleLocation;
 import utils.DateTimeUtils;
 
-/*
- class PickupDeliveryTWSearch extends GenericLocalSearch{
- //protected PickupDeliveryInput input;
- //protected PickupDeliveryRequest[] req;
- protected ArrayList<Point> pickupPoints;
- protected ArrayList<Point> deliveryPoints;
- protected LexMultiFunctions F;
- protected IConstraintVR CS;
- protected IFunctionVR cost;
- protected VarRoutesVR XR;
- public PickupDeliveryTWSearch(VRManager mgr, LexMultiFunctions F, IConstraintVR CS, IFunctionVR cost,
- VarRoutesVR XR, ArrayList<Point> pickupPoints, ArrayList<Point> deliveryPoints){
- super(mgr);
- this.pickupPoints = pickupPoints;
- this.deliveryPoints = deliveryPoints;
- this.F = F;
- this.CS = CS;
- this.cost = cost;
- this.XR = XR;
- }
- public String name(){
- return "MySearch";
- }
- protected void greedyConstructMaintainConstraint(){
- HashSet<Integer> cand = new HashSet<Integer>();
- for(int i = 0; i < pickupPoints.size(); i++) cand.add(i);
-
- while(cand.size() > 0){
- Point sel_pickup = null;
- Point sel_delivery = null;
- double eval_violations = Integer.MAX_VALUE;
- double eval_cost = Integer.MAX_VALUE;
- Point sel_p = null;
- Point sel_d = null;
- for(int i : cand){
- Point pickup = pickupPoints.get(i);
- Point delivery = deliveryPoints.get(i);
- for(int k = 1; k <= XR.getNbRoutes(); k++){
- for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
- for(Point d = p; d != XR.endPoint(k); d = XR.next(d)){
- double ec = CS.evaluateAddTwoPoints(pickup, p, delivery, d);
- double ef = cost.evaluateAddTwoPoints(pickup, p, delivery, d);
- if(ec < eval_violations){
- eval_violations = ec;
- eval_cost = ef;
- sel_p = p; sel_d = d;
- sel_pickup = pickup;
- sel_delivery = delivery;
- }else if(ec == eval_violations && ef < eval_cost){
- eval_cost = ef;
- sel_p = p; sel_d = d;
- sel_pickup = pickup;
- sel_delivery = delivery;
- }
- }
- }
- }
-
- }
- }
- }
-
- @Override
- public void generateInitialSolution(){
- System.out.println(name() + "::generateInitialSolution.....");
- //super.generateInitialSolution();
- //System.exit(-1);
- }
- public void search(int maxIter, int timeLimit){
- bestSolution = new ValueRoutesVR(XR);
- currentIter = 0;
- generateInitialSolution();
- nic = 0;
- bestValue = new LexMultiValues(F.getValues());
- updateBest();
- }
- }
- */
 public class PickupDeliverySolver {
 	public static final String module = PickupDeliverySolver.class.getName();
 	protected BrennTagPickupDeliveryInput input;
@@ -167,7 +89,7 @@ public class PickupDeliverySolver {
 	protected double[][] dis;// dis[i][j] is the distance from point i to point
 								// j
 	protected double[] cap;// capacity of vehicles
-	protected HashMap<Integer, Integer> mOrderItem2Request;
+	protected HashMap<Integer, Integer> mItemIndex2RequestIndex;
 	protected HashMap<Point, Vehicle> mPoint2Vehicle;
 	protected HashMap<Point, PickupDeliveryRequest> mPoint2Request;
 	protected HashMap<Point, String> mPoint2Type;// "S": start, "P": pickup,
@@ -178,7 +100,7 @@ public class PickupDeliverySolver {
 	protected ArrayList<Point> endPoints;
 	protected ArrayList<Point> pickupPoints;
 	protected ArrayList<Point> deliveryPoints;
-	HashMap<Point, Point> pickup2DeliveryOfGood = new HashMap<Point, Point>();
+	protected HashMap<Point, Point> pickup2DeliveryOfGood = new HashMap<Point, Point>();
 	protected ArrayList<Point> allPoints;
 	protected HashMap<Point, Integer> mPoint2Index;
 	protected HashMap<Point, String> mPoint2LocationCode;
@@ -187,21 +109,24 @@ public class PickupDeliverySolver {
 	protected HashMap<String, HashSet<String>> mItem2ExclusiveItems;
 	protected HashMap<String, HashSet<String>> mVehicle2NotReachedLocations;
 	protected HashMap<Item, Item[]> mLogicalItem2PhysicalItems;
+	protected HashMap<Point, Integer> mPickupPoint2RequestIndex;
 
-	HashMap<Point, Integer> earliestAllowedArrivalTime;
-	HashMap<Point, Integer> serviceDuration;
-	HashMap<Point, Integer> lastestAllowedArrivalTime;
+	protected HashMap<Integer, HashSet<Integer>> mRequest2PointIndices;
+	
+	protected HashMap<Point, Integer> earliestAllowedArrivalTime;
+	protected HashMap<Point, Integer> serviceDuration;
+	protected HashMap<Point, Integer> lastestAllowedArrivalTime;
 	protected ArcWeightsManager awm;
 	protected ArcWeightsManager travelTime;
 	protected NodeWeightsManager nwm;
 	protected VRManager mgr;
 	protected VarRoutesVR XR;
-	AccumulatedWeightNodesVR awn;
-	AccumulatedWeightEdgesVR awe;
+	protected AccumulatedWeightNodesVR awn;
+	protected AccumulatedWeightEdgesVR awe;
 
 	protected ConstraintSystemVR CS;
-	protected CEarliestArrivalTimeVR ceat;
-	protected EarliestArrivalTimeVR eat;
+	//protected CEarliestArrivalTimeVR ceat;
+	//protected EarliestArrivalTimeVR eat;
 	protected IFunctionVR cost;
 	protected IFunctionVR[] load;
 	protected LexMultiFunctions F;
@@ -228,6 +153,8 @@ public class PickupDeliverySolver {
 																		// point
 																		// p
 
+
+	protected HashMap<Item, Integer> mItem2Index;
 	protected HashMap<String, Integer> mItemCode2Index;
 	protected ArrayList<Item> items;// itemCodes.get(i) is the code of ith item,
 									// use with mItemCode2Index;
@@ -236,7 +163,7 @@ public class PickupDeliverySolver {
 
 	protected HashMap<Point, Integer> mPoint2ArrivalTime;
 	protected HashMap<Point, Integer> mPoint2DepartureTime;
-	
+
 	protected PrintWriter log;
 
 	public void initializeLog() {
@@ -403,7 +330,7 @@ public class PickupDeliverySolver {
 		return E;
 	}
 
-	private boolean checkExclusiveItems(Point fromPoint, Point pickup) {
+	protected boolean checkExclusiveItems(Point fromPoint, Point pickup) {
 		boolean ok = true;
 		/*
 		 * HashSet<String> E = getExclusiveItemsOfPickupPoint(pickup); for
@@ -417,114 +344,157 @@ public class PickupDeliverySolver {
 		}
 		return ok;
 	}
-	private boolean checkExclusiveItemForPickupAndDeliveryPoint(Point p, Point d, Point pickup){
-		// return true if pickup can be inserted after p and delivery is inserted after d
-		for(Point tp = p; tp != XR.next(d); tp = XR.next(tp))
-			if(!checkExclusiveItems(tp, pickup)) return false;
+
+	private boolean checkExclusiveItemForPickupAndDeliveryPoint(Point p,
+			Point d, Point pickup) {
+		// return true if pickup can be inserted after p and delivery is
+		// inserted after d
+		for (Point tp = p; tp != XR.next(d); tp = XR.next(tp))
+			if (!checkExclusiveItems(tp, pickup))
+				return false;
 		return true;
 	}
-	protected void propagateArrivalDepartureTime(boolean DEBUG){
-		for(int k = 1; k <= XR.getNbRoutes(); k++){
-			propagateArrivalDepartureTime(k,DEBUG);
+
+	protected void propagateArrivalDepartureTime(boolean DEBUG) {
+		for (int k = 1; k <= XR.getNbRoutes(); k++) {
+			propagateArrivalDepartureTime(k, DEBUG);
 		}
 	}
-	protected void propagateArrivalDepartureTime(int k, boolean DEBUG){
-		
-		//for(int k = 1; k <= XR.getNbRoutes(); k++){
-			Point p = XR.startPoint(k);
-			int startTime = earliestAllowedArrivalTime.get(p) + serviceDuration.get(p); 
-			mPoint2DepartureTime.put(p, startTime);
-			mPoint2ArrivalTime.put(p, startTime);
-			startTime = startTime + (int)travelTime.getWeight(p, XR.next(p));
-			p = XR.next(p);
-			while(p != XR.endPoint(k)){
-				//Point p = s;
-				String locationCode = mPoint2LocationCode.get(p);
-				if(log != null && DEBUG){
-					log.println("start  point " + p.ID + ", locationCode = " + locationCode);
+
+	protected void propagateArrivalDepartureTime(int k, boolean DEBUG) {
+
+		// for(int k = 1; k <= XR.getNbRoutes(); k++){
+		Point p = XR.startPoint(k);
+		int startTime = earliestAllowedArrivalTime.get(p)
+				+ serviceDuration.get(p);
+		mPoint2DepartureTime.put(p, startTime);
+		mPoint2ArrivalTime.put(p, startTime);
+		startTime = startTime + (int) travelTime.getWeight(p, XR.next(p));
+		p = XR.next(p);
+		while (p != XR.endPoint(k)) {
+			// Point p = s;
+			String locationCode = mPoint2LocationCode.get(p);
+			if (log != null && DEBUG) {
+				//log.println("start  point " + p.ID + ", locationCode = "
+				//		+ locationCode);
+			}
+			int fixTime = 0;
+			if (mPoint2Type.get(p).equals("D"))
+				fixTime = mPoint2Request.get(p).getFixUnloadTime();
+			else if (mPoint2Type.get(p).equals("P"))
+				fixTime = mPoint2Request.get(p).getFixLoadTime();
+
+			Point np = XR.next(p);
+			int duration = serviceDuration.get(p);
+			while (np != null) {
+				if (log != null && DEBUG) {
+					//log.println("point np =  " + np.ID + ", locationCode = "
+					//		+ mPoint2LocationCode.get(np));
 				}
-				int fixTime = 0;
-				if(mPoint2Type.get(p).equals("D")) 
-					fixTime = mPoint2Request.get(p).getFixUnloadTime();
-				else if(mPoint2Type.get(p).equals("P"))
-					fixTime = mPoint2Request.get(p).getFixLoadTime();
-				
-				Point np = XR.next(p);
-				int duration = serviceDuration.get(p);
-				while(np != null){
-					if(log != null && DEBUG){
-						log.println("point np =  " + np.ID + ", locationCode = " + mPoint2LocationCode.get(np));
-					}
-					if(!mPoint2LocationCode.get(np).equals(locationCode)) break;
-					
-					duration += serviceDuration.get(np);
-					if(log != null && DEBUG){
-						log.println("point np =  " + np.ID + ", locationCode = " + mPoint2LocationCode.get(np) +
-								", KEEP and augment duration = " + duration);
-					}
-					
-					
-					if(np == XR.endPoint(k)) break;
-					else
+				if (!mPoint2LocationCode.get(np).equals(locationCode))
+					break;
+
+				duration += serviceDuration.get(np);
+				if (log != null && DEBUG) {
+					//log.println("point np =  " + np.ID + ", locationCode = "
+					//		+ mPoint2LocationCode.get(np)
+					//		+ ", KEEP and augment duration = " + duration);
+				}
+
+				if (np == XR.endPoint(k))
+					break;
+				else
+					np = XR.next(np);
+			}
+			duration += fixTime;
+			if (log != null && DEBUG) {
+				//log.println("ADD FIX TIME " + fixTime + " --> duration = "
+				//		+ duration);
+			}
+
+			int departureTime = startTime + duration;
+
+			mPoint2ArrivalTime.put(p, startTime);
+			mPoint2DepartureTime.put(p, departureTime);
+			if (log != null && DEBUG) {
+				//log.println("SET START point p = " + p.ID + ", SET arr = "
+				//		+ mPoint2ArrivalTime.get(p) + ", dep = "
+				//		+ mPoint2DepartureTime.get(p));
+			}
+
+			np = XR.next(p);
+			while (np != null) {
+				if (!mPoint2LocationCode.get(np).equals(locationCode))
+					break;
+
+				mPoint2ArrivalTime.put(np, startTime);
+				mPoint2DepartureTime.put(np, departureTime);
+				if (log != null && DEBUG) {
+					//log.println("KEEP point " + np.ID + ", SET arr = "
+					//		+ mPoint2ArrivalTime.get(np) + ", dep = "
+					//		+ mPoint2DepartureTime.get(np));
+				}
+
+				if (np == XR.endPoint(k))
+					break;
+				else {
+					p = np;
 					np = XR.next(np);
 				}
-				duration += fixTime;
-				if(log != null && DEBUG){
-					log.println("ADD FIX TIME " + fixTime + " --> duration = " + duration);
-				}
-				
-				int departureTime = startTime + duration;
-				
-				mPoint2ArrivalTime.put(p, startTime);
-				mPoint2DepartureTime.put(p, departureTime);
-				if(log != null && DEBUG){
-					log.println("SET START point p = " + p.ID + ", SET arr = " + mPoint2ArrivalTime.get(p)
-							+ ", dep = " + mPoint2DepartureTime.get(p));
-				}
-				
-				np = XR.next(p);
-				while(np != null){
-					if(!mPoint2LocationCode.get(np).equals(locationCode)) break;
-					
-					mPoint2ArrivalTime.put(np, startTime);
-					mPoint2DepartureTime.put(np, departureTime);
-					if(log != null && DEBUG){
-						log.println("KEEP point " + np.ID + ", SET arr = " + mPoint2ArrivalTime.get(np)
-								+ ", dep = " + mPoint2DepartureTime.get(np));
-					}
-						
-					if(np == XR.endPoint(k)) break;
-					else{
-						p = np;
-						np = XR.next(np);
-					}
-				}
-				if(np != XR.endPoint(k)){
-					startTime = departureTime + (int)travelTime.getWeight(p, np); 
-					p = np; 
-				}else break;		
 			}
-			mPoint2ArrivalTime.put(XR.endPoint(k), startTime);
-		//}
+			if (np != XR.endPoint(k)) {
+				startTime = departureTime + (int) travelTime.getWeight(p, np);
+				p = np;
+			} else
+				break;
+		}
+		mPoint2ArrivalTime.put(XR.endPoint(k), startTime);
+		// }
 	}
-	protected int evaluateTimeViolationsAddTwoPoints(int k, Point pickup, Point p, Point delivery, Point d){
+
+	protected int evaluateNewOrderLoad(int k, Point pickup,
+			Point p, Point delivery, Point d) {
+		// return 1 is there is new order loaded when inserting (pickup,delivery) after (p,d)
+		int reqID = mPickupPoint2RequestIndex.get(pickup);
+		boolean ok = false;
+		if(mPoint2IndexLoadedItems.get(p) != null){
+			for(int i: mPoint2IndexLoadedItems.get(p)){
+				int r = mItemIndex2RequestIndex.get(i);
+				if(r == reqID){
+					ok = true;
+					break;
+				}
+			}
+		}
+		if(!ok) return 1;// has new order to be loaded into vehicle
+		return 0;
+	}
+	protected int evaluateTimeViolationsAddTwoPoints(int k, Point pickup,
+			Point p, Point delivery, Point d) {
 		XR.performAddOnePoint(delivery, d);
 		XR.performAddOnePoint(pickup, p);
-		propagateArrivalDepartureTime(k,false);
-		
+		propagateArrivalDepartureTime(k, true);
+
 		int violations = 0;
-		for(Point q = XR.next(XR.startPoint(k)); q != XR.endPoint(k); q = XR.next(q)){
-			if(mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
-				violations += mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime.get(q); 
+		for (Point q = XR.next(XR.startPoint(k)); q != XR.endPoint(k); q = XR
+				.next(q)) {
+			if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
+				violations += mPoint2ArrivalTime.get(q)
+						- lastestAllowedArrivalTime.get(q);
+			//System.out.println("evaluateTimeViolationsAddTwoPoints, arrT(" + q.ID + ") = " + mPoint2ArrivalTime.get(q) + 
+			//		"(" + DateTimeUtils.unixTimeStamp2DateTime(mPoint2ArrivalTime.get(q)) + ")" +  
+			//		", latestAllowArrivalTime(" + q.ID + ") = " + lastestAllowedArrivalTime.get(q) + 
+			//		"(" + DateTimeUtils.unixTimeStamp2DateTime(lastestAllowedArrivalTime.get(q)));
 		}
 		// recovery
 		XR.performRemoveOnePoint(delivery);
 		XR.performRemoveOnePoint(pickup);
-		propagateArrivalDepartureTime(k,false);
-		
+		propagateArrivalDepartureTime(k, false);
+
 		return violations;
-		
+
 	}
+
 	protected HashSet<Integer> greedyConstructMaintainConstraint() {
 		initializeLog();
 
@@ -541,13 +511,17 @@ public class PickupDeliverySolver {
 			Point sel_d = null;
 			int sel_i = -1;
 			int sel_k = -1;
-			
-			if(log != null){
-				for(int k = 1; k <= XR.getNbRoutes(); k++){
+
+			if (log != null) {
+				for (int k = 1; k <= XR.getNbRoutes(); k++) {
 					log.println("Route " + k);
-					for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
-						log.println("point " + p.ID + ", location = " + mPoint2LocationCode.get(p) + ", arr = " + mPoint2ArrivalTime.get(p) + 
-								", dep = " + mPoint2DepartureTime.get(p) + ", duration = " + serviceDuration.get(p));
+					for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
+							.next(p)) {
+						log.println("point " + p.ID + ", location = "
+								+ mPoint2LocationCode.get(p) + ", arr = "
+								+ mPoint2ArrivalTime.get(p) + ", dep = "
+								+ mPoint2DepartureTime.get(p) + ", duration = "
+								+ serviceDuration.get(p));
 					}
 					log.println("---------------------------------------");
 				}
@@ -609,13 +583,23 @@ public class PickupDeliverySolver {
 							if (!ok)
 								continue;
 
-							//double ec = CS.evaluateAddTwoPoints(pickup, p,
-							//		delivery, d);
-							double ec = evaluateTimeViolationsAddTwoPoints(k, pickup, p, delivery, d);
 							
+							if(awn.getSumWeights(p) > 0){
+								// cannot pickup any more if there are still items on the vehicle
+								continue;
+							}
+							
+							// double ec = CS.evaluateAddTwoPoints(pickup, p,
+							// delivery, d);
+							double ec = evaluateTimeViolationsAddTwoPoints(k,
+									pickup, p, delivery, d);
+
 							double ef = cost.evaluateAddTwoPoints(pickup, p,
 									delivery, d);
 
+							System.out.println("consider i = " + i + ", vehicle k = " + k + ", pickup = " +  pickup.ID + ", delivery = "
+									+ delivery.ID + ", p = " + p.ID + ", d = " + d.ID + ", ec = " + ec + ", ef = " + ef);
+							
 							if (ec > 0)
 								continue;// ensure constraint always satisfied
 
@@ -674,10 +658,10 @@ public class PickupDeliverySolver {
 
 							for (Point d = p; d != XR.endPoint(k); d = XR
 									.next(d)) {
-								
+
 								okExclusiveItems = true;
-								for (Point tp = XR.startPoint(k); tp != XR.next(d); tp = XR
-										.next(tp)) {
+								for (Point tp = XR.startPoint(k); tp != XR
+										.next(d); tp = XR.next(tp)) {
 									okExclusiveItems = checkExclusiveItems(tp,
 											pickup);
 									if (!okExclusiveItems)
@@ -699,9 +683,11 @@ public class PickupDeliverySolver {
 								if (!ok)
 									continue;
 
-								//double ec = CS.evaluateAddTwoPoints(pickup, p,
-								//		delivery, d);
-								double ec = evaluateTimeViolationsAddTwoPoints(k, pickup, p, delivery, d);
+								// double ec = CS.evaluateAddTwoPoints(pickup,
+								// p,
+								// delivery, d);
+								double ec = evaluateTimeViolationsAddTwoPoints(
+										k, pickup, p, delivery, d);
 								double ef = cost.evaluateAddTwoPoints(pickup,
 										p, delivery, d);
 								if (ec > 0)
@@ -736,7 +722,7 @@ public class PickupDeliverySolver {
 				mgr.performAddOnePoint(sel_delivery, sel_d);
 				mgr.performAddOnePoint(sel_pickup, sel_p);
 				propagateArrivalDepartureTime(sel_k, true);
-				
+
 				// log.println("add delivery " + sel_delivery.ID + " after "+
 				// sel_d.ID +
 				// " AND pickup " + sel_pickup.ID + " after " + sel_p.ID);
@@ -777,7 +763,16 @@ public class PickupDeliverySolver {
 		finalizeLog();
 		return cand;
 	}
-	
+	public boolean better(double e1, double e2, double e3, double f1, double f2, double f3){
+		if(e1 < f1) return true;
+		if(e1 > f1) return false;
+		if(e2 < f2) return true;
+		if(e2 > f2) return false;
+		if(e3 < f3) return true;
+		return false;
+	}
+
+
 	public String analyzeRequest(int idx) {
 		String des = "";
 		Point pickup = pickupPoints.get(idx);
@@ -864,11 +859,14 @@ public class PickupDeliverySolver {
 			for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
 					.next(p)) {
 				for (Point d = p; d != XR.endPoint(k); d = XR.next(d)) {
-					if(checkExclusiveItemForPickupAndDeliveryPoint(p, d, pickup)){
-						ok = true; break;
+					if (checkExclusiveItemForPickupAndDeliveryPoint(p, d,
+							pickup)) {
+						ok = true;
+						break;
 					}
 				}
-				if(ok)break;
+				if (ok)
+					break;
 			}
 		}
 		if (!ok) {
@@ -908,8 +906,10 @@ public class PickupDeliverySolver {
 			for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
 					.next(p)) {
 				for (Point d = p; d != XR.endPoint(k); d = XR.next(d)) {
-					if(!checkExclusiveItemForPickupAndDeliveryPoint(p, d, pickup)) continue;
-					
+					if (!checkExclusiveItemForPickupAndDeliveryPoint(p, d,
+							pickup))
+						continue;
+
 					boolean okok = true;
 					Point sel_tmp = null;
 					for (Point tmp = p; tmp != XR.next(d); tmp = XR.next(tmp)) {
@@ -979,10 +979,12 @@ public class PickupDeliverySolver {
 
 			for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
 					.next(p)) {
-				
+
 				for (Point d = p; d != XR.endPoint(k); d = XR.next(d)) {
-					if(!checkExclusiveItemForPickupAndDeliveryPoint(p, d, pickup)) continue;
-					
+					if (!checkExclusiveItemForPickupAndDeliveryPoint(p, d,
+							pickup))
+						continue;
+
 					boolean okok = true;
 					Point sel_tmp = null;
 					for (Point tmp = p; tmp != XR.next(d); tmp = XR.next(tmp)) {
@@ -1072,19 +1074,23 @@ public class PickupDeliverySolver {
 		}
 		items = new ArrayList<Item>();
 		mItemCode2Index = new HashMap<String, Integer>();
-		
+
 		N = requests.length;
 		M = vehicles.length + externalVehicles.length;
 		System.out.println(module + "::mapData, requests = " + N
 				+ ", vehicles = " + M);
 
+		mRequest2PointIndices = new HashMap<Integer, HashSet<Integer>>();
+		mItemIndex2RequestIndex = new HashMap<Integer, Integer>();
+		
 		for (int i = 0; i < requests.length; i++) {
 			for (int j = 0; j < requests[i].getItems().length; j++) {
 				Item I = requests[i].getItems()[j];
 				I.setOrderId(requests[i].getOrderID());
-				
-				mItemCode2Index.put(I.getCode(), items.size());
+				int idx = items.size();// index of item
+				mItemCode2Index.put(I.getCode(), idx);
 				items.add(I);
+				mItemIndex2RequestIndex.put(idx, i);
 			}
 		}
 		/*
@@ -1148,8 +1154,11 @@ public class PickupDeliverySolver {
 		lastestAllowedArrivalTime = new HashMap<Point, Integer>();
 		serviceDuration = new HashMap<Point, Integer>();
 
+		mPickupPoint2RequestIndex = new HashMap<Point, Integer>();
 		int idxPoint = -1;
 		for (int i = 0; i < requests.length; i++) {
+			mRequest2PointIndices.put(i, new HashSet<Integer>());
+			
 			if (requests[i].getSplitDelivery() != null
 					&& requests[i].getSplitDelivery().equals("Y")) {
 				for (int j = 0; j < requests[i].getItems().length; j++) {
@@ -1159,6 +1168,9 @@ public class PickupDeliverySolver {
 					idxPoint++;
 					Point pickup = new Point(idxPoint);
 					pickupPoints.add(pickup);
+					mRequest2PointIndices.get(i).add(pickupPoints.size()-1);
+					mPickupPoint2RequestIndex.put(pickup, i);
+					
 					mPoint2Index.put(pickup, idxPoint);
 					mPoint2LocationCode.put(pickup,
 							requests[i].getPickupLocationCode());
@@ -1171,7 +1183,9 @@ public class PickupDeliverySolver {
 					// mPoint2ItemCode.put(pickup,
 					// requests[i].getItems()[j].getCode());
 					Integer[] ite = new Integer[1];
-					ite[0] = mItemCode2Index.get(requests[i].getItems()[j].getCode());
+					ite[0] = mItemCode2Index.get(requests[i].getItems()[j]
+							.getCode());
+
 					
 					mPoint2IndexItems.put(pickup, ite);
 
@@ -1202,10 +1216,10 @@ public class PickupDeliverySolver {
 					// minutes
 					int pickupDuration = requests[i].getItems()[j]
 							.getPickupDuration();
-					//if (pickupDuration < requests[i].getPickupDuration())
-					//	pickupDuration = requests[i].getPickupDuration();
-					//pickupDuration += requests[i].getFixLoadTime();
-					
+					// if (pickupDuration < requests[i].getPickupDuration())
+					// pickupDuration = requests[i].getPickupDuration();
+					// pickupDuration += requests[i].getFixLoadTime();
+
 					serviceDuration.put(pickup, pickupDuration);
 
 					lastestAllowedArrivalTime.put(pickup, (int) DateTimeUtils
@@ -1217,10 +1231,10 @@ public class PickupDeliverySolver {
 					// minutes
 					int deliveryDuration = requests[i].getItems()[j]
 							.getDeliveryDuration();
-					//if (deliveryDuration < requests[i].getDeliveryDuration())
-					//	deliveryDuration = requests[i].getDeliveryDuration();
+					// if (deliveryDuration < requests[i].getDeliveryDuration())
+					// deliveryDuration = requests[i].getDeliveryDuration();
 					deliveryDuration += requests[i].getFixUnloadTime();
-					
+
 					serviceDuration.put(delivery, deliveryDuration);
 
 					lastestAllowedArrivalTime.put(delivery, (int) DateTimeUtils
@@ -1230,6 +1244,10 @@ public class PickupDeliverySolver {
 				idxPoint++;
 				Point pickup = new Point(idxPoint);
 				pickupPoints.add(pickup);
+				
+				mRequest2PointIndices.get(i).add(pickupPoints.size()-1);
+				mPickupPoint2RequestIndex.put(pickup, i);
+				
 				mPoint2Index.put(pickup, idxPoint);
 				mPoint2LocationCode.put(pickup,
 						requests[i].getPickupLocationCode());
@@ -1243,14 +1261,14 @@ public class PickupDeliverySolver {
 					pickupDuration = pickupDuration
 							+ requests[i].getItems()[j].getPickupDuration();
 				}
-				//if (pickupDuration < requests[i].getPickupDuration())
-				//	pickupDuration = requests[i].getPickupDuration();
-				//pickupDuration += requests[i].getFixLoadTime();
-				
-				//if (deliveryDuration < requests[i].getDeliveryDuration())
-				//	deliveryDuration = requests[i].getDeliveryDuration();
-				//deliveryDuration += requests[i].getFixUnloadTime();
-				
+				// if (pickupDuration < requests[i].getPickupDuration())
+				// pickupDuration = requests[i].getPickupDuration();
+				// pickupDuration += requests[i].getFixLoadTime();
+
+				// if (deliveryDuration < requests[i].getDeliveryDuration())
+				// deliveryDuration = requests[i].getDeliveryDuration();
+				// deliveryDuration += requests[i].getFixUnloadTime();
+
 				mPoint2Demand.put(pickup, demand);
 				mPoint2Request.put(pickup, requests[i]);
 				mPoint2Type.put(pickup, "P");
@@ -1261,8 +1279,9 @@ public class PickupDeliverySolver {
 				// requests[i].getItems()[j].getCode());
 
 				Integer[] L = new Integer[requests[i].getItems().length];
-				for(int ii = 0; ii < requests[i].getItems().length; ii++)
-					L[ii] = mItemCode2Index.get(requests[i].getItems()[ii].getCode());
+				for (int ii = 0; ii < requests[i].getItems().length; ii++)
+					L[ii] = mItemCode2Index.get(requests[i].getItems()[ii]
+							.getCode());
 				mPoint2IndexItems.put(pickup, L);
 
 				for (int j = 0; j < requests[i].getItems().length; j++)
@@ -1319,6 +1338,9 @@ public class PickupDeliverySolver {
 			mPoint2Index.put(t, t.ID);
 			startPoints.add(s);
 			endPoints.add(t);
+			mPoint2Type.put(s, "S");
+			mPoint2Type.put(t, "T");
+			
 			mPoint2LocationCode.put(s, vh.getStartLocationCode());// vehicles[k].getStartLocationCode());
 			mPoint2LocationCode.put(t, vh.getEndLocationCode());// vehicles[k].getEndLocationCode());
 			mPoint2Demand.put(s, 0.0);
@@ -1351,26 +1373,36 @@ public class PickupDeliverySolver {
 			// (int)DateTimeUtils.dateTime2Int(vehicles[k].getEndWorkingTime()));
 			lastestAllowedArrivalTime.put(t,
 					(int) DateTimeUtils.dateTime2Int(vh.getEndWorkingTime()));
+			
+			//System.out.println("mapData, startWorkingTime = " + vh.getStartWorkingTime() + ", end working time = " + vh.getEndWorkingTime());
 		}
 		for (Point p : allPoints) {
 			mPoint2IndexLoadedItems.put(p, new HashSet<Integer>());
 		}
 		itemConflict = new boolean[items.size()][items.size()];
-		for(int ii = 0; ii < items.size(); ii++ )
-			for(int jj = 0; jj < items.size(); jj++)
+		for (int ii = 0; ii < items.size(); ii++)
+			for (int jj = 0; jj < items.size(); jj++)
 				itemConflict[ii][jj] = false;
-		
+
 		ExclusiveItem[] exclusiveItems = input.getExclusiveItemPairs();
 		for (int i = 0; i < exclusiveItems.length; i++) {
 			String I1 = exclusiveItems[i].getCode1();
 			String I2 = exclusiveItems[i].getCode2();
+			if (mItem2ExclusiveItems.get(I1) == null)
+				mItem2ExclusiveItems.put(I1, new HashSet<String>());
+			if (mItem2ExclusiveItems.get(I2) == null)
+				mItem2ExclusiveItems.put(I2, new HashSet<String>());
+
 			mItem2ExclusiveItems.get(I1).add(I2);
 			mItem2ExclusiveItems.get(I2).add(I1);
 
-			itemConflict[mItemCode2Index.get(I1)][mItemCode2Index.get(I2)] = true;
-			itemConflict[mItemCode2Index.get(I2)][mItemCode2Index.get(I1)] = true;
+			if (mItemCode2Index.get(I1) != null
+					&& mItemCode2Index.get(I2) != null) {
+				itemConflict[mItemCode2Index.get(I1)][mItemCode2Index.get(I2)] = true;
+				itemConflict[mItemCode2Index.get(I2)][mItemCode2Index.get(I1)] = true;
+			}
 		}
-		
+
 		ExclusiveVehicleLocation[] exclusiveVehicleLocations = input
 				.getExclusiveVehicleLocations();
 		for (int i = 0; i < exclusiveVehicleLocations.length; i++) {
@@ -1405,7 +1437,7 @@ public class PickupDeliverySolver {
 
 		mPoint2ArrivalTime = new HashMap<Point, Integer>();
 		mPoint2DepartureTime = new HashMap<Point, Integer>();
-		
+
 		mgr = new VRManager();
 		XR = new VarRoutesVR(mgr);
 		for (int k = 0; k < startPoints.size(); k++) {
@@ -1419,26 +1451,10 @@ public class PickupDeliverySolver {
 		CS = new ConstraintSystemVR(mgr);
 		awn = new AccumulatedWeightNodesVR(XR, nwm);
 		awe = new AccumulatedWeightEdgesVR(XR, awm);
-		eat = new EarliestArrivalTimeVR(XR, travelTime,
-				earliestAllowedArrivalTime, serviceDuration);
-		ceat = new CEarliestArrivalTimeVR(eat, lastestAllowedArrivalTime);
-
-		// IConstraintVR goodC = new CPickupDeliveryOfGoodVR(XR,
-		// pickup2DeliveryOfGood);
-		// CS.post(goodC);
-
-		// load = new IFunctionVR[XR.getNbRoutes()];
-		// IFunctionVR[] routeIndex = new IFunctionVR[allPoints.size()];
-		// for(Point p: allPoints){
-		// routeIndex[mPoint2Index.get(p)] = new RouteIndex(XR, p);
-		// IFunctionVR ld = new AccumulatedNodeWeightsOnPathVR(awn, p);
-		// for(int k = 1; k <= M; k++){
-		// CS.post(new Implicate(new Eq(routeIndex[mPoint2Index.get(p)], k), new
-		// Leq(ld, cap[k-1])));
-		// }
-		// }
-
-		CS.post(ceat);
+		//eat = new EarliestArrivalTimeVR(XR, travelTime,
+		//		earliestAllowedArrivalTime, serviceDuration);
+		//ceat = new CEarliestArrivalTimeVR(eat, lastestAllowedArrivalTime);
+		//CS.post(ceat);
 
 		cost = new TotalCostVR(XR, awm);
 
@@ -1481,9 +1497,11 @@ public class PickupDeliverySolver {
 
 	protected HashSet<Integer> search() {
 		HashSet<Integer> remainUnScheduled = greedyConstructMaintainConstraint();
-
+		//HashSet<Integer> remainUnScheduled = greedyConstructMaintainConstraintFTL();
+		
 		System.out.println("solution XR = " + XR.toString() + ", cost = "
 				+ cost.getValue());
+		/*
 		for (int k = 1; k <= XR.getNbRoutes(); k++) {
 			System.out.println("Route[" + k + "]");
 			for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
@@ -1499,7 +1517,7 @@ public class PickupDeliverySolver {
 			// ", cap = " + cap[k-1]);
 			System.out.println("------------------------------------");
 		}
-
+		*/
 		return remainUnScheduled;
 	}
 
@@ -1554,17 +1572,8 @@ public class PickupDeliverySolver {
 		}
 	}
 
-	public PickupDeliverySolution compute(BrennTagPickupDeliveryInput input) {
-		this.input = input;
-		this.requests = input.getRequests();
-		this.vehicles = input.getVehicles();
-		this.distances = input.getDistances();
-		this.travelTimes = input.getTravelTime();
-		this.externalVehicles = input.getExternalVehicles();
-		mapData();
-
-		HashSet<Integer> remainUnScheduled = search();
-
+	public PickupDeliverySolution buildSolution(
+			HashSet<Integer> remainUnScheduled) {
 		int nbr = 0;
 		for (int k = 1; k <= XR.getNbRoutes(); k++)
 			if (XR.next(XR.startPoint(k)) != XR.endPoint(k))
@@ -1584,12 +1593,13 @@ public class PickupDeliverySolver {
 					RoutingElement e = null;
 					if (p == XR.startPoint(k)) {
 						// depot
-						//long at = (long) eat.getEarliestArrivalTime(p);
-						//if (at < earliestAllowedArrivalTime.get(p))
-						//	at = earliestAllowedArrivalTime.get(p);
+						// long at = (long) eat.getEarliestArrivalTime(p);
+						// if (at < earliestAllowedArrivalTime.get(p))
+						// at = earliestAllowedArrivalTime.get(p);
 						long at = mPoint2ArrivalTime.get(p);
-						
-						long dt = mPoint2DepartureTime.get(p);//at + serviceDuration.get(p);
+
+						long dt = mPoint2DepartureTime.get(p);// at +
+																// serviceDuration.get(p);
 						String s_at = DateTimeUtils.unixTimeStamp2DateTime(at);
 						String s_dt = DateTimeUtils.unixTimeStamp2DateTime(dt);
 
@@ -1625,14 +1635,13 @@ public class PickupDeliverySolver {
 							lng = r.getPickupLng();
 							locationCode = r.getPickupLocationCode();
 						}
-						//long at = (long) eat.getEarliestArrivalTime(p);
-						//if (at < earliestAllowedArrivalTime.get(p))
-						//	at = earliestAllowedArrivalTime.get(p);
-						//long dt = at + serviceDuration.get(p);
+						// long at = (long) eat.getEarliestArrivalTime(p);
+						// if (at < earliestAllowedArrivalTime.get(p))
+						// at = earliestAllowedArrivalTime.get(p);
+						// long dt = at + serviceDuration.get(p);
 						long at = mPoint2ArrivalTime.get(p);
 						long dt = mPoint2DepartureTime.get(p);
-						
-						
+
 						String s_at = DateTimeUtils.unixTimeStamp2DateTime(at);
 						String s_dt = DateTimeUtils.unixTimeStamp2DateTime(dt);
 
@@ -1653,9 +1662,9 @@ public class PickupDeliverySolver {
 						e.setDistance(e_distance);
 						Integer[] L = mPoint2IndexItems.get(p);
 						Item[] pitems = null;
-						if(L != null){
+						if (L != null) {
 							pitems = new Item[L.length];
-							for(int ii = 0; ii < L.length; ii++)
+							for (int ii = 0; ii < L.length; ii++)
 								pitems[ii] = items.get(L[ii]);
 						}
 						e.setItems(pitems);
@@ -1665,11 +1674,11 @@ public class PickupDeliverySolver {
 				}
 				// add terminating point of route
 				Point p = XR.endPoint(k);
-				//long at = (long) eat.getEarliestArrivalTime(p);
-				//if (at < earliestAllowedArrivalTime.get(p))
-				//	at = earliestAllowedArrivalTime.get(p);
+				// long at = (long) eat.getEarliestArrivalTime(p);
+				// if (at < earliestAllowedArrivalTime.get(p))
+				// at = earliestAllowedArrivalTime.get(p);
 				long at = mPoint2ArrivalTime.get(p);
-				
+
 				String s_at = DateTimeUtils.unixTimeStamp2DateTime(at);
 
 				Vehicle v = mPoint2Vehicle.get(p);
@@ -1729,6 +1738,22 @@ public class PickupDeliverySolver {
 
 		return new PickupDeliverySolution(routes, unScheduledItems);
 
+	}
+
+	public PickupDeliverySolution compute(BrennTagPickupDeliveryInput input) {
+		this.input = input;
+		this.requests = input.getRequests();
+		this.vehicles = input.getVehicles();
+		this.distances = input.getDistances();
+		this.travelTimes = input.getTravelTime();
+		this.externalVehicles = input.getExternalVehicles();
+		mapData();
+
+		HashSet<Integer> remainUnScheduled = search();
+
+		PickupDeliverySolution sol = buildSolution(remainUnScheduled);
+
+		return sol;
 	}
 	/*
 	 * // model protected VRManager mgr; protected VarRoutesVR XR; protected
