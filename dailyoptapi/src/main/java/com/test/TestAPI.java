@@ -43,7 +43,8 @@ import utils.DateTimeUtils;
 
 @RestController
 public class TestAPI {
-	public static final String ROOT_DIR = "C:/DungPQ/daily-opt/tmp/";
+	//public static final String ROOT_DIR = "C:/DungPQ/daily-opt/tmp/";
+	public static final String ROOT_DIR = "/root/projects/smartlog/logs/";
 	@RequestMapping(value = "/basic", method = RequestMethod.POST)
 	public TestSolution getFields(HttpServletRequest request, @RequestBody TestInput input) {
 		int c = input.getA() + input.getB();

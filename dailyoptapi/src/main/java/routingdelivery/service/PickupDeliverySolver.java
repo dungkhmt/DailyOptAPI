@@ -442,11 +442,14 @@ public class PickupDeliverySolver {
 					np = XR.next(np);
 				}
 			}
+			startTime = departureTime + (int) travelTime.getWeight(p, np);
 			if (np != XR.endPoint(k)) {
-				startTime = departureTime + (int) travelTime.getWeight(p, np);
+				//startTime = departureTime + (int) travelTime.getWeight(p, np);
 				p = np;
-			} else
+			} else{
+				
 				break;
+			}
 		}
 		mPoint2ArrivalTime.put(XR.endPoint(k), startTime);
 		// }
@@ -479,13 +482,18 @@ public class PickupDeliverySolver {
 		for (Point q = XR.next(XR.startPoint(k)); q != XR.endPoint(k); q = XR
 				.next(q)) {
 			if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
-				violations += mPoint2ArrivalTime.get(q)
-						- lastestAllowedArrivalTime.get(q);
+				violations += (mPoint2ArrivalTime.get(q)
+						- lastestAllowedArrivalTime.get(q));
 			//System.out.println("evaluateTimeViolationsAddTwoPoints, arrT(" + q.ID + ") = " + mPoint2ArrivalTime.get(q) + 
 			//		"(" + DateTimeUtils.unixTimeStamp2DateTime(mPoint2ArrivalTime.get(q)) + ")" +  
 			//		", latestAllowArrivalTime(" + q.ID + ") = " + lastestAllowedArrivalTime.get(q) + 
 			//		"(" + DateTimeUtils.unixTimeStamp2DateTime(lastestAllowedArrivalTime.get(q)));
 		}
+		Point q = XR.endPoint(k);
+		if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
+			violations += (mPoint2ArrivalTime.get(q)
+					- lastestAllowedArrivalTime.get(q));
+		
 		// recovery
 		XR.performRemoveOnePoint(delivery);
 		XR.performRemoveOnePoint(pickup);
@@ -1431,8 +1439,8 @@ public class PickupDeliverySolver {
 		}
 		for (Point p : allPoints) {
 			nwm.setWeight(p, mPoint2Demand.get(p));
-			System.out.println(module + "::compute, nwm.setWeight(" + p.ID
-					+ "," + mPoint2Demand.get(p));
+			//System.out.println(module + "::compute, nwm.setWeight(" + p.ID
+			//		+ "," + mPoint2Demand.get(p));
 		}
 
 		mPoint2ArrivalTime = new HashMap<Point, Integer>();
@@ -1571,14 +1579,25 @@ public class PickupDeliverySolver {
 			}
 		}
 	}
+	public Vehicle getVehicle(int idx) {
+		if (idx < vehicles.length)
+			return vehicles[idx];
+		return externalVehicles[idx - vehicles.length];
+	}
 
-	public PickupDeliverySolution buildSolution(
+	public PickupDeliverySolution buildSolution(int[] scheduled_vehicle,
 			HashSet<Integer> remainUnScheduled) {
+		//scheduled_vehicle[k] is the index of vehicle assigned to route k (k = 0,1,...)
+		
 		int nbr = 0;
-		for (int k = 1; k <= XR.getNbRoutes(); k++)
-			if (XR.next(XR.startPoint(k)) != XR.endPoint(k))
+		for (int k = 1; k <= XR.getNbRoutes(); k++){
+			if (XR.next(XR.startPoint(k)) != XR.endPoint(k)){
 				nbr++;
-
+				mPoint2Vehicle.put(XR.startPoint(k), getVehicle(scheduled_vehicle[k-1]));
+				mPoint2Vehicle.put(XR.endPoint(k), getVehicle(scheduled_vehicle[k-1]));
+			}
+		}
+		
 		RoutingSolution[] routes = new RoutingSolution[nbr];
 		nbr = -1;
 		for (int k = 1; k <= XR.getNbRoutes(); k++) {
@@ -1703,12 +1722,17 @@ public class PickupDeliverySolver {
 				for (int j = 0; j < lst.size(); j++)
 					a_route[j] = lst.get(j);
 				// routes[nbr] = new RoutingSolution(a_route);
+				
+				
+				/*
 				Vehicle vh = null;
+				
 				if (k <= vehicles.length)
 					vh = vehicles[k - 1];
 				else
 					vh = externalVehicles[k - vehicles.length - 1];
-
+				*/
+				Vehicle vh = getVehicle(scheduled_vehicle[k-1]);
 				routes[nbr] = new RoutingSolution(vh, a_route, 0.0, distance);
 			}
 		}
@@ -1750,8 +1774,11 @@ public class PickupDeliverySolver {
 		mapData();
 
 		HashSet<Integer> remainUnScheduled = search();
-
-		PickupDeliverySolution sol = buildSolution(remainUnScheduled);
+		int[] scheduled_vehicle = new int[XR.getNbRoutes()];
+		for(int k = 0; k < XR.getNbRoutes(); k++){
+			scheduled_vehicle[k] = k;
+		}
+		PickupDeliverySolution sol = buildSolution(scheduled_vehicle,remainUnScheduled);
 
 		return sol;
 	}
