@@ -73,6 +73,12 @@ import utils.DateTimeUtils;
 
 public class PickupDeliverySolver {
 	public static final String module = PickupDeliverySolver.class.getName();
+	public static final String ROUTE_ELEMENT_STARTING_POINT = "START_POINT";
+	public static final String ROUTE_ELEMENT_END_POINT = "END_POINT";
+	public static final String ROUTE_ELEMENT_END_TRIP = "END_TRIP";
+	public static final String ROUTE_ELEMENT_PICKUP_POINT = "PICKUP_POINT";
+	public static final String ROUTE_ELEMENT_DELIVERY_POINT = "DELIVERY_POINT";
+	public static final double EPS = 0.0000001;
 	protected BrennTagPickupDeliveryInput input;
 	protected PickupDeliveryRequest[] requests;
 	protected Vehicle[] vehicles;
@@ -90,8 +96,10 @@ public class PickupDeliverySolver {
 								// j
 	protected double[] cap;// capacity of vehicles
 	protected HashMap<Integer, Integer> mItemIndex2RequestIndex;
+	protected HashMap<PickupDeliveryRequest, Integer> mRequest2Index;
 	protected HashMap<Point, Vehicle> mPoint2Vehicle;
-	protected HashMap<Point, PickupDeliveryRequest> mPoint2Request;
+	//protected HashMap<Point, PickupDeliveryRequest> mPoint2Request;
+	protected HashMap<Point, ArrayList<PickupDeliveryRequest>> mPoint2Request;
 	protected HashMap<Point, String> mPoint2Type;// "S": start, "P": pickup,
 													// "D": delivery, "T":
 													// terminate
@@ -330,6 +338,22 @@ public class PickupDeliverySolver {
 		return E;
 	}
 
+	protected boolean checkConflictItemsAtPoint(Point p){
+		for(int i: mPoint2IndexLoadedItems.get(p)){
+			for(int j: mPoint2IndexLoadedItems.get(p))if(i < j){
+				if(itemConflict[i][j]) return false;
+			}
+		}
+		return true;
+	}
+	protected boolean checkAllSolution(){
+		for(int k = 1; k < XR.getNbRoutes(); k++){
+			for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
+				if(!checkConflictItemsAtPoint(p)) return false;
+			}
+		}
+		return true;
+	}
 	protected boolean checkExclusiveItems(Point fromPoint, Point pickup) {
 		boolean ok = true;
 		/*
@@ -379,10 +403,10 @@ public class PickupDeliverySolver {
 				//		+ locationCode);
 			}
 			int fixTime = 0;
-			if (mPoint2Type.get(p).equals("D"))
-				fixTime = mPoint2Request.get(p).getFixUnloadTime();
-			else if (mPoint2Type.get(p).equals("P"))
-				fixTime = mPoint2Request.get(p).getFixLoadTime();
+			if (mPoint2Type.get(p).equals("D") && mPoint2Request.get(p) != null && mPoint2Request.get(p).size() > 0)
+				fixTime = mPoint2Request.get(p).get(0).getFixUnloadTime();
+			else if (mPoint2Type.get(p).equals("P") && mPoint2Request.get(p) != null && mPoint2Request.get(p).size() > 0)
+				fixTime = mPoint2Request.get(p).get(0).getFixLoadTime();
 
 			Point np = XR.next(p);
 			int duration = serviceDuration.get(p);
@@ -458,14 +482,18 @@ public class PickupDeliverySolver {
 	protected int evaluateNewOrderLoad(int k, Point pickup,
 			Point p, Point delivery, Point d) {
 		// return 1 is there is new order loaded when inserting (pickup,delivery) after (p,d)
-		int reqID = mPickupPoint2RequestIndex.get(pickup);
+		//int reqID = mPickupPoint2RequestIndex.get(pickup);
 		boolean ok = false;
 		if(mPoint2IndexLoadedItems.get(p) != null){
 			for(int i: mPoint2IndexLoadedItems.get(p)){
 				int r = mItemIndex2RequestIndex.get(i);
-				if(r == reqID){
-					ok = true;
-					break;
+				ArrayList<PickupDeliveryRequest> R = mPoint2Request.get(pickup);
+				if(R != null)for(PickupDeliveryRequest req: R){
+					int reqID = mRequest2Index.get(req);
+					if(r == reqID){
+						ok = true;
+						break;
+					}
 				}
 			}
 		}
@@ -1148,7 +1176,8 @@ public class PickupDeliverySolver {
 		mPoint2LocationCode = new HashMap<Point, String>();
 		mPoint2Demand = new HashMap<Point, Double>();
 		mPoint2Vehicle = new HashMap<Point, Vehicle>();
-		mPoint2Request = new HashMap<Point, PickupDeliveryRequest>();
+		//mPoint2Request = new HashMap<Point, PickupDeliveryRequest>();
+		mPoint2Request = new HashMap<Point, ArrayList<PickupDeliveryRequest>>();
 		mPoint2Type = new HashMap<Point, String>();
 		mPoint2PossibleVehicles = new HashMap<Point, HashSet<Integer>>();
 		// mPoint2ItemCode = new HashMap<Point, String>();
@@ -1184,7 +1213,11 @@ public class PickupDeliverySolver {
 							requests[i].getPickupLocationCode());
 					mPoint2Demand.put(pickup,
 							requests[i].getItems()[j].getWeight());
-					mPoint2Request.put(pickup, requests[i]);
+					
+					//mPoint2Request.put(pickup, requests[i]);
+					if(mPoint2Request.get(pickup) == null) mPoint2Request.put(pickup, new ArrayList<PickupDeliveryRequest>());
+					mPoint2Request.get(pickup).add(requests[i]);
+					
 					mPoint2Type.put(pickup, "P");
 					mPoint2PossibleVehicles.put(pickup, new HashSet<Integer>());
 					// mPoint2LoadedItems.put(pickup, new HashSet<String>());
@@ -1208,7 +1241,11 @@ public class PickupDeliverySolver {
 							requests[i].getDeliveryLocationCode());
 					mPoint2Demand.put(delivery,
 							-requests[i].getItems()[j].getWeight());
-					mPoint2Request.put(delivery, requests[i]);
+					
+					//mPoint2Request.put(delivery, requests[i]);
+					if(mPoint2Request.get(delivery) == null) mPoint2Request.put(delivery, new ArrayList<PickupDeliveryRequest>());
+					mPoint2Request.get(delivery).add(requests[i]);
+					
 					mPoint2Type.put(delivery, "D");
 					mPoint2PossibleVehicles.put(delivery,
 							new HashSet<Integer>());
@@ -1278,7 +1315,11 @@ public class PickupDeliverySolver {
 				// deliveryDuration += requests[i].getFixUnloadTime();
 
 				mPoint2Demand.put(pickup, demand);
-				mPoint2Request.put(pickup, requests[i]);
+				//mPoint2Request.put(pickup, requests[i]);
+				if(mPoint2Request.get(pickup) == null)
+					mPoint2Request.put(pickup, new ArrayList<PickupDeliveryRequest>());
+				mPoint2Request.get(pickup).add(requests[i]);
+				
 				mPoint2Type.put(pickup, "P");
 				mPoint2PossibleVehicles.put(pickup, new HashSet<Integer>());
 				// mPoint2LoadedItems.put(pickup, new HashSet<String>());
@@ -1303,7 +1344,12 @@ public class PickupDeliverySolver {
 				mPoint2LocationCode.put(delivery,
 						requests[i].getDeliveryLocationCode());
 				mPoint2Demand.put(delivery, -demand);
-				mPoint2Request.put(delivery, requests[i]);
+				//mPoint2Request.put(delivery, requests[i]);
+				if(mPoint2Request.get(delivery)==null)
+					mPoint2Request.put(delivery, new ArrayList<PickupDeliveryRequest>());
+				mPoint2Request.get(delivery).add(requests[i]);
+				
+				
 				mPoint2Type.put(delivery, "D");
 				mPoint2PossibleVehicles.put(delivery, new HashSet<Integer>());
 				// mPoint2LoadedItems.put(delivery, new HashSet<String>());
@@ -1606,6 +1652,9 @@ public class PickupDeliverySolver {
 				ArrayList<RoutingElement> lst = new ArrayList<RoutingElement>();
 				double distance = 0;
 				double maxLoad = 0;
+				//double totalLoadOfTrips = 0;
+				//double loadPerTrip = 0;
+				//double tripDistance = 0;
 				for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
 						.next(p)) {
 					int ip = mPoint2Index.get(p);
@@ -1633,6 +1682,9 @@ public class PickupDeliverySolver {
 						double e_distance = awe.getCostRight(p);
 						e.setLoad(e_load);
 						e.setDistance(e_distance);
+						//e.setType(ROUTE_ELEMENT_STARTING_POINT);
+						
+						
 					} else if (p == XR.endPoint(k)) {
 						Vehicle v = mPoint2Vehicle.get(p);
 						double d_lat = v.getEndLat();
@@ -1643,16 +1695,34 @@ public class PickupDeliverySolver {
 						double e_distance = awe.getCostRight(p);
 						e.setLoad(e_load);
 						e.setDistance(e_distance);
+						//e.setType(ROUTE_ELEMENT_END_POINT);
+						
 					} else {
 						// int ir = mOrderItem2Request.get(ip);
-						PickupDeliveryRequest r = mPoint2Request.get(p);
+						PickupDeliveryRequest r = mPoint2Request.get(p).get(0);
 						double lat = r.getDeliveryLat();
 						double lng = r.getDeliveryLng();
 						String locationCode = r.getDeliveryLocationCode();
+						boolean isEndTrip = false;
+						double tripLoad = 0;
 						if (mPoint2Type.get(p).equals("P")) {
 							lat = r.getPickupLat();
 							lng = r.getPickupLng();
 							locationCode = r.getPickupLocationCode();
+							//totalLoadOfTrips += awn.getWeights(p);
+							//Point pp = XR.prev(p);
+							//if(Math.abs(awn.getSumWeights(pp)) <= EPS){
+							//	tripLoad = loadPerTrip;
+							//	loadPerTrip = 0;
+							//	isEndTrip = true;
+							//	tripDistance += awm.getWeight(pp, p);
+							//}else{
+								
+							//}
+							//loadPerTrip += awn.getWeights(p);
+							
+						}else{
+							
 						}
 						// long at = (long) eat.getEarliestArrivalTime(p);
 						// if (at < earliestAllowedArrivalTime.get(p))
@@ -1679,6 +1749,9 @@ public class PickupDeliverySolver {
 						double e_distance = awe.getCostRight(p);
 						e.setLoad(e_load);
 						e.setDistance(e_distance);
+						
+						
+						
 						Integer[] L = mPoint2IndexItems.get(p);
 						Item[] pitems = null;
 						if (L != null) {
@@ -1709,7 +1782,10 @@ public class PickupDeliverySolver {
 				double e_distance = awe.getCostRight(p);
 				e.setLoad(e_load);
 				e.setDistance(e_distance);
-
+				//e.setTotalTripLoad(loadPerTrip);
+				//e.setType(ROUTE_ELEMENT_END_TRIP);
+				//e.setTripDistance(awm.getWeight(XR.prev(p), p));
+				
 				lst.add(e);
 				RoutingElement firstEle = lst.get(0);
 				NumberFormat formatter = new DecimalFormat("#0.00");

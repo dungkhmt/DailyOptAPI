@@ -50,6 +50,8 @@ public class CEarliestArrivalTimeVR implements IConstraintVR {
 	}
 
 	private int computeViolations(Point i, double arrivalTime) {
+		//System.out.println("computeViolations, Point i = " + i.ID + ", latestAllowedArrivalTime = " + 
+	//latestAllowedArrivalTime.get(i));
 		double v = arrivalTime <= latestAllowedArrivalTime.get(i) ? 0 : arrivalTime
 				- latestAllowedArrivalTime.get(i);
 		return (int) Math.ceil(v);

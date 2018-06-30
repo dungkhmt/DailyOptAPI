@@ -12,6 +12,9 @@ public class RoutingElement {
 	private String orderId;
 	private double load;
 	private double distance;
+	//private double totalTripLoad;
+	//private double tripDistance;
+	//private String type;
 	private Item[] items;
 	
 	public RoutingElement(String code, String address, String latlng,

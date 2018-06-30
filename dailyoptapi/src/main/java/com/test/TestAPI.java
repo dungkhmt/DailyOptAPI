@@ -22,6 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 
 
 
+
+
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 //import org.apache.log4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -38,6 +41,9 @@ import routingdelivery.model.PickupDeliverySolution;
 import routingdelivery.service.PickupDeliverySolver;
 import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
 import routingdelivery.smartlog.brenntag.service.BrenntagPickupDeliverySolver;
+import routingdelivery.smartlog.sem.model.SEMPickupDeliveryInput;
+import routingdelivery.smartlog.sem.model.SEMPickupDeliverySolution;
+import routingdelivery.smartlog.sem.service.SEMPickupDeliverySolver;
 import utils.DateTimeUtils;
 
 
@@ -100,6 +106,25 @@ public class TestAPI {
 		BrenntagPickupDeliverySolver solver = new BrenntagPickupDeliverySolver();
 		//return solver.compute(input);
 		return solver.computeNew(input);
+		
+	}
+
+	@CrossOrigin
+	@RequestMapping(value = "/sem-pickup-delivery", method = RequestMethod.POST)
+	public SEMPickupDeliverySolution computeSEMPickupDeliverySolution(HttpServletRequest request, 
+			@RequestBody SEMPickupDeliveryInput input){
+		
+		//Gson gson = new Gson();
+		//String json = gson.toJson(input);
+		try{
+			//writeGlobalRequest(input);
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		//PickupDeliverySolver solver = new PickupDeliverySolver();
+		SEMPickupDeliverySolver solver = new SEMPickupDeliverySolver();
+		//return solver.compute(input);
+		return solver.compute(input);
 		
 	}
 	
