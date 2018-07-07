@@ -24,8 +24,15 @@ public class PickupDeliveryRequest {
 	
 	
 	private String splitDelivery;// "Y" or "N"
+	private String description;
 	
 	
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
 	public PickupDeliveryRequest(String orderID, Item[] items,
 			String pickupLocationCode, String pickupAddr, double pickupLat,
 			double pickupLng, String earlyPickupTime, String latePickupTime,

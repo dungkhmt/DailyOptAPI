@@ -106,7 +106,7 @@ public class SEMPickupDeliveryInput {
 					I, pickupLocationCode, pickupAddr, pickupLat, pickupLng, earlyPickupTime, 
 					latePickupTime, pickupDuration, deliveryLocationCode, deliveryAddr, deliveryLat, 
 					deliveryLng, earlyDeliveryTime, lateDeliveryTime, deliveryDuration, splitDelivery);
-			
+			r[i].setAmountMoney(amountMoney);
 		}
 		String[] startLocationCodes = {"20001","20002"};
 		String[] endLocationCodes = {"30001","30002"};

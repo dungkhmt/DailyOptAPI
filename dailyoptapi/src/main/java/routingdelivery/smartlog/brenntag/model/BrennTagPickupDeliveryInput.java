@@ -11,7 +11,57 @@ public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
 	private ExclusiveItem[] exclusiveItemPairs;// cap 2 items khong the van chuyen cung nhau
 	private ExclusiveVehicleLocation[] exclusiveVehicleLocations;// xe ko the di den location
 	private Vehicle[] externalVehicles;// xe thau ngoai
+	private Vehicle[] vehicleCategories;
+	private ExclusiveVehicleLocation[] exclusiveVehicleCategoryLocations;
 	
+	
+	public ExclusiveVehicleLocation[] getExclusiveVehicleCategoryLocations() {
+		return exclusiveVehicleCategoryLocations;
+	}
+
+	public void setExclusiveVehicleCategoryLocations(
+			ExclusiveVehicleLocation[] exclusiveVehicleCategoryLocations) {
+		this.exclusiveVehicleCategoryLocations = exclusiveVehicleCategoryLocations;
+	}
+
+	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+			Vehicle[] vehicles, DistanceElement[] distances,
+			ConfigParams params, DistanceElement[] travelTime,
+			ExclusiveItem[] exclusiveItemPairs,
+			ExclusiveVehicleLocation[] exclusiveVehicleLocations,
+			Vehicle[] externalVehicles, Vehicle[] vehicleCategories,
+			ExclusiveVehicleLocation[] exclusiveVehicleCategoryLocations) {
+		super(requests, vehicles, distances, params);
+		this.travelTime = travelTime;
+		this.exclusiveItemPairs = exclusiveItemPairs;
+		this.exclusiveVehicleLocations = exclusiveVehicleLocations;
+		this.externalVehicles = externalVehicles;
+		this.vehicleCategories = vehicleCategories;
+		this.exclusiveVehicleCategoryLocations = exclusiveVehicleCategoryLocations;
+	}
+
+	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+			Vehicle[] vehicles, DistanceElement[] distances,
+			ConfigParams params, DistanceElement[] travelTime,
+			ExclusiveItem[] exclusiveItemPairs,
+			ExclusiveVehicleLocation[] exclusiveVehicleLocations,
+			Vehicle[] externalVehicles, Vehicle[] vehicleCategories) {
+		super(requests, vehicles, distances, params);
+		this.travelTime = travelTime;
+		this.exclusiveItemPairs = exclusiveItemPairs;
+		this.exclusiveVehicleLocations = exclusiveVehicleLocations;
+		this.externalVehicles = externalVehicles;
+		this.vehicleCategories = vehicleCategories;
+	}
+
+	public Vehicle[] getVehicleCategories() {
+		return vehicleCategories;
+	}
+
+	public void setVehicleCategories(Vehicle[] vehicleCategories) {
+		this.vehicleCategories = vehicleCategories;
+	}
+
 	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
 			Vehicle[] vehicles, DistanceElement[] distances,
 			ConfigParams params, DistanceElement[] travelTime,

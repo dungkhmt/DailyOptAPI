@@ -2,6 +2,22 @@ package routingdelivery.smartlog.sem.model;
 
 public class SEMPickupDeliverySolution {
 	private SEMRoutingSolution[] routes;
+	private SEMPickupDeliveryRequest[] unServedRequests;
+	
+	public SEMPickupDeliverySolution(SEMRoutingSolution[] routes,
+			SEMPickupDeliveryRequest[] unServedRequests) {
+		super();
+		this.routes = routes;
+		this.unServedRequests = unServedRequests;
+	}
+
+	public SEMPickupDeliveryRequest[] getUnServedRequests() {
+		return unServedRequests;
+	}
+
+	public void setUnServedRequests(SEMPickupDeliveryRequest[] unServedRequests) {
+		this.unServedRequests = unServedRequests;
+	}
 
 	public SEMRoutingSolution[] getRoutes() {
 		return routes;

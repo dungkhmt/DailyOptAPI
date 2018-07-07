@@ -15,7 +15,49 @@ public class Vehicle {
 	private String startWorkingTime;
 	private String endWorkingTime;
 	private int cost;// chi phi thue xe
+	private String vehicleCategory;
+	private String description;
 	
+	
+	public Vehicle(int width, int length, int height, String code, double lat,
+			double lng, double endLat, double endLng, double weight,
+			String startLocationCode, String endLocationCode,
+			String startWorkingTime, String endWorkingTime, int cost,
+			String vehicleCategory, String description) {
+		super();
+		this.width = width;
+		this.length = length;
+		this.height = height;
+		this.code = code;
+		this.lat = lat;
+		this.lng = lng;
+		this.endLat = endLat;
+		this.endLng = endLng;
+		this.weight = weight;
+		this.startLocationCode = startLocationCode;
+		this.endLocationCode = endLocationCode;
+		this.startWorkingTime = startWorkingTime;
+		this.endWorkingTime = endWorkingTime;
+		this.cost = cost;
+		this.vehicleCategory = vehicleCategory;
+		this.description = description;
+	}
+	public Vehicle clone(){
+		return new Vehicle(width,length,height,code,lat,lng,endLat,endLng,weight,startLocationCode,endLocationCode,
+				startWorkingTime,endWorkingTime,cost,vehicleCategory,description);
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public String getVehicleCategory() {
+		return vehicleCategory;
+	}
+	public void setVehicleCategory(String vehicleCategory) {
+		this.vehicleCategory = vehicleCategory;
+	}
 	public Vehicle(int width, int length, int height, String code, double lat,
 			double lng, double endLat, double endLng, double weight,
 			String startLocationCode, String endLocationCode,

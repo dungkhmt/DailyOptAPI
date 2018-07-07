@@ -5,13 +5,40 @@ import java.util.ArrayList;
 public class PickupDeliverySolution {
 	private RoutingSolution[] routes;
 	private Item[] unScheduledItems;
+	private PickupDeliveryRequest[] unScheduledRequests;
 	
+	
+	public PickupDeliveryRequest[] getUnScheduledRequests() {
+		return unScheduledRequests;
+	}
+	public void setUnScheduledRequests(PickupDeliveryRequest[] unScheduledRequests) {
+		this.unScheduledRequests = unScheduledRequests;
+	}
+	public PickupDeliverySolution(RoutingSolution[] routes,
+			Item[] unScheduledItems, PickupDeliveryRequest[] unScheduledRequests) {
+		super();
+		this.routes = routes;
+		this.unScheduledItems = unScheduledItems;
+		this.unScheduledRequests = unScheduledRequests;
+	}
+	public void append(ArrayList<RoutingSolution> new_r){
+		ArrayList<RoutingSolution> L = new ArrayList<RoutingSolution>();
+		for(int i = 0; i < routes.length; i++)
+			L.add(routes[i]);
+		for(int i = 0; i < new_r.size(); i++)
+			L.add(new_r.get(i));
+		routes = new RoutingSolution[L.size()];
+		for(int i = 0; i < L.size(); i++){
+			routes[i] = L.get(i);
+		}
+	}
 	public PickupDeliverySolution(RoutingSolution[] routes,
 			Item[] unScheduledItems) {
 		super();
 		this.routes = routes;
 		this.unScheduledItems = unScheduledItems;
 	}
+	
 	public void insertHead(ArrayList<RoutingSolution> L){
 		ArrayList<RoutingSolution> tmp = new ArrayList<RoutingSolution>();
 		//double distance = 0;

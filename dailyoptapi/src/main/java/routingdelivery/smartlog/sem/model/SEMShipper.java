@@ -14,6 +14,10 @@ public class SEMShipper {
 	private double endLng;
 	private String endLocationCode;
 	
+	private int currentNbOrders;
+	private int currentMoney;
+	private int currentWeight;
+	private int currentDistance;
 	
 	public String getStartLocationCode() {
 		return startLocationCode;

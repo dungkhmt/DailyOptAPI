@@ -1,2 +1,3 @@
 eclipse.preferences.version=1
 encoding//src/main/java/routingdelivery/service/PickupDeliverySolver.java=UTF-8
+encoding//src/main/java/routingdelivery/smartlog/brenntag/service/BrennTagRouteSolverForOneVehicle.java=UTF-8

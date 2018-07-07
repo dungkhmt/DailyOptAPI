@@ -105,8 +105,8 @@ public class TestAPI {
 		//PickupDeliverySolver solver = new PickupDeliverySolver();
 		BrenntagPickupDeliverySolver solver = new BrenntagPickupDeliverySolver();
 		//return solver.compute(input);
-		return solver.computeNew(input);
-		
+		//return solver.computeNew(input);
+		return solver.computeVehicleSuggestion(input);
 	}
 
 	@CrossOrigin

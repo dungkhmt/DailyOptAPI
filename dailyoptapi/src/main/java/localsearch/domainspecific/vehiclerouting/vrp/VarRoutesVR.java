@@ -196,6 +196,19 @@ public class VarRoutesVR{
 		}
 		return s;
 	}
+	public String toStringShort(){
+		String s = "";
+		for(int k = 1; k <= K; k++)if(next(startPoint(k)) != endPoint(k)){
+			s += "route[" + k + "] = ";
+			Point x = getStartingPointOfRoute(k);
+			while(x != getTerminatingPointOfRoute(k)){
+				s = s + x.getID() + " " + " -> ";
+				x = next(x);
+			}
+			s = s + x.getID() + "\n";
+		}
+		return s;
+	}
 	public String routeString(int k){
 		String s = "";
 		for(Point p = startPoint(k); p != endPoint(k); p = next(p)){

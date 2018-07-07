@@ -8,4 +8,7 @@ public class Arc{
 	public Arc(int from, int to, double w, double f){
 		this.from = from; this.to = to; this.w = w; this.f = f;
 	}
+	public String toString(){
+		return "(" + from + "," + to + "," + w + "," + f + ")";
+	}
 }
