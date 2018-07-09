@@ -19,6 +19,54 @@ public class SEMShipper {
 	private int currentWeight;
 	private int currentDistance;
 	
+	public SEMShipper(String shipperID, double weightCapacity, int maxOrder,
+			int maxAmountMoney, String startWorkingTime, String endWorkingTime,
+			double startLat, double startLng, String startLocationCode,
+			double endLat, double endLng, String endLocationCode,
+			int currentNbOrders, int currentMoney, int currentWeight,
+			int currentDistance) {
+		super();
+		this.shipperID = shipperID;
+		this.weightCapacity = weightCapacity;
+		this.maxOrder = maxOrder;
+		this.maxAmountMoney = maxAmountMoney;
+		this.startWorkingTime = startWorkingTime;
+		this.endWorkingTime = endWorkingTime;
+		this.startLat = startLat;
+		this.startLng = startLng;
+		this.startLocationCode = startLocationCode;
+		this.endLat = endLat;
+		this.endLng = endLng;
+		this.endLocationCode = endLocationCode;
+		this.currentNbOrders = currentNbOrders;
+		this.currentMoney = currentMoney;
+		this.currentWeight = currentWeight;
+		this.currentDistance = currentDistance;
+	}
+	public int getCurrentNbOrders() {
+		return currentNbOrders;
+	}
+	public void setCurrentNbOrders(int currentNbOrders) {
+		this.currentNbOrders = currentNbOrders;
+	}
+	public int getCurrentMoney() {
+		return currentMoney;
+	}
+	public void setCurrentMoney(int currentMoney) {
+		this.currentMoney = currentMoney;
+	}
+	public int getCurrentWeight() {
+		return currentWeight;
+	}
+	public void setCurrentWeight(int currentWeight) {
+		this.currentWeight = currentWeight;
+	}
+	public int getCurrentDistance() {
+		return currentDistance;
+	}
+	public void setCurrentDistance(int currentDistance) {
+		this.currentDistance = currentDistance;
+	}
 	public String getStartLocationCode() {
 		return startLocationCode;
 	}

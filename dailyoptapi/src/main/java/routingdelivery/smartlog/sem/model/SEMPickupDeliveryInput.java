@@ -129,6 +129,10 @@ public class SEMPickupDeliveryInput {
 			double endLng = Double.valueOf(s[1]);
 			String endLocationCode = endLocationCodes[i];
 			shippers[i] = new SEMShipper(shipperID, weightCapacity, maxOrder, maxAmountMoney, startWorkingTime, endWorkingTime, startLat, startLng, startLocationCode, endLat, endLng, endLocationCode);
+		
+			shippers[i].setCurrentMoney(0);
+			shippers[i].setCurrentNbOrders(0);
+			shippers[i].setCurrentWeight(0);
 		}
 		String[] locCode = new String[pickupLoc.length+deliveryLoc.length + startLocationCodes.length + endLocationCodes.length];
 		String[] latlng = new String[latlngpickup.length+latlngdelivery.length+latlngStart.length+latlngEnd.length];

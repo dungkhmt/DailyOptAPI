@@ -20,4 +20,11 @@ public class VehicleTrip {
 		this.load= load;
 		this.distance = distance;
 	}
+	public String seqPointString(){
+		String s = "";
+		for(int i = 0; i < seqPoints.size(); i++){
+			s += seqPoints.get(i).ID + ", ";
+		}
+		return s;
+	}
 }

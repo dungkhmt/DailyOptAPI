@@ -183,6 +183,7 @@ public class VarRoutesVR{
 		mgr.initPropagation();
 	}
 	
+	
 	public String toString(){
 		String s = "";
 		for(int k = 1; k <= K; k++){
@@ -196,6 +197,18 @@ public class VarRoutesVR{
 		}
 		return s;
 	}
+	public String toStringRoute(int k){
+		String s = "";
+			s += "route[" + k + "] = ";
+			Point x = getStartingPointOfRoute(k);
+			while(x != getTerminatingPointOfRoute(k)){
+				s = s + x.getID() + " " + " -> ";
+				x = next(x);
+			}
+			s = s + x.getID() + "\n";
+		return s;
+	}
+
 	public String toStringShort(){
 		String s = "";
 		for(int k = 1; k <= K; k++)if(next(startPoint(k)) != endPoint(k)){

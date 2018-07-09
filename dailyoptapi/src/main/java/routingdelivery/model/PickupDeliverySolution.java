@@ -32,6 +32,18 @@ public class PickupDeliverySolution {
 			routes[i] = L.get(i);
 		}
 	}
+	public void append(RoutingSolution[] new_r){
+		ArrayList<RoutingSolution> L = new ArrayList<RoutingSolution>();
+		for(int i = 0; i < routes.length; i++)
+			L.add(routes[i]);
+		for(int i = 0; i < new_r.length; i++)
+			L.add(new_r[i]);
+		routes = new RoutingSolution[L.size()];
+		for(int i = 0; i < L.size(); i++){
+			routes[i] = L.get(i);
+		}
+	}
+
 	public PickupDeliverySolution(RoutingSolution[] routes,
 			Item[] unScheduledItems) {
 		super();

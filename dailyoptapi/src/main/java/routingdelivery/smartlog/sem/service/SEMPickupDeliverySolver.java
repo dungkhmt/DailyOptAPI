@@ -398,11 +398,11 @@ public class SEMPickupDeliverySolver {
 					accWeightPoint, XR.endPoint(i + 1));
 			distanceRoutes[i] = new AccumulatedEdgeWeightsOnPathVR(accDistance, XR.endPoint(i+1));
 			
-			CS.post(new Leq(nbOrderOfShipper[i], shippers[i].getMaxOrder()));
+			CS.post(new Leq(nbOrderOfShipper[i], shippers[i].getMaxOrder() - shippers[i].getCurrentNbOrders()));
 			CS.post(new Leq(amountMoneyOfShipper[i], shippers[i]
-					.getMaxAmountMoney()));
+					.getMaxAmountMoney() - shippers[i].getCurrentMoney()));
 			CS.post(new Leq(weightTripOfShipper[i], shippers[i]
-					.getWeightCapacity()));
+					.getWeightCapacity() - shippers[i].getCurrentWeight()));
 		}
 
 		eat = new EarliestArrivalTimeVR(XR, travelTime,
