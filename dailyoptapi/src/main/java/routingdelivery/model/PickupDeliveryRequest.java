@@ -2,6 +2,46 @@ package routingdelivery.model;
 
 public class PickupDeliveryRequest {
 	private String orderID;
+	private String orderCode;
+	
+	public PickupDeliveryRequest(String orderID, String orderCode,
+			Item[] items, String pickupLocationCode, String pickupAddr,
+			double pickupLat, double pickupLng, String earlyPickupTime,
+			String latePickupTime, int pickupDuration, int fixLoadTime,
+			String deliveryLocationCode, String deliveryAddr,
+			double deliveryLat, double deliveryLng, String earlyDeliveryTime,
+			String lateDeliveryTime, int deliveryDuration, int fixUnloadTime,
+			String splitDelivery, String description) {
+		super();
+		this.orderID = orderID;
+		this.orderCode = orderCode;
+		this.items = items;
+		this.pickupLocationCode = pickupLocationCode;
+		this.pickupAddr = pickupAddr;
+		this.pickupLat = pickupLat;
+		this.pickupLng = pickupLng;
+		this.earlyPickupTime = earlyPickupTime;
+		this.latePickupTime = latePickupTime;
+		this.pickupDuration = pickupDuration;
+		this.fixLoadTime = fixLoadTime;
+		this.deliveryLocationCode = deliveryLocationCode;
+		this.deliveryAddr = deliveryAddr;
+		this.deliveryLat = deliveryLat;
+		this.deliveryLng = deliveryLng;
+		this.earlyDeliveryTime = earlyDeliveryTime;
+		this.lateDeliveryTime = lateDeliveryTime;
+		this.deliveryDuration = deliveryDuration;
+		this.fixUnloadTime = fixUnloadTime;
+		this.splitDelivery = splitDelivery;
+		this.description = description;
+	}
+	
+	public String getOrderCode() {
+		return orderCode;
+	}
+	public void setOrderCode(String orderCode) {
+		this.orderCode = orderCode;
+	}
 	private Item[] items;
 
 	private String pickupLocationCode;
@@ -110,13 +150,18 @@ public class PickupDeliveryRequest {
 		for(int i = 0; i < items.length; i++){
 			I[i] = items[i].clone();
 		}
-		return new PickupDeliveryRequest(orderID, I,
+		PickupDeliveryRequest r = new PickupDeliveryRequest(orderID, I,
 				pickupLocationCode, pickupAddr, pickupLat,
 				pickupLng, earlyPickupTime, latePickupTime,
 				pickupDuration, deliveryLocationCode,
 				deliveryAddr, deliveryLat, deliveryLng,
 				earlyDeliveryTime, lateDeliveryTime,
 				deliveryDuration, splitDelivery);
+		
+		r.fixLoadTime = this.fixLoadTime;
+		r.fixUnloadTime = this.fixUnloadTime;
+		r.orderCode = this.orderCode;
+		return r;
 	}
 	public PickupDeliveryRequest(String orderID, Item[] items,
 			String pickupLocationCode, String pickupAddr, double pickupLat,

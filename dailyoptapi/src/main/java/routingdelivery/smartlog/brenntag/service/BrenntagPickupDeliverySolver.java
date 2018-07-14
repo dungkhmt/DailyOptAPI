@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import javax.annotation.processing.Processor;
+import com.google.gson.Gson;
 
 import algorithms.matching.MaxMatching;
 import localsearch.domainspecific.vehiclerouting.vrp.ConstraintSystemVR;
 import localsearch.domainspecific.vehiclerouting.vrp.VRManager;
 import localsearch.domainspecific.vehiclerouting.vrp.VarRoutesVR;
-import localsearch.domainspecific.vehiclerouting.vrp.constraints.timewindows.CEarliestArrivalTimeVR;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.ArcWeightsManager;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.NodeWeightsManager;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.Point;
@@ -19,7 +18,6 @@ import localsearch.domainspecific.vehiclerouting.vrp.functions.LexMultiFunctions
 import localsearch.domainspecific.vehiclerouting.vrp.functions.TotalCostVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightEdgesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightNodesVR;
-import localsearch.domainspecific.vehiclerouting.vrp.invariants.EarliestArrivalTimeVR;
 import routingdelivery.model.Item;
 import routingdelivery.model.PickupDeliveryRequest;
 import routingdelivery.model.PickupDeliverySolution;
@@ -96,6 +94,39 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		}
 	}
 
+	public boolean checkFTLSatisfyingDeliveryTime(double cap,
+			int arrivalTimePickup, double amount, int pickupLocationIdx,
+			int deliveryLocationIdx, int pickupDurationPerUnit,
+			int deliveryDurationPerUnit, int fix_load_time,
+			int fix_unload_time, int ealiestAllowArrivalTimePickup,
+			int latestAllowArrivalTimePickup,
+			int earliestAllowArrivalTimeDelivery,
+			int latestAllowArrivalTimeDelivery, boolean useDurationPerUnit) {
+
+		int serviceTimePickup = arrivalTimePickup < ealiestAllowArrivalTimePickup ? ealiestAllowArrivalTimePickup
+				: arrivalTimePickup;
+		double factor = 1;
+
+		int pickupDuration = (int) (pickupDurationPerUnit * cap * factor / amount)
+				+ fix_load_time;
+		int departureTimePickup = (int) serviceTimePickup + pickupDuration;
+
+		int arrivalTimeDelivery = departureTimePickup
+				+ (int) a_travelTime[pickupLocationIdx][deliveryLocationIdx];
+		int serviceTimeDelivery = arrivalTimeDelivery < earliestAllowArrivalTimeDelivery ? earliestAllowArrivalTimeDelivery
+				: arrivalTimeDelivery;
+		int deliveryDuration = (int) (deliveryDurationPerUnit * cap * factor / amount)
+				+ fix_unload_time;
+		int departureTimeDelivery = serviceTimeDelivery + deliveryDuration;
+
+		if (arrivalTimeDelivery >= latestAllowArrivalTimeDelivery)
+			return false;
+		// NEED TO CHECK DEPARTURE-TIME-DELIVERY???
+
+		return true;
+
+	}
+
 	public Trip splitLargeItemCreateATripWithInternalVehicle(int itemIndex,
 			double amount, int pickupLocationIdx, int deliveryLocationIdx,
 			int pickupDurationPerUnit, int deliveryDurationPerUnit,
@@ -111,11 +142,43 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		for (int i = 0; i < vehicles.length; i++) {
 			int locationIdx = getLastLocationIndex(i);
 			int deptime = getLastDepartureTimeOfVehicle(i);
+			if(getVehicle(i).getCode().equals("60C-242.61")){
+				log(name() + "::splitLargeItemCreateATripWithInternalVehicle, trips[" + i + "," + getVehicle(i).getCode() + 
+						"].sz = " + trips[i].size() + ", deptime = " + deptime);
+			}
+			
 			if (deptime + a_travelTime[locationIdx][pickupLocationIdx] <= latestAllowArrivalTimePickup) {
-				if (amount <= vehicles[i].getWeight())
+				if (amount <= vehicles[i].getWeight()){
 					// has available vehicle with enough capacity
+					arrivalTimePickup = (int) (deptime + a_travelTime[locationIdx][pickupLocationIdx]);
+
+					if (checkFTLSatisfyingDeliveryTime(
+						vehicles[i].getWeight(), arrivalTimePickup, amount,
+						pickupLocationIdx, deliveryLocationIdx,
+						pickupDurationPerUnit, deliveryDurationPerUnit,
+						fix_load_time, fix_unload_time,
+						ealiestAllowArrivalTimePickup,
+						latestAllowArrivalTimePickup,
+						earliestAllowArrivalTimeDelivery,
+						latestAllowArrivalTimeDelivery, useDurationPerUnit))
+					
 					return null;
-				else {
+				}else {
+					// check if vehicle i can load FTL satisfying deliverying
+					// time
+					arrivalTimePickup = (int) (deptime + a_travelTime[locationIdx][pickupLocationIdx]);
+
+					if (!checkFTLSatisfyingDeliveryTime(
+							vehicles[i].getWeight(), arrivalTimePickup, amount,
+							pickupLocationIdx, deliveryLocationIdx,
+							pickupDurationPerUnit, deliveryDurationPerUnit,
+							fix_load_time, fix_unload_time,
+							ealiestAllowArrivalTimePickup,
+							latestAllowArrivalTimePickup,
+							earliestAllowArrivalTimeDelivery,
+							latestAllowArrivalTimeDelivery, useDurationPerUnit))
+						continue;
+
 					if (max_cap < vehicles[i].getWeight()) {
 						sel_vehicle = i;
 						max_cap = vehicles[i].getWeight();
@@ -136,22 +199,39 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			factor = vehicles[sel_vehicle].getWeight();
 		}
 
-		departureTimePickup = (int) serviceTimePickup
-				+ (int) (pickupDurationPerUnit * max_cap * factor / amount)
+		int pickupDuration = (int) (pickupDurationPerUnit * max_cap * factor / amount)
 				+ fix_load_time;
+		departureTimePickup = (int) serviceTimePickup + pickupDuration;
+		String des_pickup = "pickupDurationTotal = " + pickupDurationPerUnit
+				+ ", fix_load_time = " + fix_load_time + ", factor = " + factor
+				+ ", max_cap = " + max_cap + ", totalAmount = " + amount
+				+ ", splitPickupDuration = " + pickupDuration + "("
+				+ DateTimeUtils.second2HMS(pickupDuration) + ")";
 
 		int arrivalTimeDelivery = departureTimePickup
 				+ (int) a_travelTime[pickupLocationIdx][deliveryLocationIdx];
 		int serviceTimeDelivery = arrivalTimeDelivery < earliestAllowArrivalTimeDelivery ? earliestAllowArrivalTimeDelivery
 				: arrivalTimeDelivery;
-		int departureTimeDelivery = serviceTimeDelivery
-				+ (int) (deliveryDurationPerUnit * max_cap * factor / amount)
+		int deliveryDuration = (int) (deliveryDurationPerUnit * max_cap
+				* factor / amount)
 				+ fix_unload_time;
+		int departureTimeDelivery = serviceTimeDelivery + deliveryDuration;
+		String des_delivery = "deliveryDurationTotal = "
+				+ deliveryDurationPerUnit + ", fix_unload_time = "
+				+ fix_unload_time + ", factor = " + factor + ", max_cap = "
+				+ max_cap + ", totalAmount = " + amount
+				+ ", splitDeliveryDuration = " + deliveryDuration + "("
+				+ DateTimeUtils.second2HMS(deliveryDuration) + ")";
 
 		RouteNode start = new RouteNode(pickupLocationIdx, arrivalTimePickup,
 				departureTimePickup, L, sel_vehicle, "P");// pickup
 		RouteNode end = new RouteNode(deliveryLocationIdx, arrivalTimeDelivery,
 				departureTimeDelivery, L, sel_vehicle, "D");// delivery
+
+		start.solver = this;
+		start.description = des_pickup;
+		end.solver = this;
+		end.description = des_delivery;
 
 		return new Trip(start, end, "FTL");
 	}
@@ -164,18 +244,56 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			int latestAllowArrivalTimePickup,
 			int earliestAllowArrivalTimeDelivery,
 			int latestAllowArrivalTimeDelivery, boolean useDurationPerUnit) {
+		log(name() + "::splitLargeItemCreateATripWithExternalVehicle"
+				+ ", externalVehicles = " + externalVehicles.length);
 		double max_cap = 0;
 		int sel_vehicle = -1;
 		int arrivalTimePickup = -1;
 		int departureTimePickup = -1;
+		int rID = mItemIndex2RequestIndex.get(itemIndex);
+		PickupDeliveryRequest r= requests[rID];
+		Item I = items.get(itemIndex);
+		
 		for (int i = 0; i < externalVehicles.length; i++) {
 			int locationIdx = getLastLocationIndex(i + vehicles.length);
 			int deptime = getLastDepartureTimeOfVehicle(i + vehicles.length);
 			if (deptime + a_travelTime[locationIdx][pickupLocationIdx] <= latestAllowArrivalTimePickup) {
-				if (amount <= externalVehicles[i].getWeight())
+				if (amount <= externalVehicles[i].getWeight()){
 					// has available vehicle with enough capacity
-					return null;
-				else {
+					arrivalTimePickup = (int) (deptime + a_travelTime[locationIdx][pickupLocationIdx]);
+
+					if (checkFTLSatisfyingDeliveryTime(
+						externalVehicles[i].getWeight(), arrivalTimePickup,
+						amount, pickupLocationIdx, deliveryLocationIdx,
+						pickupDurationPerUnit, deliveryDurationPerUnit,
+						fix_load_time, fix_unload_time,
+						ealiestAllowArrivalTimePickup,
+						latestAllowArrivalTimePickup,
+						earliestAllowArrivalTimeDelivery,
+						latestAllowArrivalTimeDelivery, useDurationPerUnit)){
+						
+						log(name() + "::splitLargeItemCreateATripWithExternalVehicle, DONOT SPLIT large item " + I.getCode() + 
+								", amount = " + amount + ", order = " + r.getOrderID() + " BECAUSE AVAILABLE vehicle " + externalVehicles[i].getCode() + ", "
+								+ externalVehicles[i].getWeight() + ", external-vehicle = " 
+								+ externalVehicles.length);
+						return null;
+					}
+				}else {
+					// check if vehicle i can load FTL satisfying deliverying
+					// time
+					arrivalTimePickup = (int) (deptime + a_travelTime[locationIdx][pickupLocationIdx]);
+
+					if (!checkFTLSatisfyingDeliveryTime(
+							externalVehicles[i].getWeight(), arrivalTimePickup,
+							amount, pickupLocationIdx, deliveryLocationIdx,
+							pickupDurationPerUnit, deliveryDurationPerUnit,
+							fix_load_time, fix_unload_time,
+							ealiestAllowArrivalTimePickup,
+							latestAllowArrivalTimePickup,
+							earliestAllowArrivalTimeDelivery,
+							latestAllowArrivalTimeDelivery, useDurationPerUnit))
+						continue;
+
 					if (max_cap < externalVehicles[i].getWeight()) {
 						sel_vehicle = i;
 						max_cap = externalVehicles[i].getWeight();
@@ -184,9 +302,16 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				}
 			}
 		}
-		if (sel_vehicle == -1)
+		if (sel_vehicle == -1){
+			log(name() + "::splitLargeItemCreateATripWithExternalVehicle, CANNOT SPLIT large item " + I.getCode() + 
+					", amount = " + amount + ", order = " + r.getOrderID() + " BECAUSE NO AVAILABLE vehicle, external-vehicle = " + externalVehicles.length);
 			return null;
-
+		}else{
+			log(name() + "::splitLargeItemCreateATripWithExternalVehicle, CAN SPLIT large item " + I.getCode() + 
+					", amount = " + amount + ", order = " + r.getOrderID() + " WITH vehicle " + externalVehicles[sel_vehicle].getCode() + ", " + externalVehicles[sel_vehicle].getWeight() + ", external-vehicle = " + externalVehicles.length);
+			
+		}
+		
 		ArrayList<ItemAmount> L = new ArrayList<ItemAmount>();
 		L.add(new ItemAmount(itemIndex, max_cap));
 		int serviceTimePickup = arrivalTimePickup < ealiestAllowArrivalTimePickup ? ealiestAllowArrivalTimePickup
@@ -196,22 +321,39 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			factor = externalVehicles[sel_vehicle].getWeight();
 		}
 
-		departureTimePickup = (int) serviceTimePickup
-				+ (int) (pickupDurationPerUnit * max_cap * factor / amount)
+		int pickupDuration = (int) (pickupDurationPerUnit * max_cap * factor / amount)
 				+ fix_load_time;
+		departureTimePickup = (int) serviceTimePickup + pickupDuration;
+		String des_pickup = "pickupDurationTotal = " + pickupDurationPerUnit
+				+ ", fix_load_time = " + fix_load_time + ", factor = " + factor
+				+ ", max_cap = " + max_cap + ", totalAmount = " + amount
+				+ ", splitPickupDuration = " + pickupDuration + "("
+				+ DateTimeUtils.second2HMS(pickupDuration) + ")";
 
 		int arrivalTimeDelivery = departureTimePickup
 				+ (int) a_travelTime[pickupLocationIdx][deliveryLocationIdx];
 		int serviceTimeDelivery = arrivalTimeDelivery < earliestAllowArrivalTimeDelivery ? earliestAllowArrivalTimeDelivery
 				: arrivalTimeDelivery;
-		int departureTimeDelivery = serviceTimeDelivery
-				+ (int) (deliveryDurationPerUnit * max_cap * factor / amount)
+		int deliveryDuration = (int) (deliveryDurationPerUnit * max_cap
+				* factor / amount)
 				+ fix_unload_time;
+		int departureTimeDelivery = serviceTimeDelivery + deliveryDuration;
+		String des_delivery = "deliveryDurationTotal = "
+				+ deliveryDurationPerUnit + ", fix_unload_time = "
+				+ fix_unload_time + ", factor = " + factor + ", max_cap = "
+				+ max_cap + ", totalAmount = " + amount
+				+ ", splitDeliveryDuration = " + deliveryDuration + "("
+				+ DateTimeUtils.second2HMS(deliveryDuration) + ")";
 
 		RouteNode start = new RouteNode(pickupLocationIdx, arrivalTimePickup,
-				departureTimePickup, L, sel_vehicle, "P");// pickup
+				departureTimePickup, L, sel_vehicle + vehicles.length, "P");// pickup
 		RouteNode end = new RouteNode(deliveryLocationIdx, arrivalTimeDelivery,
-				departureTimeDelivery, L, sel_vehicle, "D");// delivery
+				departureTimeDelivery, L, sel_vehicle + vehicles.length, "D");// delivery
+
+		start.solver = this;
+		start.description = des_pickup;
+		end.solver = this;
+		end.description = des_delivery;
 
 		return new Trip(start, end, "FTL");
 	}
@@ -328,8 +470,13 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			ci[0].setPickupDuration(ftl_pickup_duration);
 			ci[0].setDeliveryDuration(ftl_delivery_duration);
 
+			a.start.solver = this;
+			a.end.solver = this;
 			mTrip2Items.put(a, ci);
 			trips[a.start.vehicleIndex].add(a);
+			if(getVehicle(a.start.vehicleIndex).getCode().equals("60C-242.61"))
+				log(name() + "::processSplitOrderItemWithInternalVehicle, trips[" + a.start.vehicleIndex + "].add, z = " + 
+			trips[a.start.vehicleIndex].size());
 		}
 
 	}
@@ -373,7 +520,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				// ", amount = " + ia.amount);
 				break;
 			}
-			double cap = vehicles[a.start.vehicleIndex].getWeight();
+			double cap = externalVehicles[a.start.vehicleIndex-vehicles.length].getWeight();
 			int ftl_pickup_duration = (int) (ori_pickup_duration * cap / amount);
 			int ftl_delivery_duration = (int) (ori_delivery_duration * cap / amount);
 			ori_pickup_duration = ori_pickup_duration - ftl_pickup_duration;// (ori_pickup_duration*(ia.amount-cap))/(ia.amount);
@@ -404,6 +551,8 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			ci[0].setPickupDuration(ftl_pickup_duration);
 			ci[0].setDeliveryDuration(ftl_delivery_duration);
 
+			a.start.solver = this;
+			a.end.solver = this;
 			mTrip2Items.put(a, ci);
 			trips[a.start.vehicleIndex].add(a);
 		}
@@ -580,7 +729,12 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			return a;
 		return b;
 	}
-
+	public int MIN(int a, int b){
+		return a < b ? a : b;
+	}
+	public int MAX(int a, int b){
+		return a > b ? a : b;
+	}
 	public ArrayList<Item> loadFTLToVehicle(int vehicle_index,
 			int pickuplocationIndex, int deliveryLocationIndex,
 			ArrayList<Item> decreasing_weight_items, int fix_load_time,
@@ -588,7 +742,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		Vehicle vh = getVehicle(vehicle_index);
 
 		String debug_vehicle_code = "";
-		String debug_location_code = "10008275";
+		String debug_location_code = "";
 
 		String deliveryLocationCode = locationCodes.get(deliveryLocationIndex);
 
@@ -637,6 +791,14 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		double departure_pickup = -1;
 		double arrival_delivery = -1;
 		double departure_delivery = -1;
+		
+		double sel_arrival_pickup = startTime
+				+ a_travelTime[locationIndex][pickuplocationIndex];
+		double sel_departure_pickup = -1;
+		double sel_arrival_delivery = -1;
+		double sel_departure_delivery = -1;
+		
+		
 		int end_work_time_vehicle = (int) DateTimeUtils.dateTime2Int(vh
 				.getEndWorkingTime());
 		int load_time = 0;
@@ -645,6 +807,11 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 
 		ArrayList<ItemAmount> IA = new ArrayList<ItemAmount>();
 
+		int pickup_early_time = Integer.MAX_VALUE;
+		int pickup_late_time = Integer.MAX_VALUE;
+		int delivery_early_time = Integer.MAX_VALUE;
+		int delivery_late_time = Integer.MAX_VALUE;
+		
 		while (decreasing_weight_items.size() > 0) {
 			int sel_i = -1;
 			for (int i = 0; i < decreasing_weight_items.size(); i++) {
@@ -658,24 +825,24 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				}
 
 				// check time
-				int pickup_early_time = (int) DateTimeUtils.dateTime2Int(r
-						.getEarlyPickupTime());
-				int pickup_late_time = (int) DateTimeUtils.dateTime2Int(r
-						.getLatePickupTime());
-				int delivery_early_time = (int) DateTimeUtils.dateTime2Int(r
-						.getEarlyDeliveryTime());
-				int delivery_late_time = (int) DateTimeUtils.dateTime2Int(r
-						.getLateDeliveryTime());
+				pickup_early_time = MIN(pickup_early_time,(int) DateTimeUtils.dateTime2Int(r
+						.getEarlyPickupTime()));
+				pickup_late_time = MIN(pickup_late_time,(int) DateTimeUtils.dateTime2Int(r
+						.getLatePickupTime()));
+				delivery_early_time = MIN(delivery_early_time,(int) DateTimeUtils.dateTime2Int(r
+						.getEarlyDeliveryTime()));
+				delivery_late_time = MIN(delivery_late_time,(int) DateTimeUtils.dateTime2Int(r
+						.getLateDeliveryTime()));
 
 				if (arrival_pickup > pickup_late_time)
 					continue;
 				departure_pickup = max(arrival_pickup, pickup_early_time)
-						+ load_time + fix_load_time;
+						+ load_time + I.getPickupDuration() + fix_load_time;
 				arrival_delivery = departure_pickup + travel_time;
 				if (arrival_delivery > delivery_late_time)
 					continue;
 				departure_delivery = max(arrival_delivery, delivery_early_time)
-						+ unload_time + fix_unload_time;
+						+ unload_time + I.getDeliveryDuration() + fix_unload_time;
 
 				double arrival_depot = departure_delivery
 						+ a_travelTime[deliveryLocationIndex][endLocationIndexVehicle];
@@ -699,6 +866,11 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				unload_time += I.getDeliveryDuration();
 				load += I.getWeight();
 
+				sel_arrival_pickup = arrival_pickup;
+				sel_departure_pickup = departure_pickup;
+				sel_arrival_delivery = arrival_delivery;
+				sel_departure_delivery = departure_delivery;
+				
 				sel_i = i;
 				break;
 			}
@@ -721,18 +893,25 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		if (IA.size() > 0) {
 			if (decreasing_weight_items.size() > 0) {
 				RouteNode start = new RouteNode(pickuplocationIndex,
-						(int) arrival_pickup, (int) departure_pickup, IA,
+						(int) sel_arrival_pickup, (int) sel_departure_pickup, IA,
 						vehicle_index, "P");
 				RouteNode end = new RouteNode(deliveryLocationIndex,
-						(int) arrival_delivery, (int) departure_delivery, IA,
+						(int) sel_arrival_delivery, (int) sel_departure_delivery, IA,
 						vehicle_index, "D");
+
+				start.solver = this;
+				end.solver = this;
+
 				Trip t = new Trip(start, end, "COLLECT_TO_FTL");
 				Item[] items_of_trip = new Item[IA.size()];
 				for (int ii = 0; ii < IA.size(); ii++) {
 					items_of_trip[ii] = items.get(IA.get(ii).itemIndex);
 				}
 				mTrip2Items.put(t, items_of_trip);
-
+				if(!t.checkTime()){
+					log(name() + "::loadFTLToVehicle, BUG checkTime????");
+					log(name() + "::loadFTLToVehicle, BUG Vehicle = " + getVehicle(vehicle_index).getCode() + ", INFO TRIP = " + t.toString());
+				}
 				trips[vehicle_index].add(t);
 				// System.out.println("CONSIDER OK********************");
 				if (log != null)
@@ -1329,6 +1508,8 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 
 		M = vehicles.length + externalVehicles.length;
 		int idxPoint = -1;
+		HashSet<String> IC = new HashSet<String>();
+		
 		// create points from init FTL trips
 		for (int k = 0; k < M; k++) {
 			if (trips[k].size() > 0) {
@@ -1347,6 +1528,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 															// add it to items
 							items.add(I);
 							mItem2Index.put(I, itemIndex);
+							IC.add(I.getCode());
 
 							int reqIdx = mItemIndex2RequestIndex
 									.get(ta.itemIndex);
@@ -1434,7 +1616,8 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 							ItemAmount ta = t.start.items.get(i);
 							int itemIndex = ta.itemIndex;
 							Item I = items.get(itemIndex);
-
+							IC.add(I.getCode());
+							
 							int reqIdx = mItemIndex2RequestIndex
 									.get(ta.itemIndex);
 
@@ -1601,6 +1784,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				for (int i : C) {
 					for (int ii = 0; ii < requests[i].getItems().length; ii++) {
 						Item item = requests[i].getItems()[ii];
+						IC.add(item.getCode());
 						idx++;
 						L[idx] = mItem2Index.get(item);
 					}
@@ -1683,6 +1867,8 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 						latestAllowedArrivalTimeDelivery);
 			}
 		}
+		log(name()+ "::initPoint, IC.sz = " + IC.size());
+		
 
 		/*
 		 * // create points from requests for (int i = 0; i < requests.length;
@@ -1982,9 +2168,22 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 
 		for (int k = 0; k < vehicles.length + externalVehicles.length; k++) {
 			if (trips[k].size() > 0) {
+				// log trip infos
+				for (int j = 0; j < trips[k].size(); j++) {
+					Trip trip = trips[k].get(j);
+					log(name() + "::greedyConstructMaintainConstraintFTL, INIT CONVERT TRIP to XR, vehicle " + getVehicle(k).getCode() + 
+							", trip[" + j + "] = " + trip.toString());
+					log(name() + "::greedyConstructMaintainConstraintFTL------------------");
+				}
+				log(name() + "::greedyConstructMaintainConstraintFTL*********************************************");
+				
 				for (int j = 0; j < trips[k].size(); j++) {
 					Trip trip = trips[k].get(j);
 					int vehicle_index = trip.start.vehicleIndex;
+					if(vehicle_index != k){
+						log(name() + "::greedyConstructMaintainConstraintFTL, vehicle_index = " + vehicle_index + 
+								" != k = " + k + ", SERIOUS BUG????????????");
+					}
 					Point p = XR.prev(XR.endPoint(vehicle_index + 1));
 					ArrayList<Integer> pickup_index = mTrip2PickupPointIndices
 							.get(trip);
@@ -2003,6 +2202,8 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 						// + pickup.ID + "," + p.ID + ")");
 						mgr.performAddOnePoint(pickup, p);
 						mgr.performAddOnePoint(delivery, pickup);
+						propagateArrivalDepartureTime(XR,k+1, false);
+						
 						for (int ii : mPoint2IndexLoadedItems.get(p)) {
 							mPoint2IndexLoadedItems.get(pickup).add(ii);
 							mPoint2IndexLoadedItems.get(delivery).add(ii);
@@ -2024,10 +2225,42 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				}
 			}
 		}
+		
+		if(!checkAllSolution(XR)){
+			log(name() + "::::greedyConstructMaintainConstraintFTL, AFTER CONVERTING TRIPS to XR, FAILED, BUG???????");
+		}
 		for (int i = 0; i < pickupPoints.size(); i++)
 			if (!scheduled_pickup_point_index.contains(i))
 				cand.add(i);
 
+		log(name()
+				+ "::greedyConstructMaintainConstraintFTL PREPARE Search --------------BEGIN---------------");
+		for (int i : cand) {
+			Point pickup = pickupPoints.get(i);
+			Point delivery = deliveryPoints.get(i);
+			String deliveryLocationCode = mPoint2LocationCode.get(delivery);
+			double demand_pickup = mPoint2Demand.get(pickup);
+			boolean consistent = checkExclusiveItemsAtAPoint(pickup);
+			ArrayList<Vehicle> L = findPossibleVehicle(pickup, delivery);
+			//log(name() + "::greedyConstructMaintainConstraintFTL, delivery "
+			//		+ deliveryLocationCode + ", demand = " + demand_pickup
+			//		+ ", possible vehicle L = " + L.size() + ": ");
+			//for (Vehicle vh : L)
+			//	log("[" + vh.getCode() + ", cap = " + vh.getWeight() + "]");
+			if (!consistent) {
+				log(name()
+						+ "::greedyConstructMaintainConstraintFTL, delivery "
+						+ deliveryLocationCode + ", demand = " + demand_pickup
+						+ " INPUT NOT CONSISTENT EXCLUSIVE ITEMS, BUG???");
+			}
+		}
+		//for (int k = 0; k < vehicles.length + externalVehicles.length; k++) {
+		//	Vehicle vh = getVehicle(k);
+		//	log(name() + "::greedyConstructMaintainConstraintFTL, vehicle "
+		//			+ vh.getCode() + ", cap = " + vh.getWeight());
+		//}
+		//log(name()
+		//		+ "::greedyConstructMaintainConstraintFTL PREPARE Search ---------------END--------------");
 		while (cand.size() > 0) {
 			Point sel_pickup = null;
 			Point sel_delivery = null;
@@ -2068,14 +2301,64 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				}
 			}
 
+			/*
+			 * for(int i: cand){ Point pickup = pickupPoints.get(i); Point
+			 * delivery = deliveryPoints.get(i); double demand =
+			 * mPoint2Demand.get(pickup); String deliveryLocationCode =
+			 * mPoint2LocationCode.get(delivery); log(name() +
+			 * "::greedyConstructMaintainConstraintFTL CHECK point " + i +
+			 * ", delivery location " + deliveryLocationCode + ", demand = " +
+			 * demand); boolean ok = false; for(int j = 0; j <
+			 * input.getVehicleCategories().length; j++){ Vehicle vh =
+			 * input.getVehicleCategories()[j]; if(vh.getWeight() >= demand){
+			 * log(name() +
+			 * "::greedyConstructMaintainConstraintFTL, FIND enough cap vehicle "
+			 * + vh.getCode() + ", cap " + vh.getWeight());
+			 * //if(vehicleCanGoToPoint(vh, delivery)){
+			 * if(vehicleCategoryCanDoToLocationCode(vh, deliveryLocationCode)){
+			 * ok = true; break; }else{ log(name() +
+			 * "::greedyConstructMaintainConstraintFTL, FIND enough cap vehicle "
+			 * + vh.getCode() + ", cap " + vh.getWeight() +
+			 * " BUT CAN NOT GO TO " + deliveryLocationCode); } } } if(!ok){
+			 * log(name() +
+			 * "::greedyConstructMaintainConstraintFTL CHECK point " + i +
+			 * ", delivery location " + deliveryLocationCode + ", demand = " +
+			 * demand + " CANNOT FIND SUITABLE vehicle???????");
+			 * 
+			 * }else{ log(name() +
+			 * "::greedyConstructMaintainConstraintFTL CHECK point " + i +
+			 * ", delivery location " + deliveryLocationCode + ", demand = " +
+			 * demand + " FOUND vehicleCategory");
+			 * 
+			 * } }
+			 */
+
 			for (int i : cand) {
 				Point pickup = pickupPoints.get(i);
 				Point delivery = deliveryPoints.get(i);
+				double demand = mPoint2Demand.get(pickup);
+				/*
+				log(name()
+						+ "::greedyConstructMaintainConstraintFTL LOOP consider point "
+						+ i + ", delivery location "
+						+ mPoint2LocationCode.get(delivery) + ", demand = "
+						+ demand);
+				*/
+				
 				// Item I = items.get(mPoint2IndexItems.get(pickup)[0]);
 
 				// for(int k = 1; k <= XR.getNbRoutes(); k++){
 				// try internal vehicles FIRST
 				for (int k = 1; k <= vehicles.length; k++) {
+					/*
+					 * // check conflict items boolean checkConflict = true;
+					 * for(Point p = XR.startPoint(k); p != XR.endPoint(k); p =
+					 * XR.next(p)){ if(mPoint2Type.get(p).equals("P")){
+					 * if(!checkExclusiveItemsAtPoints(pickup, p)) {
+					 * checkConflict = false; break; } } } if(!checkConflict)
+					 * continue;
+					 */
+
 					String vehicleCode = vehicles[k - 1].getCode();
 					String pickupLocation = mPoint2LocationCode.get(pickup);
 					String deliveryLocation = mPoint2LocationCode.get(delivery);
@@ -2084,10 +2367,14 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 					// if(!mPoint2PossibleVehicles.get(pickup).contains(k) ||
 					// !mPoint2PossibleVehicles.get(delivery).contains(k))
 					// continue;
-					if (mVehicle2NotReachedLocations.get(vehicleCode).contains(
-							pickupLocation)
-							|| mVehicle2NotReachedLocations.get(vehicleCode)
-									.contains(deliveryLocation))
+
+					// if
+					// (mVehicle2NotReachedLocations.get(vehicleCode).contains(
+					// pickupLocation)
+					// || mVehicle2NotReachedLocations.get(vehicleCode)
+					// .contains(deliveryLocation))
+					if (!vehicleCanGoToPoint(vehicles[k - 1], pickup)
+							|| !vehicleCanGoToPoint(vehicles[k - 1], delivery))
 						continue;
 
 					for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
@@ -2134,6 +2421,11 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 						for (Point d = p; d != XR.endPoint(k); d = XR.next(d)) {
 							// new trial items will be unloaded after d --> need
 							// check exclusive items
+
+							if (!checkExclusiveItemAddPoint2Route(XR, k,
+									pickup, p, delivery, d)) {
+								continue;
+							}
 
 							okExclusiveItems = true;
 							for (Point tp = XR.startPoint(k); tp != XR.next(d); tp = XR
@@ -2213,9 +2505,29 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 
 				// NO internal vehicles are possible --> TRY external vehicles
 				if (sel_p == null) {
+
 					for (int k = vehicles.length + 1; k <= M; k++) {
-						String vehicleCode = externalVehicles[k
-								- vehicles.length - 1].getCode();
+
+						// check conflict items
+						/*
+						 * boolean checkConflict = true; for(Point p =
+						 * XR.startPoint(k); p != XR.endPoint(k); p =
+						 * XR.next(p)){ if(mPoint2Type.get(p).equals("P")){
+						 * if(!checkExclusiveItemsAtPoints(pickup, p)) {
+						 * checkConflict = false; break; } } }
+						 * if(!checkConflict) continue;
+						 */
+
+						Vehicle vh = getVehicle(k - 1);
+						String vehicleCode = vh.getCode();// externalVehicles[k
+															// - vehicles.length
+															// - 1].getCode();
+						/*
+						log(name()
+								+ "::greedyConstructMaintainConstraintFTL NO internal vehicle for point "
+								+ i + " --> TRY external vehicle "
+								+ vh.getCode() + ", cap = " + vh.getWeight());
+						*/
 						String pickupLocation = mPoint2LocationCode.get(pickup);
 						String deliveryLocation = mPoint2LocationCode
 								.get(delivery);
@@ -2225,11 +2537,14 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 						// ||
 						// !mPoint2PossibleVehicles.get(delivery).contains(k))
 						// continue;
-						if (mVehicle2NotReachedLocations.get(vehicleCode)
-								.contains(pickupLocation)
-								|| mVehicle2NotReachedLocations
-										.get(vehicleCode).contains(
-												deliveryLocation))
+						// if (mVehicle2NotReachedLocations.get(vehicleCode)
+						// .contains(pickupLocation)
+						// || mVehicle2NotReachedLocations
+						// .get(vehicleCode).contains(
+						// deliveryLocation))
+						// continue;
+						if (!vehicleCanGoToPoint(vh, pickup)
+								|| !vehicleCanGoToPoint(vh, delivery))
 							continue;
 
 						for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
@@ -2256,6 +2571,11 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 							for (Point d = p; d != XR.endPoint(k); d = XR
 									.next(d)) {
 
+								if (!checkExclusiveItemAddPoint2Route(XR, k,
+										pickup, p, delivery, d)) {
+									continue;
+								}
+
 								okExclusiveItems = true;
 								for (Point tp = XR.startPoint(k); tp != XR
 										.next(d); tp = XR.next(tp)) {
@@ -2278,6 +2598,17 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 										.next(tmp)) {
 									if (nwm.getWeight(pickup)
 											+ awn.getSumWeights(tmp) > cap[k - 1]) {
+										/*
+										log(name()
+												+ "::greedyConstructMaintainConstraintFTL NO internal vehicle for point "
+												+ i
+												+ " --> TRY external vehicle "
+												+ vh.getCode() + ", cap = "
+												+ vh.getWeight()
+												+ " NOT-POSSIBLE demand = "
+												+ nwm.getWeight(pickup)
+												+ ", cap[k-1] = " + cap[k - 1]);
+										*/
 										ok = false;
 										break;
 									}
@@ -2292,7 +2623,18 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 
 								int e_o = evaluateNewOrderLoad(k, pickup, p,
 										delivery, d);
-
+								/*
+								log(name()
+										+ "::greedyConstructMaintainConstraintFTL NO internal vehicle for point "
+										+ i + " --> TRY external vehicle "
+										+ vh.getCode() + ", cap = "
+										+ vh.getWeight() + ", pickup = "
+										+ pickup.ID + ", p = " + p.ID
+										+ ", delivery = " + delivery.ID
+										+ ", d = " + d.ID
+										+ ", timeConstraint ec = " + ec
+										+ ", route = " + XR.toStringRoute(k));
+								*/
 								// System.out.println("consider i = " + i
 								// + ", vehicle k = " + k + ", pickup = "
 								// + pickup.ID + ", delivery = "
@@ -2329,7 +2671,21 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 							}
 						}
 					}
-
+					if (sel_k < 0) {
+						/*
+						log(name()
+								+ "::greedyConstructMaintainConstraintFTL NO external vehicle for point "
+								+ i);
+						*/
+					}
+				}
+				if (sel_i < 0) {
+					/*
+					log(name()
+							+ "::greedyConstructMaintainConstraintFTL NOT POSSIBLE for point "
+							+ i + ", delivery location = "
+							+ mPoint2LocationCode.get(delivery));
+					*/
 				}
 
 			}
@@ -2337,7 +2693,42 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				mgr.performAddOnePoint(sel_delivery, sel_d);
 				mgr.performAddOnePoint(sel_pickup, sel_p);
 				propagateArrivalDepartureTime(sel_k, true);
+				log(name() + "::greedyConstructMaintainConstraintFTL, performAddOnePoint sel_pickup = "
+									+ sel_pickup.ID + ", sel_p = " + sel_p.ID
+									+ ", sel_delivery = " + sel_delivery.ID
+									+ ", sel_d = " + sel_d.ID + ", XR[" + sel_k + "] = " + XR.toStringRoute(sel_k));
+				
+				if(!checkExclusiveItemsAtAPoint(sel_pickup)){
+					log(name() + "::greedyConstructMaintainConstraintFTL checkConflictItemsAtPoint(" + sel_pickup.ID + 
+							") BUG???");
+				}
+				if(sel_pickup.ID == 178){
+					String ic = "";
+					for(int ii: mPoint2IndexItems.get(sel_pickup)){
+						Item I = items.get(ii);
+						ic += "[" + I.getCode() + ", orderID " + I.getOrderId() + "], ";
+					}
+					log(name() + "::greedyConstructMaintainConstraintFTL, items at point 178 = " + ic);
+				}
+				
+				if (!checkAllSolution(XR)) {
+					System.out
+							.println(name()
+									+ "::greedyConstructMaintainConstraintFTL, after performAddOnePoint sel_pickup = "
+									+ sel_pickup.ID + ", sel_p = " + sel_p.ID
+									+ ", sel_delivery = " + sel_delivery.ID
+									+ ", sel_d = " + sel_d.ID
+									+ ", checkAllSolution FAILED, XR = "
+									+ XR.toString());
 
+					log(name()
+							+ "::greedyConstructMaintainConstraintFTL, after performAddOnePoint sel_pickup = "
+							+ sel_pickup.ID + ", sel_p = " + sel_p.ID
+							+ ", sel_delivery = " + sel_delivery.ID
+							+ ", sel_d = " + sel_d.ID
+							+ ", checkAllSolution FAILED, XR = "
+							+ XR.toString());
+				}
 				// log.println("add delivery " + sel_delivery.ID + " after "+
 				// sel_d.ID +
 				// " AND pickup " + sel_pickup.ID + " after " + sel_p.ID);
@@ -2371,16 +2762,26 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 
 			} else {
 				System.out.println("Cannot schedule any more, BREAK");
+				log(name()
+						+ "::greedyConstructMaintainConstraintFTL NO MOVE BREAK");
 				break;
 
 			}
 		}
-
+		if (!checkAllSolution(XR)) {
+			System.out
+					.println(name()
+							+ "::greedyConstructMaintainConstraintFTL FINIHSED BUT FAILED, XR = "
+							+ XR.toString());
+		}
 		if (cand.size() > 0) {
 			// return list of un-scheduled items
 			System.out.println("number of unscheduled items is " + cand.size());
 
 		}
+		log(name()
+				+ "::greedyConstructMaintainConstraintFTL FINISHED, REMAIN cand = "
+				+ cand.size());
 		// finalizeLog();
 		return cand;
 	}
@@ -2722,6 +3123,8 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		Point t = new Point(nextPointID + 1);
 		allPoints.add(s);
 		allPoints.add(t);
+		mPoint2Type.put(s, "S");
+		mPoint2Type.put(t, "T");
 
 		mPoint2Demand.put(s, 0.0);
 		mPoint2Demand.put(t, 0.0);
@@ -2758,17 +3161,17 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			Point p = trip.seqPoints.get(i);
 			log(name() + "::createNewVarRouteFromTrip, addOnePoint(p = " + p.ID
 					+ ")");
-			System.out.println(name()
-					+ "::createNewVarRouteFromTrip, addOnePoint(p = " + p.ID
-					+ ")");
+			// System.out.println(name()
+			// + "::createNewVarRouteFromTrip, addOnePoint(p = " + p.ID
+			// + ")");
 			new_mgr.performAddOnePoint(p, curPoint);
 			curPoint = p;
 
 			log(name() + "::createNewVarRouteFromTrip, removeOnePoint(p = "
 					+ p.ID + ") from old route");
-			System.out.println(name()
-					+ "::createNewVarRouteFromTrip, removeOnePoint(p = " + p.ID
-					+ ") from old route");
+			// System.out.println(name()
+			// + "::createNewVarRouteFromTrip, removeOnePoint(p = " + p.ID
+			// + ") from old route");
 			// remove p from old VarRoute
 			oldMGR.performRemoveOnePoint(p);
 		}
@@ -2783,17 +3186,58 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			VehicleTrip trip) {
 		// remove pickup and delivery for its current routes and re-insert them
 		// into new trip
-		System.out.println(name() + "::performMoveMergeTrip START");
 		Point sel_p = null;
 		Point sel_d = null;
+
+		VarRoutesVR XR = mTrip2VarRoute.get(trip);
+		if(XR == null){
+			System.out.println(name() + "::performMoveMergeTrip, XR NULL, BUG????");
+		}
+		
+		trip.setSolver(this);
+		int k = XR.route(pickup);
 		mgr.performRemoveOnePoint(pickup);
 		mgr.performRemoveOnePoint(delivery);
-		double min_e = Integer.MAX_VALUE;
-		for (int i = 0; i < trip.seqPoints.size(); i++) {
-			Point p = trip.seqPoints.get(i);
-			for (int j = i; j < trip.seqPoints.size(); j++) {
-				Point d = trip.seqPoints.get(j);
+		propagateArrivalDepartureTime(XR, k, false);
 
+		System.out.println(name() + "::performMoveMergeTrip START, pickup = "
+				+ pickup.ID + ", delivery = " + delivery.ID + ", trip = "
+				+ trip.seqPointString());
+		System.out.println(name() + "::performMoveMergeTrip, XR of trip = "
+				+ XR.toString());
+
+		double min_e = Integer.MAX_VALUE;
+		// for (int i = 0; i < trip.seqPoints.size(); i++) {
+		// Point p = trip.seqPoints.get(i);
+		// for (int j = i; j < trip.seqPoints.size(); j++) {
+		// Point d = trip.seqPoints.get(j);
+		Point fp = trip.seqPoints.get(0);
+		k = XR.route(fp);
+
+		for (Point p = XR.prev(fp); p != XR.endPoint(k); p = XR.next(p)) {
+			for (Point d = p; d != XR.endPoint(k); d = XR.next(d)) {
+				// int k = XR.route(p);
+				// System.out.println(name() +
+				// "::performMoveMergeTrip, BEGIN CHECK EXCLUSIVE");
+				boolean ok = checkExclusiveItemAddPoint2Route(XR, k, pickup, p,
+						delivery, d);
+				// System.out.println(name() +
+				// "::performMoveMergeTrip, END CHECK EXCLUSIVE, OK = " + ok);
+
+				if (!ok)
+					continue;
+				else {
+					if (pickup.ID == 18 && delivery.ID == 19) {
+						System.out
+								.println(name()
+										+ "::performMoveMergeTrip, pickup = "
+										+ pickup.ID
+										+ ", delivery = "
+										+ delivery.ID
+										+ ", After checkExclusiveItemAddPoint2Route --> ACCEPT p = "
+										+ p.ID + ", d = " + d.ID);
+					}
+				}
 				if (mPoint2Type.get(p).equals("D") && awn.getSumWeights(p) > 0) {
 					// cannot pickup any more if there are still items
 					// on the vehicle
@@ -2807,6 +3251,12 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 					continue;
 				}
 
+				double ec = evaluateTimeViolationsAddTwoPoints(k, pickup, p,
+						delivery, d);
+				
+				if (ec > 0)
+					continue;
+
 				double e = cost.evaluateAddTwoPoints(pickup, p, delivery, d);
 				if (e < min_e) {
 					min_e = e;
@@ -2815,17 +3265,49 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				}
 			}
 		}
-		mgr.performAddOnePoint(delivery, sel_d);
-		mgr.performAddOnePoint(pickup, sel_p);
+		if (sel_p == null) {
+			System.out.println(name()
+					+ "::performMoveMergeTrip, sel_p = NULL BUG???");
+		} else {
+			System.out.println(name() + "::performMoveMergeTrip, sel_p = "
+					+ sel_p.ID + ", sel_d = " + sel_d.ID);
+			mgr.performAddOnePoint(delivery, sel_d);
+			mgr.performAddOnePoint(pickup, sel_p);
+			propagateArrivalDepartureTime(XR, k, false);
+			
+			if (!checkTimeConstraint(XR)) {
+				System.out.println(name() + "::performMoveMergeTrip, vehicle[" + k + "," + getVehicle(k-1).getCode() + "], sel_p = "
+						+ sel_p.ID + ", sel_d = " + sel_d.ID
+						+ ", checkTimeConstraint FAILED");
+				log(name() + "::performMoveMergeTrip, vehicle[" + k + "," + getVehicle(k-1).getCode() + "], sel_p = "
+						+ sel_p.ID + ", sel_d = " + sel_d.ID
+						+ ", checkTimeConstraint FAILED");
+				log(printRouteAndTime(XR, k));
+
+			}
+		}
+		
+		if(!checkAllSolution(XR)){
+			log(name() + "::performMoveMergeTrip, AFTER MERGE, checkAllSolution FAILED, BUG????");
+		}
 	}
 
 	public boolean improveMergeTrip() {
-		System.out.println(name() + "::improveMergeTrip START");
-		VehicleTripCollection tripCollection = analyzeTrips();
+		//System.out.println(name() + "::improveMergeTrip START");
+		VehicleTripCollection tripCollection = analyzeTrips(XR);
 		ArrayList<VehicleTrip> trips = tripCollection.trips;
+		
 		int n = trips.size();
 		int[] X = new int[n];
 		int[] Y = new int[n];
+		System.out.println(name() + "::improveMergeTrip START, nbTrips = " + n);
+		log(name() + "::improveMergeTrip START, nbTrips = " + n);
+		for(int i = 0; i < trips.size(); i++){
+			if(mTrip2VarRoute.get(trips.get(i)) == null){
+				log(name() + "::improveMergeTrip START, nbTrips = " + n + ", BUG??? trip has no varRoute");
+				System.out.println(name() + "::improveMergeTrip START, nbTrips = " + n + ", BUG??? trip has no varRoute");
+			}
+		}
 		ArrayList<Integer> l_edgeX = new ArrayList<Integer>();
 		ArrayList<Integer> l_edgeY = new ArrayList<Integer>();
 
@@ -2862,17 +3344,22 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 									+ "::improveMergeTrip, MaxCap = " + maxCap
 									+ ", DETECT MATCH (" + i + "," + j + ")"
 									+ " trip ["
-									+ trips.get(i).vehicle.getCode()
+									+ trips.get(i).vehicle.getCode() + ", "
+									+ trips.get(i).seqPointString()
 									+ " amount " + trips.get(i).load + "] TO "
-									+ trips.get(j).vehicle.getCode());
+									+ trips.get(j).vehicle.getCode() + ", "
+									+ trips.get(j).seqPointString());
 
 						}
 						System.out.println(name()
-								+ "::improveMergeTrip, DETECT MATCH (" + i
-								+ "," + j + ")" + " trip ["
-								+ trips.get(i).vehicle.getCode() + " amount "
-								+ trips.get(i).load + "] TO "
-								+ trips.get(j).vehicle.getCode());
+								+ "::improveMergeTrip, MaxCap = " + maxCap
+								+ ", DETECT MATCH (" + i + "," + j + ")"
+								+ " trip [" + trips.get(i).vehicle.getCode()
+								+ ", " + trips.get(i).seqPointString()
+								+ " amount " + trips.get(i).load + "] TO "
+								+ trips.get(j).vehicle.getCode() + ", "
+								+ trips.get(j).seqPointString());
+
 					}
 				}
 			}
@@ -2916,8 +3403,14 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			Point delivery = tripi.seqPoints.get(1);
 
 			VehicleTrip tripj = trips.get(solY[i]);
-
+			log(name() + "::improveMergeTrip START, nbTrips = " + n + ", solY[" + i + "] = " + solY[i]);
+			System.out.println(name() + "::improveMergeTrip START, nbTrips = " + n + ", solY[" + i + "] = " + solY[i]);
+			if(mTrip2VarRoute.get(tripj) == null){
+				log(name() + "::improveMergeTrip START, nbTrips = " + n + ", solY[" + i + "] = " + solY[i] + ", EXCEPTION, Trip has no VVARROUTE");
+				System.out.println(name() + "::improveMergeTrip START, nbTrips = " + n + ", solY[" + i + "] = " + solY[i] + ", EXCEPTION, Trip has no VVARROUTE");
+			}
 			performMoveMergeTrip(pickup, delivery, tripj);
+			
 			if (log != null) {
 				log.println(name() + "::improveMergeTrip, SUCCESSFULLY");
 			}
@@ -2926,6 +3419,155 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		return ok;
 	}
 
+	public void logStateAfterSplittingOrder() {
+		log(name() + "::logStateAfterSplittingOrder");
+		for (int k = 0; k < vehicles.length; k++) {
+			if (trips[k].size() > 0) {
+				log("internal trips[" + k + ", code = "
+						+ getVehicle(k).getCode() + "].sz = " + trips[k].size());
+				for (int j = 0; j < trips[k].size(); j++) {
+					Trip t = trips[k].get(j);
+					log(t.toString());
+					if(!t.checkTime()){
+						log(name() + "::logStateAfterSplittingOrder, TRIP VIOLATIONS TIME ?????????????");
+					}else{
+						log(name() + "::logStateAfterSplittingOrder, TRIP TIME OK");
+					}
+						
+					log("--------------------------------------------------");
+				}
+			}
+		}
+		for (int k = 0; k < externalVehicles.length; k++) {
+			int k1 = k + vehicles.length;
+			if (trips[k1].size() > 0) {
+				log("external trips[" + k1 + ", code = "
+						+ getVehicle(k1).getCode() + "].sz = "
+						+ trips[k1].size());
+				for (int j = 0; j < trips[k1].size(); j++) {
+					Trip t = trips[k1].get(j);
+					log(t.toString());
+				}
+				log("--------------------------------------------------");
+			}
+		}
+
+		log(name() + "::logStateAfterSplittingOrder --> REMAIN request");
+		for (int i = 0; i < distinct_deliveryLocationCodes.size(); i++) {
+			String lc = distinct_deliveryLocationCodes.get(i);
+			log("Location " + lc);
+			double W = 0;
+			for (int j : distinct_request_indices.get(i)) {
+				PickupDeliveryRequest r = requests[j];
+				log("OrderID" + r.getOrderID());
+				for (int k = 0; k < r.getItems().length; k++) {
+					log("[Item " + r.getItems()[k].getCode() + ", weight "
+							+ r.getItems()[k].getWeight() + "]");
+					W += r.getItems()[k].getWeight();
+				}
+			}
+			log("total weight at location " + lc + " = " + W);
+			log("------------------------");
+		}
+		for(int k = 0; k < vehicles.length; k++){
+			log("Internal Vehicle " + vehicles[k].getCode() + ", cap = " + vehicles[k].getWeight());
+		}
+		for(int i = 0; i < input.getVehicleCategories().length; i++){
+			log("VehicleCategory " + input.getVehicleCategories()[i].getVehicleCategory() + ", cap = " + input.getVehicleCategories()[i].getWeight());
+		}
+		log(name()
+				+ "::logStateAfterSplittingOrder-----------------------------------------------------------------------");
+	}
+
+	public void logStateAfterMergingFTLOrder() {
+		log(name() + "::logStateAfterMergingFTLOrder");
+		for (int k = 0; k < vehicles.length; k++) {
+			if (trips[k].size() > 0) {
+				log("internal trips[" + k + ", code = "
+						+ getVehicle(k).getCode() + "].sz = " + trips[k].size());
+				for (int j = 0; j < trips[k].size(); j++) {
+					Trip t = trips[k].get(j);
+					log(t.toString());
+					if(!t.checkTime()){
+						log(name() + "::logStateAfterMergingFTLOrder, TRIP VIOLATIONS TIME ?????????????");
+					}else{
+						log(name() + "::logStateAfterMergingFTLOrder, TRIP TIME OK");
+					}
+				}
+				log("--------------------------------------------------");
+			}
+		}
+		for (int k = 0; k < externalVehicles.length; k++) {
+			int k1 = k + vehicles.length;
+			if (trips[k1].size() > 0) {
+				log("external trips[" + k1 + ", code = "
+						+ getVehicle(k1).getCode() + "].sz = "
+						+ trips[k1].size());
+				for (int j = 0; j < trips[k1].size(); j++) {
+					Trip t = trips[k1].get(j);
+					log(t.toString());
+				}
+				log("--------------------------------------------------");
+			}
+		}
+		log(name() + "::logStateAfterMergingFTLOrder --> REMAIN request");
+		for (int i = 0; i < distinct_deliveryLocationCodes.size(); i++) {
+			String lc = distinct_deliveryLocationCodes.get(i);
+			log("Location " + lc);
+			double W = 0;
+			for (int j : distinct_request_indices.get(i)) {
+				PickupDeliveryRequest r = requests[j];
+				log("OrderID" + r.getOrderID());
+				for (int k = 0; k < r.getItems().length; k++) {
+					log("[Item " + r.getItems()[k].getCode() + ", weight "
+							+ r.getItems()[k].getWeight() + "]");
+					W += r.getItems()[k].getWeight();
+				}
+			}
+			log("total weight at location " + lc + " = " + W);
+			log("------------------------");
+		}
+
+		log(name()
+				+ "::logStateAfterMergingFTLOrder-----------------------------------------------------------------------");
+	}
+
+	public int countItems(PickupDeliveryRequest[] R){
+		int c = 0;
+		for(int i = 0; i < R.length; i++){
+			c += R[i].getItems().length;
+		}
+		return c;
+	}
+	public String analyzeInputConsistency(){
+		String s = "";
+		HashSet<String> itemCodes = new HashSet<String>();
+		boolean ok = true;
+		for(int i = 0; i < input.getRequests().length; i++){
+			PickupDeliveryRequest r = input.getRequests()[i];
+			Item[] I = r.getItems();
+			for(int j = 0; j < I.length; j++){
+				if(itemCodes.contains(I[j].getCode())){
+					s = "Duplicate item code " + I[j].getCode(); ok = false;
+				}else{
+					itemCodes.add(I[j].getCode());
+				}
+			}
+			for(int j1 = 0; j1 < I.length-1; j1++)
+				for(int j2 = j1+1; j2 < I.length; j2++){
+					int idx1 = mItem2Index.get(I[j1]);
+					int idx2 = mItem2Index.get(I[j2]);
+					if(itemConflict[idx1][idx2]){
+						s = s + "Order " + r.getOrderCode() + " has conflict items " + I[j1].getCode() + "-" + 
+					I[j2].getCode() + ",";
+						ok = false;
+					}
+				}
+		}
+		if(ok) s = "OK";
+		s = "INPUT ERROR: " + s;
+		return s;
+	}
 	public PickupDeliverySolution computeVehicleSuggestion(
 			BrennTagPickupDeliveryInput input) {
 		initializeLog();
@@ -2942,15 +3584,27 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 
 		// compute total weight of orders for estimation
 		double totalItemWeights = 0;
+		int nbItems = 0;
+		HashSet<String> itemCodes = new HashSet<String>();
 		if (input.getRequests() != null)
 			for (int i = 0; i < input.getRequests().length; i++) {
 				if (input.getRequests()[i].getItems() != null)
+					log(name() + "::computeVehicleSuggestion, Order " + input.getRequests()[i].getOrderCode());
 					for (int j = 0; j < input.getRequests()[i].getItems().length; j++) {
-						totalItemWeights += input.getRequests()[i].getItems()[j]
-								.getWeight();
+						Item I = input.getRequests()[i].getItems()[j];
+						if(itemCodes.contains(I.getCode())){
+							log(name() + "::computeVehicleSuggestion, ITEM_CODE EXIST??????");
+						}else{
+							itemCodes.add(I.getCode());
+						}
+						totalItemWeights += I.getWeight();
+						nbItems++;
+						log(name() + "::computeVehicleSuggestion, item " + input.getRequests()[i].getItems()[j].getCode());
 					}
 			}
-
+		log(name() + "::computeVehicleSuggestion, nbItems = " + nbItems + ", nbOrders = " + input.getRequests().length);
+		
+		
 		int totalVehicleCategoryWeight = 0;
 		if (input.getVehicleCategories() != null)
 			for (int i = 0; i < input.getVehicleCategories().length; i++) {
@@ -2973,6 +3627,18 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		double lastRemainItemWeight = -1;
 		boolean firstTrial = true;
 		// boolean firstTrial = false;
+		Gson gson = new Gson();
+		String jsoninput = gson.toJson(input);
+		PickupDeliveryRequest[] bkReq = new PickupDeliveryRequest[input.getRequests().length];
+		for(int i = 0; i < input.getRequests().length; i++){
+			bkReq[i] = input.getRequests()[i].clone();
+			Item[] I = new Item[input.getRequests()[i].getItems().length];
+			for(int j = 0; j < input.getRequests()[i].getItems().length; j++)
+				I[j] = input.getRequests()[i].getItems()[j].clone();
+			bkReq[i].setItems(I);
+		}
+		
+		
 		while (true) {
 			if (firstTrial) {
 				generateVehicles(input, rep);
@@ -2980,14 +3646,27 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			} else {
 				generateVehicles(input, 1);
 			}
-
+			PickupDeliveryRequest[] usedReq = new PickupDeliveryRequest[input.getRequests().length];
+			for(int i = 0; i < bkReq.length; i++){
+				usedReq[i] = bkReq[i].clone();
+				Item[] I = new Item[bkReq[i].getItems().length];
+				for(int j = 0; j < bkReq[i].getItems().length; j++)
+					I[j] = bkReq[i].getItems()[j].clone();
+				usedReq[i].setItems(I);
+			}
+			
+			input.setRequests(usedReq);
 			this.input = input;
-			this.requests = input.getRequests();
+			this.input.setRequests(usedReq);
+			
+			this.requests = usedReq;//input.getRequests();
 			this.vehicles = input.getVehicles();
 			this.distances = input.getDistances();
 			this.travelTimes = input.getTravelTime();
 			this.externalVehicles = input.getExternalVehicles();
 
+			log(name() + "::::computeVehicleSuggestion, CountItems of Requests = " + countItems(bkReq));
+			
 			mRequest2Index = new HashMap<PickupDeliveryRequest, Integer>();
 
 			for (int i = 0; i < requests.length; i++) {
@@ -2999,11 +3678,25 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				}
 				System.out.println("W = " + W);
 			}
+			
 			initMapData();
 			initItemVehicleConflicts();
 			// initDistanceTravelTime();
 
+			/*
+			String inputOK = analyzeInputConsistency();
+			if(!inputOK.equals("OK")){
+				PickupDeliverySolution sol =  new PickupDeliverySolution();
+				sol.setDescription(inputOK);
+				return sol;
+			}
+			*/
+			
+			
 			processSplitOrders();
+			processDistinctPickupDeliveryLocationCodes();
+
+			logStateAfterSplittingOrder();
 
 			if (log != null) {
 				log.println(name()
@@ -3013,12 +3706,11 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 						+ getTotalItemWeight());
 			}
 
-			processDistinctPickupDeliveryLocationCodes();
-
 			System.out.println("BEFORE MERGE FTL");
 			printRequestsOfDistinctLocations();
 
 			processMergeOrderItemsFTL();
+			logStateAfterMergingFTLOrder();
 
 			if (log != null) {
 				log.println(name()
@@ -3043,9 +3735,17 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 						if (log != null)
 							log.println("Vehicle " + vh.getCode() + ", trips "
 									+ trips[k].get(i).toString());
+
+						if (!checkConflictItemsOnTrip(trips[k].get(i))) {
+							System.out
+									.println(name()
+											+ "::computeVehicleSuggestion, RESULT of init Split and Merge FTL FAILED");
+						}
 					}
+
 				}
 			}
+
 			System.out.println("AFTER merge FTL");
 			printRequestsOfDistinctLocations();
 			/*
@@ -3065,6 +3765,12 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			mapData();
 
 			HashSet<Integer> remainUnScheduled = search();
+			if (!checkAllSolution(XR)) {
+				System.out
+						.println(name()
+								+ "::computeVehicleSuggestion, checkAllSolution after search FAILED");
+			}
+
 			unScheduledPointIndices = new HashSet<Integer>();
 			for (int i : remainUnScheduled)
 				unScheduledPointIndices.add(i);
@@ -3098,7 +3804,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		mapRoute2Vehicles(scheduled_vehicle);
 		// analyzeTrips();
 
-		VehicleTripCollection VTC_trip = analyzeTrips();
+		VehicleTripCollection VTC_trip = analyzeTrips(XR);
 		log(name()
 				+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS, XR = "
 				+ XR.toString());
@@ -3112,27 +3818,67 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		for (int i = 0; i < VTC_trip.trips.size(); i++)
 			System.out.println("TRIP[" + i + "]: "
 					+ VTC_trip.trips.get(i).seqPointString());
+		if (!checkAllSolution(XR)) {
+			System.out
+					.println(name()
+							+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION FAILED");
+			log(name()
+					+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION FAILED");
+		} else {
+			System.out
+					.println(name()
+							+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION OK!!!!!!!!!!");
+			log(name()
+					+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION OK!!!!!!!!!! , route and time as follows");
+			for(int k = 1; k <= XR.getNbRoutes(); k++){
+				log(name()
+						+ "::computeVehicleSuggestion " + printRouteAndTime(XR, k));
+			}
+			if(!checkTimeConstraint(XR)){
+				log(name()
+						+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS TIME-CONSTRAINT FAILED, BUG???");
+			}
+
+		}
 		System.out
 				.println("----------------------------------------------------------");
 
 		improveMergeTrip();
 
-		VehicleTripCollection VTC = analyzeTrips();
+		VehicleTripCollection VTC = analyzeTrips(XR);
 
 		ArrayList<ModelRoute> modelRoutes = extractAndAssignNewVehicle(VTC);
 
 		if (log != null) {
 			log.println(name()
 					+ "::computeVehicleSuggestion, AFTER IMPROVE BY MERGE TRIPS----------------");
-			analyzeTrips();
+			analyzeTrips(XR);
 		}
 		// int[] scheduled_vehicle = new int[XR.getNbRoutes()];
 		// for(int k = 0; k < XR.getNbRoutes(); k++) scheduled_vehicle[k] = k;
 
-		if (!checkAllSolution()) {
-			System.out.println("BUG??????????????????????????????????");
+		boolean solutionAllOK = true;
+		if (!checkAllSolution(XR)) {
+			System.out
+					.println(name()
+							+ "::computeVehicleSuggestion --> BUG??????????????????????????????????");
+			solutionAllOK = false;
+		}
+		for (ModelRoute mr : modelRoutes) {
+			if (!checkAllSolution(mr.XR)) {
+				System.out
+						.println(name()
+								+ "::computeVehicleSuggestion --> BUG extended XR ??????????????????????????????????");
+				solutionAllOK = false;
+			}
 		}
 
+		if (log != null) {
+			log.println("origin route = " + printRouteAndTime(XR));
+			for (ModelRoute mr : modelRoutes) {
+				log.println("extended route = " + printRouteAndTime(mr.XR));
+			}
+		}
 		// PickupDeliverySolution sol = buildSolution(scheduled_vehicle,
 		// remainUnScheduled);
 
@@ -3153,7 +3899,8 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 							+ "::computeVehicleSuggestion, APPEND solution route, sz = "
 							+ sol.getRoutes().length);
 		}
-
+		
+		
 		ArrayList<PickupDeliveryRequest> list_UnScheduledRequests = new ArrayList<PickupDeliveryRequest>();
 		for (int i : unScheduledPointIndices) {
 			String description = "";
@@ -3192,10 +3939,81 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 							+ vehicles.length));
 		}
 
+		log(name() + "::computeVehicleSuggestion, FINAL RESULT");
+		int nbScheduledItems = 0;
+		
+		for(int i = 0; i < sol.getRoutes().length; i++){
+			RoutingSolution rs = sol.getRoutes()[i];
+			log(name() + "::computeVehicleSuggestion, route[" + i + "]");
+			for(int j = 0; j < rs.getElements().length; j++){
+				RoutingElement e = rs.getElements()[j];
+				if(e.getItems() != null)
+					nbScheduledItems += e.getItems().length;
+				log(name() + "::computeVehicleSuggestion, description = " + e.getDescription());
+			}			
+		}
+		log(name() + "::computeVehicleSuggestion, nbScheduledItems = " + nbScheduledItems);
+		for(int i = 0; i < sol.getRoutes().length; i++){
+			RoutingSolution rs = sol.getRoutes()[i];
+			log(name() + "::computeVehicleSuggestion, scheduled vehicle " + rs.getVehicle().getCode() + ", " + rs.getVehicle().getWeight());
+		}
+		
+		reassignVehiclePrioritizeInternalVehicles(sol);
+		
 		finalizeLog();
+		if (!solutionAllOK)
+			sol.setDescription("KO");
+		else
+			sol.setDescription("OK");
+
 		return sol;
 	}
-
+	public void reassignVehiclePrioritizeInternalVehicles(PickupDeliverySolution sol){
+		HashSet<Vehicle> notUsedVehicles = new HashSet<Vehicle>();// internal vehicles not-used
+		HashSet<Vehicle> usedVehicles = new HashSet<Vehicle>();// internal vehicles used
+		
+		for(int i = 0; i < vehicles.length; i++) notUsedVehicles.add(vehicles[i]);
+		
+		for(int i = 0; i < sol.getRoutes().length; i++){
+			RoutingSolution rs = sol.getRoutes()[i];
+			if(notUsedVehicles.contains(rs.getVehicle())){
+				notUsedVehicles.remove(rs.getVehicle());
+				usedVehicles.add(rs.getVehicle());
+			}
+		}
+		for(Vehicle vh: notUsedVehicles){
+			log(name() + "::computeVehicleSuggestion, NOT-USED-VEHICLE " + vh.getCode() + ", " + vh.getWeight());
+		}
+		for(int i = 0; i < sol.getRoutes().length; i++){
+			RoutingSolution rs = sol.getRoutes()[i];
+			Vehicle vh = rs.getVehicle();
+			if(!usedVehicles.contains(vh)){
+				for(Vehicle ivh: notUsedVehicles){
+					if(equalVehicle(vh, ivh)){
+						usedVehicles.add(ivh);
+						notUsedVehicles.remove(ivh);
+						rs.setVehicle(ivh);
+						log(name() + "::computeVehicleSuggestion, REPLACE [" + vh.getCode() + "," + vh.getWeight() + "] by"
+								+ "  [" + ivh.getCode() + "," + ivh.getWeight());
+						break;
+					}
+				}
+			}
+		}
+		log(name() + "::computeVehicleSuggestion, AFTER REPLACE");
+		for(Vehicle vh: notUsedVehicles){
+			log(name() + "::computeVehicleSuggestion, NOT-USED-VEHICLE " + vh.getCode() + ", " + vh.getWeight());
+		}
+		
+	
+	}
+	public boolean equalVehicle(Vehicle v1, Vehicle v2){
+		return Math.abs(v1.getWeight() - v2.getWeight()) < 0.1 
+				&& v1.getStartWorkingTime().equals(v2.getStartWorkingTime())
+				&& v1.getEndWorkingTime().equals(v2.getEndWorkingTime()) 
+				&& v1.getStartLocationCode().equals(v2.getStartLocationCode())
+				&& v1.getEndLocationCode().equals(v2.getEndLocationCode());
+	}
 	public void collectUsedVehicles(VehicleTripCollection VTC) {
 		ArrayList<VehicleTrip> trips = VTC.trips;
 		usedInternalVehicles = new HashSet<Vehicle>();
@@ -3235,9 +4053,10 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 					VarRoutesVR newXR = createNewVarRouteFromTrip(trip, vh);
 					mPoint2Vehicle.put(newXR.startPoint(1), vh);
 					propagateArrivalDepartureTime(newXR, false);
-					log(name()	+ "::extractAndAssignNewVehicle, Find and Assign new Vehicle newXR = "
-								+ newXR.toString());
-					
+					log(name()
+							+ "::extractAndAssignNewVehicle, Find and Assign new Vehicle newXR = "
+							+ newXR.toString());
+
 					System.out
 							.println(name()
 									+ "::extractAndAssignNewVehicle, Find and Assign new Vehicle newXR = "
@@ -3295,114 +4114,6 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				+ "::extractAndAssignNewVehicle FINISHED, collect "
 				+ modelRoutes.size() + " new routes");
 		return modelRoutes;
-	}
-
-	public VehicleTripCollection analyzeTrips() {
-		ArrayList<VehicleTrip> trips = new ArrayList<VehicleTrip>();
-		HashMap<VehicleTrip, Integer> mTrip2Route = new HashMap<VehicleTrip, Integer>();
-		mTrip2VarRoute = new HashMap<VehicleTrip, VarRoutesVR>();
-
-		System.out.println(name() + "::analyzeTrips, XR = "
-				+ XR.toStringShort());
-		if (log != null) {
-			log.println(name()
-					+ "::analyzeTrips-----------------------------------------------------------------------------");
-			for (int k = 1; k <= XR.getNbRoutes(); k++) {
-				if (XR.next(XR.startPoint(k)) == XR.endPoint(k))
-					continue;
-				Point s = XR.startPoint(k);
-				Vehicle vh = mPoint2Vehicle.get(s);
-				log.println("Vehicle[" + k + "] code = " + vh.getCode());
-				for (Point p = s; p != XR.endPoint(k); p = XR.next(p)) {
-					log.println("POINT " + mPoint2LocationCode.get(p)
-							+ ", type = " + mPoint2Type.get(p) + ", load = "
-							+ mPoint2Demand.get(p));
-				}
-			}
-		}
-		/*
-		 * int r_index = getRouteIndex("60C-242.61"); int pi =
-		 * getPickupPointIndex("60007742"); Point pickup = pickupPoints.get(pi);
-		 * Point delivery = deliveryPoints.get(pi); int delta_time =
-		 * getTimeViolationsWhenInsert(pickup, delivery, r_index); boolean
-		 * okconflictitem = feasibleMoveConflictItems(pickup, delivery,
-		 * r_index); boolean okconflictlocation =
-		 * feaisbleMoveConflictLocation(pickup, delivery, r_index); boolean
-		 * okMove = feasibleMove(pickup, delivery, r_index);
-		 * 
-		 * System.out.println(name() + "::analyzeTrip, --> TEST delta_time = " +
-		 * delta_time + ", move conflict item = " + okconflictitem +
-		 * ", conflict location = " + okconflictlocation + ", okmove = " +
-		 * okMove);
-		 */
-
-		int nbTrips = 0;
-		for (int k = 1; k <= XR.getNbRoutes(); k++) {
-			if (XR.next(XR.startPoint(k)) == XR.endPoint(k))
-				continue;
-			Point p = XR.startPoint(k);
-
-			// if (log != null) {
-			Vehicle vh = mPoint2Vehicle.get(p);
-			if (log != null)
-				log.println(name() + "::analyzeTrips, VEHICLE " + vh.getCode());
-			p = XR.next(p);
-			Point np = XR.next(p);
-			while (p != XR.endPoint(k)) {
-				double loadPerTrip = 0;
-				double length = 0;
-				int nbLocations = 0;
-				ArrayList<Point> points = new ArrayList<Point>();
-				while (p != XR.endPoint(k)) {
-					points.add(p);
-					if (mPoint2Type.get(p).equals("D")
-							&& (mPoint2Type.get(np).equals("P")
-									|| mPoint2Type.get(np).equals("T") || np == XR
-									.endPoint(k))) {
-						break;
-					} else {
-						if (mPoint2Type.get(p).equals("P")) {
-							loadPerTrip += mPoint2Demand.get(p);
-							nbLocations += 1;
-						}
-						// System.out.println(name() + "::analyzeTrips, p = "
-						// + mPoint2LocationCode.get(p) + ", np = "
-						// + mPoint2LocationCode.get(np));
-						length += getDistance(p, np);// awm.getDistance(p,
-														// np);
-						p = np;
-						np = XR.next(np);
-					}
-				}
-				nbTrips++;
-				long dt = mPoint2DepartureTime.get(p);
-				String s_dt = DateTimeUtils.unixTimeStamp2DateTime(dt);
-
-				VehicleTrip tr = new VehicleTrip(vh, points, nbLocations,
-						loadPerTrip, length);
-				mTrip2Route.put(tr, k);
-				mTrip2VarRoute.put(tr, XR);
-				trips.add(tr);
-
-				if (log != null)
-					log.println("TRIP " + (nbTrips - 1) + ", vehicle.cap = "
-							+ vh.getWeight() + ", loadTrip = " + loadPerTrip
-							+ ", nbLocations = " + nbLocations + ", length = "
-							+ length + ", departure-time = " + s_dt);
-
-				p = np;
-				np = XR.next(np);
-			}
-			long at = mPoint2ArrivalTime.get(XR.endPoint(k));
-			if (log != null)
-				log.println("Arrival-time to END = "
-						+ DateTimeUtils.unixTimeStamp2DateTime(at));
-			if (log != null)
-				log.println("-------------------------");
-			// }
-		}
-		return new VehicleTripCollection(mTrip2Route, trips);
-
 	}
 
 	public PickupDeliverySolution computeNew(BrennTagPickupDeliveryInput input) {
@@ -3478,7 +4189,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		// int[] scheduled_vehicle = new int[XR.getNbRoutes()];
 		// for(int k = 0; k < XR.getNbRoutes(); k++) scheduled_vehicle[k] = k;
 
-		if (!checkAllSolution()) {
+		if (!checkAllSolution(XR)) {
 			System.out.println("BUG??????????????????????????????????");
 		}
 

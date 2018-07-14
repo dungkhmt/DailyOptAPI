@@ -6,8 +6,23 @@ public class PickupDeliverySolution {
 	private RoutingSolution[] routes;
 	private Item[] unScheduledItems;
 	private PickupDeliveryRequest[] unScheduledRequests;
+	private String description;
 	
-	
+	public PickupDeliverySolution(RoutingSolution[] routes,
+			Item[] unScheduledItems,
+			PickupDeliveryRequest[] unScheduledRequests, String description) {
+		super();
+		this.routes = routes;
+		this.unScheduledItems = unScheduledItems;
+		this.unScheduledRequests = unScheduledRequests;
+		this.description = description;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
 	public PickupDeliveryRequest[] getUnScheduledRequests() {
 		return unScheduledRequests;
 	}

@@ -155,20 +155,23 @@ public class OptimizeLoadTruckAssignment {
 		double t0 = System.currentTimeMillis();
 		while(true){
 			double t = System.currentTimeMillis() - t0;
-			if(t > maxTime) break;
+			//if(t > maxTime) break;
 			boolean improve = moveAssign();
 			if(!improve)
 				improve = moveSwap();
-			if(!improve) restart();
+			
+			if(!improve)	break;
+			//if(!improve) restart();
 		}
 		finalize();
+		System.out.println("OptimizeLoadTruckAssignment::solve, result = " + getSolutionString());
 		return null;
 	}
 	protected void updateBest(){
 		if(betterThan(evaluation, best_evaluation)){
 			best_evaluation = evaluation;
 			for(int i = 0; i < n; i++) best_x[i] = x[i];
-			System.out.println("updateBest evaluation = " + best_evaluation[0] + "," + evaluation[1]);
+			System.out.println("OptimizeLoadTruckAssignment::updateBest evaluation = " + best_evaluation[0] + "," + evaluation[1]);
 		}
 
 	}
@@ -201,6 +204,12 @@ public class OptimizeLoadTruckAssignment {
 			updateBest();
 		}
 		*/
+	}
+	public String getSolutionString(){
+		String s= "";
+		for(int i = 0; i < best_x.length; i++)
+			s += best_x[i] + ",";
+		return s;
 	}
 	public int[] getSolution(){
 		return best_x;

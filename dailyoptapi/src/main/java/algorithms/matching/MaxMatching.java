@@ -23,6 +23,112 @@ public class MaxMatching {
 	private int[] solX;
 	private int[] solY;// (solX[i], solY[i]) is a matching in the solution
 	
+	// mapped data
+	private int nX;
+	private int nY;
+	private boolean[][] a;// a[i][j] = T --> is edge(i,j)
+	private HashMap<Integer, Integer> mX2Index;
+	private HashMap<Integer, Integer> mY2Index;
+	
+	// data structure for backtrack search
+	private int[] Z;// Z[i] = k means that X[i] is matched with Y[k]
+	private int[] Z_best;
+	private boolean[] used;
+	private int f;
+	private int f_best;
+	private int maxTime;
+	private double t0;
+	
+	public void mapData(){
+		System.out.println(name() + "::mapData INFO");
+		System.out.print("X = "); for(int i = 0; i < X.length; i++) System.out.print(X[i] + ", "); System.out.println();
+		System.out.print("Y = "); for(int i = 0; i < Y.length; i++) System.out.print(Y[i] + ", "); System.out.println();
+		for(int k = 0; k < edgeX.length; k++) System.out.println("edge[" + k + "] = " + edgeX[k] + "," + edgeY[k]);
+		
+		nX = X.length;
+		nY = Y.length;
+		a = new boolean[nX][nY];
+		for(int i = 0; i < nX; i++)
+			for(int j = 0; j < nY; j++)
+				a[i][j] = false;
+		mX2Index = new HashMap<Integer, Integer>();
+		mY2Index = new HashMap<Integer, Integer>();
+		for(int i = 0; i < X.length; i++) mX2Index.put(X[i], i);
+		for(int i = 0; i < Y.length; i++) mY2Index.put(Y[i], i);
+		
+		for(int k = 0; k < edgeX.length; k++){
+			int i = mX2Index.get(edgeX[k]);
+			int j = mY2Index.get(edgeY[k]);
+			a[i][j] = true;
+			//a[j][i] = true;
+		}
+		//System.out.println(name() + "::mapData, a = ");
+		//for(int i = 0; i < nX; i++){
+		//	for(int j = 0; j < nY; j++)
+		//		System.out.print(a[i][j] + " ");
+		//	System.out.println();
+		//}
+			
+	}
+	private boolean check(int v, int i){
+		if(v == nY) return true;
+		return !used[v] && a[i][v];
+	}
+	private void solution(){
+		if(f > f_best){
+			
+			for(int i = 0; i < Z.length; i++)
+				Z_best[i] = Z[i];
+			f_best = f;
+			System.out.print(name()+ "::solution, f_best = " + f_best + ", Z_best = ");
+			for(int i = 0; i < Z_best.length; i++) System.out.print(Z_best[i] + ","); System.out.println();
+			
+		}
+	}
+	private void TRY(int i){
+		double t = System.currentTimeMillis() - t0;
+		if(t > maxTime) return;
+		
+		for(int v = 0; v <= nY; v++){
+			if(check(v,i)){
+				Z[i] = v;
+				used[v] = true;
+				if(v < nY) f++;
+				if( i == nX-1){
+					solution();
+				}else{
+					TRY(i+1);
+				}
+				if(v < nY) f--;
+				used[v] = false;
+			}
+		}
+	}
+	public void solveBackTrack(int maxTime){
+		this.maxTime = maxTime;
+		mapData();
+		Z = new int[nX];
+		Z_best = new int[nX];
+		f = 0;
+		f_best = -1;
+		used = new boolean[nY+1];
+		for(int v = 0; v <= nY; v++) used[v] = false;
+		t0 = System.currentTimeMillis();
+		TRY(0);
+		if(f_best > 0){
+			solX = new int[f_best];
+			solY = new int[f_best];
+			int idx = -1;
+			System.out.println(name() + "::solveBackTrack, FOUND solution");
+			for(int i = 0; i < Z_best.length; i++)
+				if(Z_best[i] < nY){
+					idx++;
+					solX[idx] = X[i];
+					solY[idx] = Y[Z_best[i]];
+					System.out.println(name() + "::solveBackTrack, FOUND solution: " + solX[idx] + " -- " + solY[idx]);
+				}
+		}
+	}
 	public String name(){
 		return "MaxMatching";
 	}
@@ -30,6 +136,9 @@ public class MaxMatching {
 		// list of points X, Y
 		// list of connection from X to Y: w[k] is the weight of (edgeX[k], edgeY[k])
 		this.X = X; this.Y = Y; this.edgeX = edgeX; this.edgeY = edgeY; this.w = w;
+		
+		solveBackTrack(5000);
+		if(true) return;
 		
 		// map Y to Y1 so that nodes are different
 		int max = 0;
