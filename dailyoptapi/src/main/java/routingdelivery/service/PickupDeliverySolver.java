@@ -72,6 +72,7 @@ import routingdelivery.smartlog.brenntag.model.ExclusiveVehicleLocation;
 import routingdelivery.smartlog.brenntag.model.ModelRoute;
 import routingdelivery.smartlog.brenntag.model.VehicleTrip;
 import routingdelivery.smartlog.brenntag.model.VehicleTripCollection;
+import routingdelivery.smartlog.brenntag.service.BrennTagRouteSolverForOneVehicle;
 import routingdelivery.smartlog.brenntag.service.ItemAmount;
 import routingdelivery.smartlog.brenntag.service.Trip;
 import utils.DateTimeUtils;
@@ -125,9 +126,13 @@ public class PickupDeliverySolver {
 	public HashMap<Point, HashSet<Integer>> mPoint2PossibleVehicles;
 	public HashMap<String, HashSet<String>> mItem2ExclusiveItems;
 	public HashMap<String, HashSet<String>> mVehicle2NotReachedLocations;
+	public HashMap<String, HashSet<String>> mVehicleCategory2NotReachedLocations;
 	public HashMap<Item, Item[]> mLogicalItem2PhysicalItems;
 	public HashMap<Point, Integer> mPickupPoint2RequestIndex;
 
+	public HashMap<Point, Integer> mPickupPoint2PickupIndex;
+	public HashMap<Point, Integer> mDeliveryPoint2DeliveryIndex;
+	
 	public HashMap<Integer, HashSet<Integer>> mRequest2PointIndices;
 
 	public HashMap<Point, Integer> earliestAllowedArrivalTime;
@@ -371,6 +376,7 @@ public class PickupDeliverySolver {
 		HashSet<String> loadedItems = new HashSet<String>();
 		for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)) {
 			String s1 = "";
+			String s2 = "";
 			if (mPoint2Type.get(p) == "P") {
 				for (int j = 0; j < mPoint2IndexItems.get(p).length; j++) {
 					Item I = items.get(mPoint2IndexItems.get(p)[j]);
@@ -378,11 +384,16 @@ public class PickupDeliverySolver {
 				}
 				for(String ic: loadedItems) s1 = s1 + ic + ",";
 			}
-			s = s + p.ID + ", location " + mPoint2LocationCode.get(p) + ": items = " + s1 + "\n";
+			for(int i: mPoint2IndexLoadedItems.get(p)){
+				Item I = items.get(i);
+				s2 = s2 + I.getCode() + ",";
+			}
+			s = s + p.ID + ", location " + mPoint2LocationCode.get(p) + ": items = " + s1 + ", loaded items = " + s2 + "\n";
 		}
 		return s;
 	}
 
+	
 	public boolean checkConflictItemsAtPoint(Point p) {
 		if (mPoint2IndexLoadedItems.get(p) == null)
 			return true;
@@ -390,9 +401,19 @@ public class PickupDeliverySolver {
 		for (int i : mPoint2IndexLoadedItems.get(p)) {
 			for (int j : mPoint2IndexLoadedItems.get(p))
 				if (i < j) {
+					
 					if (itemConflict[i][j]) {
+						Item I = items.get(i);
+						Item J = items.get(j);
+						/*
+						if(I.getOrderId().equals(J.getOrderId())){
+							log(name() + "::checkConflictItemsAtPoint, CONFLICT-ITEMS " + I.getCode() + "," + J.getCode()
+									+ " have the SAME Order " + I.getOrderId());
+							continue;
+						}
+						*/
 						log(name()
-								+ "::checkConflictItemsAtPoint, FAILED??? CONFLICT-ITEMS "
+								+ "::checkConflictItemsAtPoint, FAILED??? CONFLICT-ITEMS at point " + p.ID + ": "
 								+ items.get(i).getCode() + "-"
 								+ items.get(j).getCode());
 						return false;
@@ -890,11 +911,19 @@ public class PickupDeliverySolver {
 	}
 
 	public boolean checkExclusiveItemsAtPoints(Point p, Point q) {
+		if(mPoint2IndexItems.get(p) != null){
 		for (int i : mPoint2IndexItems.get(p)) {
+			if(mPoint2IndexItems.get(q) != null){
 			for (int j : mPoint2IndexItems.get(q)) {
 				if (itemConflict[i][j])
 					return false;
 			}
+			}else{
+				log(name() + "::checkExclusiveItemsAtPoints, point q = " + q.ID + " has not items");
+			}
+		}
+		}else{
+			log(name() + "::checkExclusiveItemsAtPoints, point p = " + p.ID + " has not items");
 		}
 		return true;
 	}
@@ -1192,14 +1221,31 @@ public class PickupDeliverySolver {
 			}
 		}
 		if (sel_p != null) {
+			/*
 			MR.mgr.performAddOnePoint(delivery, sel_d);
 			MR.mgr.performAddOnePoint(pickup, sel_p);
 			propagateArrivalDepartureTime(MR.XR, k, false);
+			*/
+			performAddOnePoint(MR.XR,delivery, sel_d);
+			performAddOnePoint(MR.XR,pickup, sel_p);
+			
 			return true;
 		} else
 			return false;
 	}
 
+	public void performAddOnePoint(VarRoutesVR XR, Point x, Point y){
+		int k = XR.route(y);
+		XR.getVRManager().performAddOnePoint(x, y);
+		propagateArrivalDepartureTime(XR, k, false);
+		propagateLoadedItems(XR, k);
+	}
+	public void performRemoveOnePoint(VarRoutesVR XR, Point x){
+		int k = XR.route(x);
+		XR.getVRManager().performRemoveOnePoint(x);
+		propagateArrivalDepartureTime(XR, k, false);
+		propagateLoadedItems(XR, k);
+	}
 	public void propagateArrivalDepartureTime(VarRoutesVR XR, int k,
 			boolean DEBUG) {
 
@@ -1329,6 +1375,18 @@ public class PickupDeliverySolver {
 		return 0;
 	}
 
+	public HashSet<Integer> collectLoadedItemIndexAtPoint(VarRoutesVR XR, int k, Point p){
+		HashSet<Integer> S = new HashSet<Integer>();
+		for(Point x = XR.startPoint(k); x != XR.endPoint(k); x = XR.next(x)){
+			if(mPoint2Type.get(x).equals("P") && mPoint2IndexItems.get(x) != null){
+				for(int i: mPoint2IndexItems.get(x)){
+					S.add(i);
+				}
+				if(x == p) return S;
+			}
+		}
+		return new HashSet<Integer>();
+	}
 	public int evaluateNewOrderLoad(VarRoutesVR XR, int k, Point pickup,
 			Point p, Point delivery, Point d) {
 		// return 1 is there is new order loaded when inserting
@@ -1336,7 +1394,13 @@ public class PickupDeliverySolver {
 		// int reqID = mPickupPoint2RequestIndex.get(pickup);
 		boolean ok = false;
 		if (mPoint2IndexLoadedItems.get(p) != null) {
-			for (int i : mPoint2IndexLoadedItems.get(p)) {
+			HashSet<Integer> S = collectLoadedItemIndexAtPoint(XR, k, p);
+			//for (int i : mPoint2IndexLoadedItems.get(p)) {
+			for(int i: S){	
+				if(mItemIndex2RequestIndex.get(i) == null){
+					log(name() + "::evaluateNewOrderLoad, item index " + i + " does not match to any requets --> BUG???");
+					return 0;
+				}
 				int r = mItemIndex2RequestIndex.get(i);
 				ArrayList<PickupDeliveryRequest> R = mPoint2Request.get(pickup);
 				if (R != null)
@@ -1682,9 +1746,14 @@ public class PickupDeliverySolver {
 
 			}
 			if (sel_i != -1) {
+				/*
 				mgr.performAddOnePoint(sel_delivery, sel_d);
 				mgr.performAddOnePoint(sel_pickup, sel_p);
 				propagateArrivalDepartureTime(sel_k, true);
+				*/
+				performAddOnePoint(XR,sel_delivery, sel_d);
+				performAddOnePoint(XR,sel_pickup, sel_p);
+				
 
 				// log.println("add delivery " + sel_delivery.ID + " after "+
 				// sel_d.ID +
@@ -1696,6 +1765,7 @@ public class PickupDeliverySolver {
 						+ CS.violations() + ", cost = " + cost.getValue());
 				cand.remove(sel_i);
 
+				/*
 				// update loaded items
 				for (int I : mPoint2IndexLoadedItems.get(sel_p)) {
 					mPoint2IndexLoadedItems.get(sel_pickup).add(I);
@@ -1710,7 +1780,7 @@ public class PickupDeliverySolver {
 						mPoint2IndexLoadedItems.get(p).add(ite);
 					}
 				}
-
+				*/
 			} else {
 				System.out.println("Cannot schedule any more, BREAK");
 				break;
@@ -1741,7 +1811,44 @@ public class PickupDeliverySolver {
 			return true;
 		return false;
 	}
-
+	
+	public void propagateLoadedItems(VarRoutesVR XR, int k){
+		for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
+			if(mPoint2IndexLoadedItems.get(p)==null)
+				mPoint2IndexLoadedItems.put(p,new HashSet<Integer>());
+			else
+				mPoint2IndexLoadedItems.get(p).clear();
+		}
+		HashSet<Integer> S = new HashSet<Integer>();
+		for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
+			if(mPoint2Type.get(p).equals("P")){
+				for(int i: mPoint2IndexItems.get(p)){
+					if(S.contains(i)){
+						log(name() + "::propagateLoadedItems, BUG???? duplicate loaded items");
+					}
+					S.add(i);
+				}
+				for(int i: S){
+					mPoint2IndexLoadedItems.get(p).add(i);
+				}
+			}else if(mPoint2Type.get(p).equals("D")){
+				int idx = mDeliveryPoint2DeliveryIndex.get(p);
+				Point pickup = pickupPoints.get(idx);
+				for(int i: mPoint2IndexItems.get(pickup)){
+					S.remove(i);
+				}
+				for(int i: S){
+					mPoint2IndexLoadedItems.get(p).add(i);
+				}
+			}
+		}
+		
+	}
+	public void propagateLoadedItems(VarRoutesVR XR){
+		for(int k = 1; k <= XR.getNbRoutes(); k++)
+			propagateLoadedItems(XR, k);
+	}
+	
 	public String analyzeRequest(int idx) {
 		String des = "";
 		Point pickup = pickupPoints.get(idx);
@@ -2764,7 +2871,7 @@ public class PickupDeliverySolver {
 	}
 
 	public boolean vehicleCanGoToPoint(Vehicle vh, Point p) {
-		if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(p))
+		if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(mPoint2LocationCode.get(p)))
 			return false;
 		return true;
 	}
@@ -2776,25 +2883,18 @@ public class PickupDeliverySolver {
 		return true;
 	}
 
-	public boolean feasibleMergeTrip(VehicleTrip t1, VehicleTrip t2) {
-		// find earliest available vehicles having enough capacity
-		double load = t1.load + t2.load;
-		for (Point p : t1.seqPoints) {
-			for (Point q : t2.seqPoints) {
-				if (!checkExclusiveItemsAtPoints(p, q))
-					return false;
-			}
-		}
+	public boolean vehicleCategoryCanGoToPoint(Vehicle vh, Point p) {
+		if(mVehicleCategory2NotReachedLocations.get(vh.getVehicleCategory())==null) return true;
+		if(mPoint2LocationCode.get(p) == null) return true;		
+		if (mVehicleCategory2NotReachedLocations.get(vh.getVehicleCategory()).contains(mPoint2LocationCode.get(p)))
+			return false;
+		return true;
+	}
 
-		for (int i = 0; i < input.getVehicleCategories().length; i++) {
-			Vehicle vh = input.getVehicleCategories()[i];
-			if (vh.getWeight() < load)
-				continue;
-			if (!vehicleCanGoToPointsTrip(vh, t1)
-					|| !vehicleCanGoToPointsTrip(vh, t2))
-				continue;
-
-		}
+	public boolean vehicleCategoryCanGoToPointsTrip(Vehicle vh, VehicleTrip t) {
+		for (Point p : t.seqPoints)
+			if (!vehicleCategoryCanGoToPoint(vh, p))
+				return false;
 		return true;
 	}
 
@@ -2804,7 +2904,7 @@ public class PickupDeliverySolver {
 		String vehicleCode = getVehicle(k - 1).getCode();
 		String pickupLocation = mPoint2LocationCode.get(pickup);
 		String deliveryLocation = mPoint2LocationCode.get(delivery);
-		String debug_location_code = "10008531";
+		String debug_location_code = "";
 
 		// if (pickup.ID == 18 && delivery.ID == 19) {
 		// System.out.println(name() + "::feasibleMove, delivery location = "

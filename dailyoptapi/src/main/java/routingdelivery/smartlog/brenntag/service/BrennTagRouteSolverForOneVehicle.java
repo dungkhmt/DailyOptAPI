@@ -283,7 +283,11 @@ public class BrennTagRouteSolverForOneVehicle {
 					for (Point d = p; d != XR.endPoint(1); d = XR.next(d)) {
 						// new trial items will be unloaded after d --> need
 						// check exclusive items
-
+						if (!solver.checkExclusiveItemAddPoint2Route(XR, 1,
+								pickup, p, delivery, d)) {
+							continue;
+						}
+						
 						okExclusiveItems = true;
 						for (Point tp = XR.startPoint(1); tp != XR.next(d); tp = XR
 								.next(tp)) {
