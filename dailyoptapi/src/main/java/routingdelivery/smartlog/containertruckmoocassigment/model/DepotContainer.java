@@ -5,12 +5,6 @@ public class DepotContainer {
 	private String locationCode;
 	private int pickupContainerDuration;
 	private int deliveryContainerDuration;
-	
-	public DepotContainer(String code, String locationCode) {
-		super();
-		this.code = code;
-		this.locationCode = locationCode;
-	}
 	public String getCode() {
 		return code;
 	}
@@ -23,5 +17,30 @@ public class DepotContainer {
 	public void setLocationCode(String locationCode) {
 		this.locationCode = locationCode;
 	}
+	public int getPickupContainerDuration() {
+		return pickupContainerDuration;
+	}
+	public void setPickupContainerDuration(int pickupContainerDuration) {
+		this.pickupContainerDuration = pickupContainerDuration;
+	}
+	public int getDeliveryContainerDuration() {
+		return deliveryContainerDuration;
+	}
+	public void setDeliveryContainerDuration(int deliveryContainerDuration) {
+		this.deliveryContainerDuration = deliveryContainerDuration;
+	}
+	public DepotContainer(String code, String locationCode,
+			int pickupContainerDuration, int deliveryContainerDuration) {
+		super();
+		this.code = code;
+		this.locationCode = locationCode;
+		this.pickupContainerDuration = pickupContainerDuration;
+		this.deliveryContainerDuration = deliveryContainerDuration;
+	}
+	public DepotContainer() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
 	
 }

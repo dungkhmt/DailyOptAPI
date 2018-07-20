@@ -10,15 +10,107 @@ public class ImportContainerRequest {
 	private String portCode;
 	private String earlyDateTimePickupAtPort;
 	private String lateDateTimePickupAtPort;
-	private int loadDuration = 3600;
+	private int loadDuration;
 	
 	private String wareHouseCode;
 	private String earlyDateTimeUnloadAtWarehouse;
 	private String lateDateTimeUnloadAtWarehouse;
-	private int unloadDuration = 3600;
+	private int unloadDuration;
 	
 	private String earlyDateTimeDeliveryAtDepot;
 	private String lateDateTimeDeliveryAtDepot;
+	public String getOrderItemID() {
+		return orderItemID;
+	}
+	public void setOrderItemID(String orderItemID) {
+		this.orderItemID = orderItemID;
+	}
+	public String getShipCompanyCode() {
+		return shipCompanyCode;
+	}
+	public void setShipCompanyCode(String shipCompanyCode) {
+		this.shipCompanyCode = shipCompanyCode;
+	}
+	public String getDepotCode() {
+		return depotCode;
+	}
+	public void setDepotCode(String depotCode) {
+		this.depotCode = depotCode;
+	}
+	public String getContainerCategory() {
+		return containerCategory;
+	}
+	public void setContainerCategory(String containerCategory) {
+		this.containerCategory = containerCategory;
+	}
+	public double getWeight() {
+		return weight;
+	}
+	public void setWeight(double weight) {
+		this.weight = weight;
+	}
+	public String getPortCode() {
+		return portCode;
+	}
+	public void setPortCode(String portCode) {
+		this.portCode = portCode;
+	}
+	public String getEarlyDateTimePickupAtPort() {
+		return earlyDateTimePickupAtPort;
+	}
+	public void setEarlyDateTimePickupAtPort(String earlyDateTimePickupAtPort) {
+		this.earlyDateTimePickupAtPort = earlyDateTimePickupAtPort;
+	}
+	public String getLateDateTimePickupAtPort() {
+		return lateDateTimePickupAtPort;
+	}
+	public void setLateDateTimePickupAtPort(String lateDateTimePickupAtPort) {
+		this.lateDateTimePickupAtPort = lateDateTimePickupAtPort;
+	}
+	public int getLoadDuration() {
+		return loadDuration;
+	}
+	public void setLoadDuration(int loadDuration) {
+		this.loadDuration = loadDuration;
+	}
+	public String getWareHouseCode() {
+		return wareHouseCode;
+	}
+	public void setWareHouseCode(String wareHouseCode) {
+		this.wareHouseCode = wareHouseCode;
+	}
+	public String getEarlyDateTimeUnloadAtWarehouse() {
+		return earlyDateTimeUnloadAtWarehouse;
+	}
+	public void setEarlyDateTimeUnloadAtWarehouse(
+			String earlyDateTimeUnloadAtWarehouse) {
+		this.earlyDateTimeUnloadAtWarehouse = earlyDateTimeUnloadAtWarehouse;
+	}
+	public String getLateDateTimeUnloadAtWarehouse() {
+		return lateDateTimeUnloadAtWarehouse;
+	}
+	public void setLateDateTimeUnloadAtWarehouse(
+			String lateDateTimeUnloadAtWarehouse) {
+		this.lateDateTimeUnloadAtWarehouse = lateDateTimeUnloadAtWarehouse;
+	}
+	public int getUnloadDuration() {
+		return unloadDuration;
+	}
+	public void setUnloadDuration(int unloadDuration) {
+		this.unloadDuration = unloadDuration;
+	}
+	public String getEarlyDateTimeDeliveryAtDepot() {
+		return earlyDateTimeDeliveryAtDepot;
+	}
+	public void setEarlyDateTimeDeliveryAtDepot(String earlyDateTimeDeliveryAtDepot) {
+		this.earlyDateTimeDeliveryAtDepot = earlyDateTimeDeliveryAtDepot;
+	}
+	public String getLateDateTimeDeliveryAtDepot() {
+		return lateDateTimeDeliveryAtDepot;
+	}
+	public void setLateDateTimeDeliveryAtDepot(String lateDateTimeDeliveryAtDepot) {
+		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
+	}
 	public ImportContainerRequest(String orderItemID, String shipCompanyCode,
 			String depotCode, String containerCategory, double weight,
 			String portCode, String earlyDateTimePickupAtPort,
@@ -43,6 +135,10 @@ public class ImportContainerRequest {
 		this.unloadDuration = unloadDuration;
 		this.earlyDateTimeDeliveryAtDepot = earlyDateTimeDeliveryAtDepot;
 		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
+	}
+	public ImportContainerRequest() {
+		super();
+		// TODO Auto-generated constructor stub
 	}
 	
 	

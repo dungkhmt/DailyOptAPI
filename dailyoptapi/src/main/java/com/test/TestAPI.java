@@ -25,6 +25,9 @@ import javax.servlet.http.HttpServletRequest;
 
 
 
+
+
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 //import org.apache.log4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -41,6 +44,9 @@ import routingdelivery.model.PickupDeliverySolution;
 import routingdelivery.service.PickupDeliverySolver;
 import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
 import routingdelivery.smartlog.brenntag.service.BrenntagPickupDeliverySolver;
+import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocInput;
+import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocSolution;
+import routingdelivery.smartlog.containertruckmoocassigment.service.ContainerTruckMoocSolver;
 import routingdelivery.smartlog.sem.model.SEMPickupDeliveryInput;
 import routingdelivery.smartlog.sem.model.SEMPickupDeliverySolution;
 import routingdelivery.smartlog.sem.service.SEMPickupDeliverySolver;
@@ -128,4 +134,23 @@ public class TestAPI {
 		
 	}
 	
+	@CrossOrigin
+	@RequestMapping(value = "/container", method = RequestMethod.POST)
+	public ContainerTruckMoocSolution computeContainerSolution(HttpServletRequest request, 
+			@RequestBody ContainerTruckMoocInput input){
+		
+		//Gson gson = new Gson();
+		//String json = gson.toJson(input);
+		try{
+			//writeGlobalRequest(input);
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		//PickupDeliverySolver solver = new PickupDeliverySolver();
+		ContainerTruckMoocSolver solver = new ContainerTruckMoocSolver();
+		//return solver.compute(input);
+		return solver.solve(input);
+		
+	}
+
 }

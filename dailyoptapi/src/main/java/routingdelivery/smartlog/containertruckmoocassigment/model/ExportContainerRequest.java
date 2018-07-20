@@ -13,37 +13,12 @@ public class ExportContainerRequest {
 	private String wareHouseCode;
 	private String earlyDateTimeLoadAtWarehouse;
 	private String lateDateTimeLoadAtWarehouse;
-	private int loadDuration = 3600;
+	private int loadDuration;
 	
 	private String portCode;
 	private String earlyDateTimeUnloadAtPort;
 	private String lateDateTimeUnloadAtPort;
-	private int unloadDuration = 3600;
-	public ExportContainerRequest(String orderItemID, String shipCompanyCode,
-			String depotCode, String containerCategory, double weight,
-			String earlyDateTimePickupAtDepot,
-			String lateDateTimePickupAtDepot, String wareHouseCode,
-			String earlyDateTimeLoadAtWarehouse,
-			String lateDateTimeLoadAtWarehouse, int loadDuration,
-			String portCode, String earlyDateTimeUnloadAtPort,
-			String lateDateTimeUnloadAtPort, int unloadDuration) {
-		super();
-		this.orderItemID = orderItemID;
-		this.shipCompanyCode = shipCompanyCode;
-		this.depotCode = depotCode;
-		this.containerCategory = containerCategory;
-		this.weight = weight;
-		this.earlyDateTimePickupAtDepot = earlyDateTimePickupAtDepot;
-		this.lateDateTimePickupAtDepot = lateDateTimePickupAtDepot;
-		this.wareHouseCode = wareHouseCode;
-		this.earlyDateTimeLoadAtWarehouse = earlyDateTimeLoadAtWarehouse;
-		this.lateDateTimeLoadAtWarehouse = lateDateTimeLoadAtWarehouse;
-		this.loadDuration = loadDuration;
-		this.portCode = portCode;
-		this.earlyDateTimeUnloadAtPort = earlyDateTimeUnloadAtPort;
-		this.lateDateTimeUnloadAtPort = lateDateTimeUnloadAtPort;
-		this.unloadDuration = unloadDuration;
-	}
+	private int unloadDuration;
 	public String getOrderItemID() {
 		return orderItemID;
 	}
@@ -134,8 +109,36 @@ public class ExportContainerRequest {
 	public void setUnloadDuration(int unloadDuration) {
 		this.unloadDuration = unloadDuration;
 	}
-	
-	
+	public ExportContainerRequest(String orderItemID, String shipCompanyCode,
+			String depotCode, String containerCategory, double weight,
+			String earlyDateTimePickupAtDepot,
+			String lateDateTimePickupAtDepot, String wareHouseCode,
+			String earlyDateTimeLoadAtWarehouse,
+			String lateDateTimeLoadAtWarehouse, int loadDuration,
+			String portCode, String earlyDateTimeUnloadAtPort,
+			String lateDateTimeUnloadAtPort, int unloadDuration) {
+		super();
+		this.orderItemID = orderItemID;
+		this.shipCompanyCode = shipCompanyCode;
+		this.depotCode = depotCode;
+		this.containerCategory = containerCategory;
+		this.weight = weight;
+		this.earlyDateTimePickupAtDepot = earlyDateTimePickupAtDepot;
+		this.lateDateTimePickupAtDepot = lateDateTimePickupAtDepot;
+		this.wareHouseCode = wareHouseCode;
+		this.earlyDateTimeLoadAtWarehouse = earlyDateTimeLoadAtWarehouse;
+		this.lateDateTimeLoadAtWarehouse = lateDateTimeLoadAtWarehouse;
+		this.loadDuration = loadDuration;
+		this.portCode = portCode;
+		this.earlyDateTimeUnloadAtPort = earlyDateTimeUnloadAtPort;
+		this.lateDateTimeUnloadAtPort = lateDateTimeUnloadAtPort;
+		this.unloadDuration = unloadDuration;
+	}
+	public ExportContainerRequest() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	
 	
 }

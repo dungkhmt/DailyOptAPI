@@ -15,5 +15,14 @@ public class Port {
 	public void setLocationCode(String locationCode) {
 		this.locationCode = locationCode;
 	}
+	public Port(String code, String locationCode) {
+		super();
+		this.code = code;
+		this.locationCode = locationCode;
+	}
+	public Port() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 	
 }

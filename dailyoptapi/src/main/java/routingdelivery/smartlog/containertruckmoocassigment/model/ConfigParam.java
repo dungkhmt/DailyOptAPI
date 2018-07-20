@@ -20,6 +20,10 @@ public class ConfigParam {
 		this.cutMoocDuration = cutMoocDuration;
 		this.linkMoocDuration = linkMoocDuration;
 	}
+	public ConfigParam() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 	
 	
 }

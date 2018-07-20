@@ -5,14 +5,7 @@ public class Container {
 	private int weight;
 	private String categoryCode;
 	private String depotContainerCode;
-	public Container(String code, int weight, String categoryCode,
-			String depotContainerCode) {
-		super();
-		this.code = code;
-		this.weight = weight;
-		this.categoryCode = categoryCode;
-		this.depotContainerCode = depotContainerCode;
-	}
+	
 	public String getCode() {
 		return code;
 	}
@@ -36,6 +29,18 @@ public class Container {
 	}
 	public void setDepotContainerCode(String depotContainerCode) {
 		this.depotContainerCode = depotContainerCode;
+	}
+	public Container(String code, int weight, String categoryCode,
+			String depotContainerCode) {
+		super();
+		this.code = code;
+		this.weight = weight;
+		this.categoryCode = categoryCode;
+		this.depotContainerCode = depotContainerCode;
+	}
+	public Container() {
+		super();
+		// TODO Auto-generated constructor stub
 	}
 	
 }

@@ -16,8 +16,11 @@ public class ContainerTruckMoocInput {
 	private DepotContainer[] depotContainers;
 	private DepotMooc[] depotMoocs;
 	private DepotTruck[] depotTrucks;
+	private Warehouse[] warehouses;
 	private Truck[] trucks;
 	private Mooc[] moocs;
+	private Port[] ports;
+	
 	private Container[] containers;
 	
 	DistanceElement[] distance;
@@ -25,111 +28,217 @@ public class ContainerTruckMoocInput {
 
 	private ConfigParam params;
 	
-	public ConfigParam getParams() {
-		return params;
+
+	public Port[] getPorts() {
+		return ports;
 	}
 
-	public void setParams(ConfigParam params) {
+
+	public void setPorts(Port[] ports) {
+		this.ports = ports;
+	}
+
+
+	public ContainerTruckMoocInput(
+			ExportContainerTruckMoocRequest[] exRequests,
+			ImportContainerTruckMoocRequest[] imRequests,
+			WarehouseTransportRequest[] warehouseRequests,
+			ShipCompany[] companies, DepotContainer[] depotContainers,
+			DepotMooc[] depotMoocs, DepotTruck[] depotTrucks,
+			Warehouse[] warehouses, Truck[] trucks, Mooc[] moocs, Port[] ports,
+			Container[] containers, DistanceElement[] distance,
+			DistanceElement[] travelTime, ConfigParam params) {
+		super();
+		this.exRequests = exRequests;
+		this.imRequests = imRequests;
+		this.warehouseRequests = warehouseRequests;
+		this.companies = companies;
+		this.depotContainers = depotContainers;
+		this.depotMoocs = depotMoocs;
+		this.depotTrucks = depotTrucks;
+		this.warehouses = warehouses;
+		this.trucks = trucks;
+		this.moocs = moocs;
+		this.ports = ports;
+		this.containers = containers;
+		this.distance = distance;
+		this.travelTime = travelTime;
 		this.params = params;
 	}
+
+
+	public ContainerTruckMoocInput(
+			ExportContainerTruckMoocRequest[] exRequests,
+			ImportContainerTruckMoocRequest[] imRequests,
+			WarehouseTransportRequest[] warehouseRequests,
+			ShipCompany[] companies, DepotContainer[] depotContainers,
+			DepotMooc[] depotMoocs, DepotTruck[] depotTrucks,
+			Warehouse[] warehouses, Truck[] trucks, Mooc[] moocs,
+			Container[] containers, DistanceElement[] distance,
+			DistanceElement[] travelTime, ConfigParam params) {
+		super();
+		this.exRequests = exRequests;
+		this.imRequests = imRequests;
+		this.warehouseRequests = warehouseRequests;
+		this.companies = companies;
+		this.depotContainers = depotContainers;
+		this.depotMoocs = depotMoocs;
+		this.depotTrucks = depotTrucks;
+		this.warehouses = warehouses;
+		this.trucks = trucks;
+		this.moocs = moocs;
+		this.containers = containers;
+		this.distance = distance;
+		this.travelTime = travelTime;
+		this.params = params;
+	}
+
+
+	public Warehouse[] getWarehouses() {
+		return warehouses;
+	}
+
+
+	public void setWarehouses(Warehouse[] warehouses) {
+		this.warehouses = warehouses;
+	}
+
 
 	public ExportContainerTruckMoocRequest[] getExRequests() {
 		return exRequests;
 	}
 
+
 	public void setExRequests(ExportContainerTruckMoocRequest[] exRequests) {
 		this.exRequests = exRequests;
 	}
+
 
 	public ImportContainerTruckMoocRequest[] getImRequests() {
 		return imRequests;
 	}
 
+
 	public void setImRequests(ImportContainerTruckMoocRequest[] imRequests) {
 		this.imRequests = imRequests;
 	}
+
 
 	public WarehouseTransportRequest[] getWarehouseRequests() {
 		return warehouseRequests;
 	}
 
+
 	public void setWarehouseRequests(WarehouseTransportRequest[] warehouseRequests) {
 		this.warehouseRequests = warehouseRequests;
 	}
+
 
 	public ShipCompany[] getCompanies() {
 		return companies;
 	}
 
+
 	public void setCompanies(ShipCompany[] companies) {
 		this.companies = companies;
 	}
+
 
 	public DepotContainer[] getDepotContainers() {
 		return depotContainers;
 	}
 
+
 	public void setDepotContainers(DepotContainer[] depotContainers) {
 		this.depotContainers = depotContainers;
 	}
+
 
 	public DepotMooc[] getDepotMoocs() {
 		return depotMoocs;
 	}
 
+
 	public void setDepotMoocs(DepotMooc[] depotMoocs) {
 		this.depotMoocs = depotMoocs;
 	}
+
 
 	public DepotTruck[] getDepotTrucks() {
 		return depotTrucks;
 	}
 
+
 	public void setDepotTrucks(DepotTruck[] depotTrucks) {
 		this.depotTrucks = depotTrucks;
 	}
+
 
 	public Truck[] getTrucks() {
 		return trucks;
 	}
 
+
 	public void setTrucks(Truck[] trucks) {
 		this.trucks = trucks;
 	}
+
 
 	public Mooc[] getMoocs() {
 		return moocs;
 	}
 
+
 	public void setMoocs(Mooc[] moocs) {
 		this.moocs = moocs;
 	}
+
 
 	public Container[] getContainers() {
 		return containers;
 	}
 
+
 	public void setContainers(Container[] containers) {
 		this.containers = containers;
 	}
+
 
 	public DistanceElement[] getDistance() {
 		return distance;
 	}
 
+
 	public void setDistance(DistanceElement[] distance) {
 		this.distance = distance;
 	}
+
 
 	public DistanceElement[] getTravelTime() {
 		return travelTime;
 	}
 
+
 	public void setTravelTime(DistanceElement[] travelTime) {
 		this.travelTime = travelTime;
 	}
 
-	
+
+	public ConfigParam getParams() {
+		return params;
+	}
+
+
+	public void setParams(ConfigParam params) {
+		this.params = params;
+	}
+
+
+	public ContainerTruckMoocInput() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 
 	public ContainerTruckMoocInput(
 			ExportContainerTruckMoocRequest[] exRequests,
@@ -138,7 +247,7 @@ public class ContainerTruckMoocInput {
 			ShipCompany[] companies, DepotContainer[] depotContainers,
 			DepotMooc[] depotMoocs, DepotTruck[] depotTrucks, Truck[] trucks,
 			Mooc[] moocs, Container[] containers, DistanceElement[] distance,
-			DistanceElement[] travelTime) {
+			DistanceElement[] travelTime, ConfigParam params) {
 		super();
 		this.exRequests = exRequests;
 		this.imRequests = imRequests;
@@ -152,7 +261,9 @@ public class ContainerTruckMoocInput {
 		this.containers = containers;
 		this.distance = distance;
 		this.travelTime = travelTime;
+		this.params = params;
 	}
+
 
 	public static void main(String[] args){
 		String[] locationCodes = {"0001","0002","0003","0004","0005","0006","0007","0008","0009","0010","0011","0012","0013"};
@@ -169,25 +280,31 @@ public class ContainerTruckMoocInput {
 		companies[1] = new ShipCompany("Com02",depotContainerCode);
 		
 		DepotContainer[] depotContainers = new DepotContainer[3];
-		depotContainers[0] = new DepotContainer("DepotContainer001","0007");
-		depotContainers[1] = new DepotContainer("DepotContainer002","0009");
-		depotContainers[2] = new DepotContainer("DepotContainer003","0011");
+		depotContainers[0] = new DepotContainer("DepotContainer001","0007",1800,1800);
+		depotContainers[1] = new DepotContainer("DepotContainer002","0009",1800,1800);
+		depotContainers[2] = new DepotContainer("DepotContainer003","0011",1800,1800);
 		
 		DepotTruck[] depotTrucks = new DepotTruck[2];
 		depotTrucks[0] = new DepotTruck("DepotTruck001","0005");
 		depotTrucks[1] = new DepotTruck("DepotTruck002","0006");
 		
 		DepotMooc[] depotMoocs = new DepotMooc[2];
-		depotMoocs[0] = new DepotMooc("DepotMooc001","0008");
-		depotMoocs[1] = new DepotMooc("DepotMooc002","0010");
+		depotMoocs[0] = new DepotMooc("DepotMooc001","0008",900,900);
+		depotMoocs[1] = new DepotMooc("DepotMooc002","0010",900,900);
+		
+		Warehouse[] warehouses = new Warehouse[warehouseCode.length];
+		warehouses[0] = new Warehouse("Warehouse001","0001");
+		warehouses[1] = new Warehouse("Warehouse002","0002");
+		warehouses[2] = new Warehouse("Warehouse003","0003");
+		warehouses[3] = new Warehouse("Warehouse004","0004");
 		
 		Truck[] trucks = new Truck[6];
-		trucks[0] = new Truck("Truck0001","DepotTruck001");
-		trucks[1] = new Truck("Truck0002","DepotTruck001");
-		trucks[2] = new Truck("Truck0003","DepotTruck001");
-		trucks[3] = new Truck("Truck0004","DepotTruck002");
-		trucks[4] = new Truck("Truck0005","DepotTruck002");
-		trucks[5] = new Truck("Truck0006","DepotTruck002");
+		trucks[0] = new Truck("Truck0001","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00");
+		trucks[1] = new Truck("Truck0002","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00");
+		trucks[2] = new Truck("Truck0003","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00");
+		trucks[3] = new Truck("Truck0004","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00");
+		trucks[4] = new Truck("Truck0005","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00");
+		trucks[5] = new Truck("Truck0006","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00");
 		
 		Mooc[] moocs = new Mooc[6];
 		moocs[0] = new Mooc("Mooc0001","20",20,"DepotMooc001");
@@ -204,6 +321,10 @@ public class ContainerTruckMoocInput {
 		containers[3] = new Container("Container004",40,"40","DepotContainer002");
 		containers[4] = new Container("Container005",20,"20","DepotContainer003");
 		containers[5] = new Container("Container006",45,"45","DepotContainer003");
+		
+		Port[] ports = new Port[2];
+		ports[0] = new Port("Port001","0012");
+		ports[1] = new Port("Port002","0013");
 		
 		ExportContainerRequest[] exContReq = new ExportContainerRequest[3];
 		exContReq[0] = new ExportContainerRequest(
@@ -362,8 +483,12 @@ public class ContainerTruckMoocInput {
 			}
 		}
 		
+		ConfigParam params = new ConfigParam(600, 600);
 		ContainerTruckMoocInput input = new ContainerTruckMoocInput(exReq,imReq,wtr,companies,depotContainers,depotMoocs,depotTrucks,
-				trucks,moocs,containers,dis,t);
+				trucks,moocs,containers,dis,t, params);
+		input.setWarehouses(warehouses);
+		input.setPorts(ports);
+		
 		
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
