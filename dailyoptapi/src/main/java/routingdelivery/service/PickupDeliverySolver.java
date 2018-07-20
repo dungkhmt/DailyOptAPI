@@ -449,9 +449,21 @@ public class PickupDeliverySolver {
 	}
 
 	public String printRouteAndTime(VarRoutesVR XR, int k) {
+		if(XR.next(XR.startPoint(k)) == XR.endPoint(k))
+			return "";
+		
 		String s = "";
 		s += "route[" + k + ", vehicle " + getVehicle(k - 1).getCode() + "]\n";
 		for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)) {
+			if(mPoint2ArrivalTime.get(p) == null){
+				log(name() + "::printRouteAndTime, point " + p.ID + " KHONG CO ARRIVAL TIME, BUG???, XR = " + XR.toStringRoute(k));
+				continue;
+			}
+			if(mPoint2DepartureTime.get(p) == null){
+				log(name() + "::printRouteAndTime, point " + p.ID + " KHONG CO DEPARTURE TIME, BUG???, XR = " + XR.toStringRoute(k));
+				continue;
+			}
+			
 			long at = mPoint2ArrivalTime.get(p);
 			long dt = mPoint2DepartureTime.get(p);
 			String sat = DateTimeUtils.unixTimeStamp2DateTime(at);
@@ -470,6 +482,10 @@ public class PickupDeliverySolver {
 									.get(p)) + "\n";
 		}
 		Point p = XR.endPoint(k);
+		if(mPoint2ArrivalTime.get(p) == null){
+			log(name() + "::printRouteAndTime, point " + p.ID + " KHONG CO ARRIVAL TIME, BUG???, XR = " + XR.toStringRoute(k));
+			
+		}else{
 		long at = mPoint2ArrivalTime.get(p);
 		// long dt = mPoint2DepartureTime.get(p);
 		String sat = DateTimeUtils.unixTimeStamp2DateTime(at);
@@ -486,7 +502,7 @@ public class PickupDeliverySolver {
 				+ DateTimeUtils
 						.unixTimeStamp2DateTime(lastestAllowedArrivalTime
 								.get(p)) + "\n";
-
+		}
 		return s;
 	}
 
@@ -498,19 +514,19 @@ public class PickupDeliverySolver {
 		System.out.println(name() + "::analyzeTrips, XR = "
 				+ XR.toStringShort());
 		if (log != null) {
-			log.println(name()
-					+ "::analyzeTrips-----------------------------------------------------------------------------");
+			//log.println(name()
+			//		+ "::analyzeTrips-----------------------------------------------------------------------------");
 			for (int k = 1; k <= XR.getNbRoutes(); k++) {
 				if (XR.next(XR.startPoint(k)) == XR.endPoint(k))
 					continue;
 				Point s = XR.startPoint(k);
 				Vehicle vh = mPoint2Vehicle.get(s);
-				log.println("Vehicle[" + k + "] code = " + vh.getCode());
-				for (Point p = s; p != XR.endPoint(k); p = XR.next(p)) {
-					log.println("POINT " + mPoint2LocationCode.get(p)
-							+ ", type = " + mPoint2Type.get(p) + ", load = "
-							+ mPoint2Demand.get(p));
-				}
+				//log.println("Vehicle[" + k + "] code = " + vh.getCode());
+				//for (Point p = s; p != XR.endPoint(k); p = XR.next(p)) {
+				//	log.println("POINT " + mPoint2LocationCode.get(p)
+				//			+ ", type = " + mPoint2Type.get(p) + ", load = "
+				//			+ mPoint2Demand.get(p));
+				//}
 			}
 		}
 		/*
