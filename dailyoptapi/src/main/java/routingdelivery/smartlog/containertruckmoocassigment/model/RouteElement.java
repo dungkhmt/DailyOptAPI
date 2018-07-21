@@ -13,7 +13,14 @@ public class RouteElement {
 	
 	private String arrivalTime;
 	private String departureTime;
+	private double distance;
 	
+	public double getDistance() {
+		return distance;
+	}
+	public void setDistance(double distance) {
+		this.distance = distance;
+	}
 	public String getLocationCode(){
 		if(depotTruck != null) return depotTruck.getLocationCode();
 		else if(depotMooc != null) return depotMooc.getLocationCode();

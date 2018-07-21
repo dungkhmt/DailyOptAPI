@@ -479,7 +479,7 @@ public class ContainerTruckMoocInput {
 				double d = G.computeDistanceHaversine(lat[i], lng[i], lat[j], lng[j]);
 				idx++;
 				dis[idx] = new DistanceElement(code1, code2, d);
-				t[idx] = new DistanceElement(code1, code2, d*1.0/(40*1000/3600));// meter/second
+				t[idx] = new DistanceElement(code1, code2, d*1000.0/(40*1000/3600));// meter/second
 			}
 		}
 		
