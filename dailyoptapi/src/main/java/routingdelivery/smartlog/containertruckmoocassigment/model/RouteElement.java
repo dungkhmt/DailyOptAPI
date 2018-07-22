@@ -6,15 +6,115 @@ public class RouteElement {
 	private DepotContainer depotContainer;
 	private Warehouse warehouse;
 	private Port port;
+	private Mooc mooc;
+	private Container container;
+	private Truck truck;
 	
 	private String action;// LAY_MOOC, TRA_MOOC, LAY_CONTAINER, TRA_CONTAINER, 
 						//   LOAD_HANG, UNLOAD_HANG, CAT_MOOC, 
 						// 
+	private ExportContainerRequest exportRequest;
+	private ImportContainerRequest importRequest;
+	private WarehouseContainerTransportRequest warehouseRequest;
 	
 	private String arrivalTime;
 	private String departureTime;
 	private double distance;
 	
+	public void deriveFrom(RouteElement e){
+		//this.depotTruck = e.depotTruck;
+		//this.depotMooc = e.depotMooc;
+		//this.depotContainer = e.depotContainer;
+		//this.warehouse = e.warehouse;
+		//this.port = e.port;
+		this.mooc = e.mooc;
+		this.container = e.container;
+		this.truck = e.truck;
+		this.exportRequest = e.exportRequest;
+		this.importRequest = e.importRequest;
+		this.warehouseRequest = e.warehouseRequest;
+		
+	}
+	public Truck getTruck() {
+		return truck;
+	}
+	public void setTruck(Truck truck) {
+		this.truck = truck;
+	}
+	public RouteElement(DepotTruck depotTruck, DepotMooc depotMooc,
+			DepotContainer depotContainer, Warehouse warehouse, Port port,
+			Mooc mooc, Container container, String action,
+			ExportContainerRequest exportRequest,
+			ImportContainerRequest importRequest,
+			WarehouseContainerTransportRequest warehouseRequest,
+			String arrivalTime, String departureTime, double distance) {
+		super();
+		this.depotTruck = depotTruck;
+		this.depotMooc = depotMooc;
+		this.depotContainer = depotContainer;
+		this.warehouse = warehouse;
+		this.port = port;
+		this.mooc = mooc;
+		this.container = container;
+		this.action = action;
+		this.exportRequest = exportRequest;
+		this.importRequest = importRequest;
+		this.warehouseRequest = warehouseRequest;
+		this.arrivalTime = arrivalTime;
+		this.departureTime = departureTime;
+		this.distance = distance;
+	}
+	public Mooc getMooc() {
+		return mooc;
+	}
+	public void setMooc(Mooc mooc) {
+		this.mooc = mooc;
+	}
+	public Container getContainer() {
+		return container;
+	}
+	public void setContainer(Container container) {
+		this.container = container;
+	}
+	public RouteElement(DepotTruck depotTruck, DepotMooc depotMooc,
+			DepotContainer depotContainer, Warehouse warehouse, Port port,
+			String action, ExportContainerRequest exportRequest,
+			ImportContainerRequest importRequest,
+			WarehouseContainerTransportRequest warehouseRequest,
+			String arrivalTime, String departureTime, double distance) {
+		super();
+		this.depotTruck = depotTruck;
+		this.depotMooc = depotMooc;
+		this.depotContainer = depotContainer;
+		this.warehouse = warehouse;
+		this.port = port;
+		this.action = action;
+		this.exportRequest = exportRequest;
+		this.importRequest = importRequest;
+		this.warehouseRequest = warehouseRequest;
+		this.arrivalTime = arrivalTime;
+		this.departureTime = departureTime;
+		this.distance = distance;
+	}
+	public ExportContainerRequest getExportRequest() {
+		return exportRequest;
+	}
+	public void setExportRequest(ExportContainerRequest exportRequest) {
+		this.exportRequest = exportRequest;
+	}
+	public ImportContainerRequest getImportRequest() {
+		return importRequest;
+	}
+	public void setImportRequest(ImportContainerRequest importRequest) {
+		this.importRequest = importRequest;
+	}
+	public WarehouseContainerTransportRequest getWarehouseRequest() {
+		return warehouseRequest;
+	}
+	public void setWarehouseRequest(
+			WarehouseContainerTransportRequest warehouseRequest) {
+		this.warehouseRequest = warehouseRequest;
+	}
 	public double getDistance() {
 		return distance;
 	}

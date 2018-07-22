@@ -14,30 +14,31 @@ import algorithms.graphs.Arc;
 import algorithms.maxflow.MaxFlow;
 
 public class MaxMatching {
-	private int[] X;
-	private	int[] Y;
-	private int[] edgeX;
-	private int[] edgeY;
-	private double[] w;
+	protected int[] X;
+	protected	int[] Y;
+	protected int[] edgeX;
+	protected int[] edgeY;
+	protected double[] w;
 	
-	private int[] solX;
-	private int[] solY;// (solX[i], solY[i]) is a matching in the solution
+	protected int[] solX;
+	protected int[] solY;// (solX[i], solY[i]) is a matching in the solution
 	
 	// mapped data
-	private int nX;
-	private int nY;
-	private boolean[][] a;// a[i][j] = T --> is edge(i,j)
-	private HashMap<Integer, Integer> mX2Index;
-	private HashMap<Integer, Integer> mY2Index;
+	protected int nX;
+	protected int nY;
+	protected boolean[][] a;// a[i][j] = T --> is edge(i,j)
+	protected double[][] c;// c[i][j] = weight of (i,j)
+	protected HashMap<Integer, Integer> mX2Index;
+	protected HashMap<Integer, Integer> mY2Index;
 	
 	// data structure for backtrack search
-	private int[] Z;// Z[i] = k means that X[i] is matched with Y[k]
-	private int[] Z_best;
-	private boolean[] used;
-	private int f;
-	private int f_best;
-	private int maxTime;
-	private double t0;
+	protected int[] Z;// Z[i] = k means that X[i] is matched with Y[k]
+	protected int[] Z_best;
+	protected boolean[] used;
+	protected int f;
+	protected int f_best;
+	protected int maxTime;
+	protected double t0;
 	
 	public void mapData(){
 		System.out.println(name() + "::mapData INFO");
@@ -48,9 +49,12 @@ public class MaxMatching {
 		nX = X.length;
 		nY = Y.length;
 		a = new boolean[nX][nY];
+		c = new double[nX][nY];
 		for(int i = 0; i < nX; i++)
-			for(int j = 0; j < nY; j++)
+			for(int j = 0; j < nY; j++){
 				a[i][j] = false;
+				c[i][j] = 0;
+			}
 		mX2Index = new HashMap<Integer, Integer>();
 		mY2Index = new HashMap<Integer, Integer>();
 		for(int i = 0; i < X.length; i++) mX2Index.put(X[i], i);
@@ -60,6 +64,7 @@ public class MaxMatching {
 			int i = mX2Index.get(edgeX[k]);
 			int j = mY2Index.get(edgeY[k]);
 			a[i][j] = true;
+			c[i][j] = w[k];
 			//a[j][i] = true;
 		}
 		//System.out.println(name() + "::mapData, a = ");
@@ -70,11 +75,12 @@ public class MaxMatching {
 		//}
 			
 	}
-	private boolean check(int v, int i){
+	protected boolean check(int v, int i){
 		if(v == nY) return true;
+		//if(used[i] && v != nY) return false;
 		return !used[v] && a[i][v];
 	}
-	private void solution(){
+	protected void solution(){
 		if(f > f_best){
 			
 			for(int i = 0; i < Z.length; i++)
@@ -85,7 +91,7 @@ public class MaxMatching {
 			
 		}
 	}
-	private void TRY(int i){
+	protected void TRY(int i){
 		double t = System.currentTimeMillis() - t0;
 		if(t > maxTime) return;
 		
@@ -94,6 +100,7 @@ public class MaxMatching {
 				Z[i] = v;
 				used[v] = true;
 				if(v < nY) f++;
+				
 				if( i == nX-1){
 					solution();
 				}else{

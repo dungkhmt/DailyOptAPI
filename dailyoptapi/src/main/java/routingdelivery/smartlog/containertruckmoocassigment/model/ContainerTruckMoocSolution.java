@@ -2,8 +2,26 @@ package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class ContainerTruckMoocSolution {
 	private TruckRoute[] truckRoutes;
-	
+	private StatisticInformation statisticInformation;
 	private String description;
+
+	
+	
+	public ContainerTruckMoocSolution(TruckRoute[] truckRoutes,
+			StatisticInformation statisticInformation, String description) {
+		super();
+		this.truckRoutes = truckRoutes;
+		this.statisticInformation = statisticInformation;
+		this.description = description;
+	}
+
+	public StatisticInformation getStatisticInformation() {
+		return statisticInformation;
+	}
+
+	public void setStatisticInformation(StatisticInformation statisticInformation) {
+		this.statisticInformation = statisticInformation;
+	}
 
 	public TruckRoute[] getTruckRoutes() {
 		return truckRoutes;

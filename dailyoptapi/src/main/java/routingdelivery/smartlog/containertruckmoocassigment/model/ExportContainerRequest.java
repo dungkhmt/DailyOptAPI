@@ -4,7 +4,7 @@ public class ExportContainerRequest {
 	private String orderItemID;
 	
 	private String shipCompanyCode;
-	private String depotCode;
+	private String depotContainerCode;// depotContainer
 	private String containerCategory;// 20, 40, 45
 	private double weight;
 	private String earlyDateTimePickupAtDepot;
@@ -19,6 +19,8 @@ public class ExportContainerRequest {
 	private String earlyDateTimeUnloadAtPort;
 	private String lateDateTimeUnloadAtPort;
 	private int unloadDuration;
+	
+	
 	public String getOrderItemID() {
 		return orderItemID;
 	}
@@ -31,12 +33,7 @@ public class ExportContainerRequest {
 	public void setShipCompanyCode(String shipCompanyCode) {
 		this.shipCompanyCode = shipCompanyCode;
 	}
-	public String getDepotCode() {
-		return depotCode;
-	}
-	public void setDepotCode(String depotCode) {
-		this.depotCode = depotCode;
-	}
+
 	public String getContainerCategory() {
 		return containerCategory;
 	}
@@ -109,8 +106,16 @@ public class ExportContainerRequest {
 	public void setUnloadDuration(int unloadDuration) {
 		this.unloadDuration = unloadDuration;
 	}
+
+	public String getDepotContainerCode() {
+		return depotContainerCode;
+	}
+	public void setDepotContainerCode(String depotContainerCode) {
+		this.depotContainerCode = depotContainerCode;
+	}
+	
 	public ExportContainerRequest(String orderItemID, String shipCompanyCode,
-			String depotCode, String containerCategory, double weight,
+			String depotContainerCode, String containerCategory, double weight,
 			String earlyDateTimePickupAtDepot,
 			String lateDateTimePickupAtDepot, String wareHouseCode,
 			String earlyDateTimeLoadAtWarehouse,
@@ -120,7 +125,7 @@ public class ExportContainerRequest {
 		super();
 		this.orderItemID = orderItemID;
 		this.shipCompanyCode = shipCompanyCode;
-		this.depotCode = depotCode;
+		this.depotContainerCode = depotContainerCode;
 		this.containerCategory = containerCategory;
 		this.weight = weight;
 		this.earlyDateTimePickupAtDepot = earlyDateTimePickupAtDepot;

@@ -4,7 +4,7 @@ public class ImportContainerRequest {
 	private String orderItemID;
 	
 	private String shipCompanyCode;
-	private String depotCode;
+	private String depotContainerCode;
 	private String containerCategory;// 20, 40, 45
 	private double weight;
 	private String portCode;
@@ -31,11 +31,12 @@ public class ImportContainerRequest {
 	public void setShipCompanyCode(String shipCompanyCode) {
 		this.shipCompanyCode = shipCompanyCode;
 	}
-	public String getDepotCode() {
-		return depotCode;
+	
+	public String getDepotContainerCode() {
+		return depotContainerCode;
 	}
-	public void setDepotCode(String depotCode) {
-		this.depotCode = depotCode;
+	public void setDepotContainerCode(String depotContainerCode) {
+		this.depotContainerCode = depotContainerCode;
 	}
 	public String getContainerCategory() {
 		return containerCategory;
@@ -111,8 +112,10 @@ public class ImportContainerRequest {
 	public void setLateDateTimeDeliveryAtDepot(String lateDateTimeDeliveryAtDepot) {
 		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
 	}
+
+	
 	public ImportContainerRequest(String orderItemID, String shipCompanyCode,
-			String depotCode, String containerCategory, double weight,
+			String depotContainerCode, String containerCategory, double weight,
 			String portCode, String earlyDateTimePickupAtPort,
 			String lateDateTimePickupAtPort, int loadDuration,
 			String wareHouseCode, String earlyDateTimeUnloadAtWarehouse,
@@ -122,7 +125,7 @@ public class ImportContainerRequest {
 		super();
 		this.orderItemID = orderItemID;
 		this.shipCompanyCode = shipCompanyCode;
-		this.depotCode = depotCode;
+		this.depotContainerCode = depotContainerCode;
 		this.containerCategory = containerCategory;
 		this.weight = weight;
 		this.portCode = portCode;
