@@ -63,6 +63,12 @@ public class WeightedMaxMatching extends MaxMatching {
 	}
 	protected boolean check(int v, int i){
 		if(v == nY) return true;
+		for(int j = 0; j < i; j++){
+			if(v == Z[j]) return false;
+			if(v == j) return false;
+			if(i == Z[j]) return false;
+		}
+		
 		if(used[i] && v != nY) return false;
 		return !used[v] && a[i][v];
 	}
@@ -77,6 +83,7 @@ public class WeightedMaxMatching extends MaxMatching {
 			if(check(v,i)){
 				Z[i] = v;
 				used[v] = true;
+				//used[i] = true;
 				if(v < nY){
 					wf = wf + c[i][v];
 				}
@@ -90,6 +97,7 @@ public class WeightedMaxMatching extends MaxMatching {
 				if(v < nY){
 					wf = wf - c[i][v];
 				}
+				//used[i] = false;
 				used[v] = false;
 			}
 		}

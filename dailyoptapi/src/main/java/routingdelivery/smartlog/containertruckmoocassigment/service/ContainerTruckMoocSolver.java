@@ -9,6 +9,7 @@ import algorithms.matching.WeightedMaxMatching;
 import routingdelivery.model.DistanceElement;
 import routingdelivery.model.RoutingElement;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ActionEnum;
+import routingdelivery.smartlog.containertruckmoocassigment.model.ComboContainerMoocTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Container;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocInput;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocSolution;
@@ -53,6 +54,11 @@ public class ContainerTruckMoocSolver {
 	public HashMap<RouteElement, Integer> mPoint2ArrivalTime;
 	public HashMap<RouteElement, Integer> mPoint2DepartureTime;
 
+	// additional data structures
+	public HashMap<Container, Truck> mContainer2Truck;
+	public HashMap<Mooc, Truck> mMooc2Truck;
+	
+	
 	public PrintWriter log = null;
 
 	public void initLog() {
@@ -179,6 +185,23 @@ public class ContainerTruckMoocSolver {
 		return a > b ? a : b;
 	}
 
+	public ComboContainerMoocTruck findBestFitContainerMoocTruck4ExportRequest(ExportContainerRequest req){
+		//find and return available/feasible combo of truck-mooc-container for serving the request minimizing distance
+				
+		return null;
+	}
+	public ComboContainerMoocTruck findBestFitMoocTruck4ImportRequest(ImportContainerRequest req){
+		return null;
+	}
+	public ComboContainerMoocTruck findBestFitContainerMoocTruck4WarehouseRequest(WarehouseContainerTransportRequest req){
+		
+		return null;
+	}
+	public ComboContainerMoocTruck findBestFitMoocTruckFor2ImportRequest(ImportContainerRequest req1, ImportContainerRequest req1){
+		// req1 and req2 is of type 20, source is the same port and two destination are closed together
+		return null;
+	}
+	
 	public Container selectContainer(String containerCategory, String depotContainerCode){
 		for(int i = 0; i < input.getContainers().length; i++){
 			Container c = input.getContainers()[i];

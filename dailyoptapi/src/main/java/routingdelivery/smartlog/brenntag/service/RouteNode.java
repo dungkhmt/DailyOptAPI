@@ -69,6 +69,7 @@ public class RouteNode {
 			is += "(" + itemCode + "," + ia.amount + ") ";
 		}
 		return "location " + locationCode + ", arrT " + DateTimeUtils.unixTimeStamp2DateTime(arrivalTime) + ", depT " + 
-				DateTimeUtils.unixTimeStamp2DateTime(departureTime) + ", vh " + vehicleIndex + ", items " + is;
+				DateTimeUtils.unixTimeStamp2DateTime(departureTime) + ", vh " + vehicleIndex + " = " + 
+		solver.getVehicle(vehicleIndex).getCode() + ", items " + is;
 	}
 }
