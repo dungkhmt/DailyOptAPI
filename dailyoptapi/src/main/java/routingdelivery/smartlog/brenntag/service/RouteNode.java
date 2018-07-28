@@ -17,6 +17,15 @@ public class RouteNode {
 	public String type;
 	public BrenntagPickupDeliverySolver solver;
 	public String description;
+	
+	public String toStringShort(){
+		String s = "";
+		String locationCode = solver.locationCodes.get(locationIndex);
+		String at = DateTimeUtils.unixTimeStamp2DateTime(arrivalTime);
+		String dt = DateTimeUtils.unixTimeStamp2DateTime(departureTime);
+		s = s + locationCode + "(" + at + " -> " + dt + ")";
+		return s;
+	}
 	public RouteNode(int locationIndex, int arrivalTime, int departureTime,
 			ArrayList<ItemAmount> items, int vehicleIndex, String type) {
 		super();

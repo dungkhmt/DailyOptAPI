@@ -7,7 +7,6 @@ import java.util.Random;
 import localsearch.domainspecific.vehiclerouting.vrp.CBLSVR;
 import localsearch.domainspecific.vehiclerouting.vrp.Constants;
 import localsearch.domainspecific.vehiclerouting.vrp.IFunctionVR;
-
 import localsearch.domainspecific.vehiclerouting.vrp.VRManager;
 import localsearch.domainspecific.vehiclerouting.vrp.VarRoutesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.NodeWeightsManager;
@@ -226,7 +225,15 @@ public class RouteIndex implements IFunctionVR {
 		return XR.route(v);
 	}
 
-	
+	// x is before y on the same route
+	// remove (x, next[x]) and (y,next[y])
+	// add (x,y) and (next[x],next[y])
+	public double evaluateTwoOptMoveOneRoute(Point x, Point y) {
+		System.out.println(name() + "::evaluateTwoOptMoveOneRoute NOT IMPEMENTED YET");
+		System.exit(-1);
+		return 0;
+	}
+
 	public double evaluateOnePointMove(Point x, Point y) {
 		// TODO Auto-generated method stub
 		if (!XR.checkPerformOnePointMove(x, y)) {
@@ -553,6 +560,14 @@ public class RouteIndex implements IFunctionVR {
 			return Constants.NULL_POINT - XR.route(x);
 		}
 		return 0;
+	}
+
+	// x is before y on the same route
+	// remove (x, next[x]) and (y,next[y])
+	// add (x,y) and (next[x],next[y])
+	public void propagateTwoOptMoveOneRoute(Point x, Point y) {
+		System.out.println(name() + "::propagateTwoOptMoveOneRoute NOT IMPLEMENTED YET");
+		System.exit(-1);
 	}
 
 	public double evaluateAddTwoPoints(Point x1, Point y1, Point x2, Point y2) {

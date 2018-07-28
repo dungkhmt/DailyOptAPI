@@ -4,20 +4,12 @@ public class Item3D {
 	private int width;
 	private int length;
 	private int height;
-	private int itemID;
 	
-	public int getItemID() {
-		return itemID;
-	}
-	public void setItemID(int itemID) {
-		this.itemID = itemID;
-	}
 	public String toString(){
 		return "(" + width + "," + length + "," + height + ")";
 	}
-	public Item3D(int itemID, int width, int length, int height) {
+	public Item3D(int width, int length, int height) {
 		super();
-		this.itemID = itemID;
 		this.width = width;
 		this.length = length;
 		this.height = height;

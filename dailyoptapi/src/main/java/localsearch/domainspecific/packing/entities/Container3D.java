@@ -28,7 +28,5 @@ public class Container3D {
 		this.length = length;
 		this.height = height;
 	}
-	public String toString(){
-		return "(" + width + "," +  length + "," + height +")";
-	}
+	
 }

@@ -37,7 +37,16 @@ public class OSumVR implements OFunctionVR {
 	public double getValue(){
 		return _value;
 	}
-	
+	// x is before y on the same route
+	// remove (x, next[x]) and (y,next[y])
+	// add (x,y) and (next[x],next[y])
+	public double evaluateTwoOptMoveOneRoute(Point x, Point y) {
+		System.out.println(name()
+				+ "::evaluateTwoOptMoveOneRoute NOT IMPEMENTED YET");
+		System.exit(-1);
+		return 0;
+	}
+
 	public double evaluateKPointsMove(ArrayList<Point> x, ArrayList<Point> y){
 		double delta = 0;
 		for (OFunctionVR f : _functions)
@@ -387,6 +396,13 @@ public class OSumVR implements OFunctionVR {
 		}
 		//System.out.println(name() + "::initPropagation, _value = " + _value);
 	}
+	// x is before y on the same route
+	// remove (x, next[x]) and (y,next[y])
+	// add (x,y) and (next[x],next[y])
+	public void propagateTwoOptMoveOneRoute(Point x, Point y) {
+		System.out.println(name() + "::propagateTwoOptMoveOneRoute NOT IMPLEMENTED YET");
+		System.exit(-1);
+	}
 
 	public void propagateKPointsMove(ArrayList<Point> x, ArrayList<Point> y){
 		initPropagation();
@@ -568,26 +584,6 @@ public class OSumVR implements OFunctionVR {
 		//System.out.println(name() + "::updateWhenReacingTimePoint(" + t + "), _value = " + _value);
 		//for(int i = 1; i <= _functions.size(); i++)	System.out.println("f["+ i + "] = " +_functions.get(i-1).getValue());
 		//if(_functions.size() > 0)System.out.println(_functions.get(0).getVRPManager().getVarRoutesVRP().toString());
-	}
-	@Override
-	public double evaluateAddTwoPoints(Point x1, Point y1, Point x2, Point y2) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public double evaluateRemoveTwoPoints(Point x1, Point x2) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public void propagateAddTwoPoints(Point x1, Point y1, Point x2, Point y2) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void propagateRemoveTwoPoints(Point x1, Point x2) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

@@ -5,30 +5,6 @@ public class Move3D {
 	private int w;
 	private int l;
 	private int h;
-	private int itemID;
-	private Item3D item;
-	
-	
-	public Move3D(Position3D p, Item3D item){
-		this.position = p;
-		setItem(item);
-	}
-	public Item3D getItem() {
-		return item;
-	}
-	public void setItem(Item3D item) {
-		this.item = item;
-		this.w = item.getWidth();
-		this.l = item.getLength();
-		this.h = item.getHeight();
-		this.itemID = item.getItemID();
-	}
-	public int getItemID() {
-		return itemID;
-	}
-	public void setItemID(int itemID) {
-		this.itemID = itemID;
-	}
 	public Position3D getPosition() {
 		return position;
 	}
@@ -53,17 +29,13 @@ public class Move3D {
 	public void setH(int h) {
 		this.h = h;
 	}
-	public Move3D(Position3D position, int w, int l, int h, int itemID) {
+	public Move3D(Position3D position, int w, int l, int h) {
 		super();
 		this.position = position;
 		this.w = w;
 		this.l = l;
 		this.h = h;
-		this.itemID = itemID;
 	}
 	
-	public String toString(){
-		return "Pos " + position.toString() + ", sz(" + w + "," + l + "," + h + "), ID = " + itemID;
-	}
 	
 }

@@ -40,6 +40,7 @@ import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.Gre
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove6Explorer;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove7Explorer;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove8Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMoveOneRouteExplorer;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.INeighborhoodExplorer;
 import localsearch.domainspecific.vehiclerouting.vrp.search.GenericLocalSearch;
 
@@ -74,9 +75,9 @@ public class DemoVRP {
 	public void readData(String fn){
 		try{
 			Scanner in = new Scanner(new File(fn));
-			K = in.nextInt();
 			N = in.nextInt();
-			//capacity = in.nextInt();
+			K = in.nextInt();
+			capacity = in.nextInt();
 			demand = new int[N+1]; 
 			x = new int[N+1];
 			y = new int[N+1];
@@ -102,8 +103,6 @@ public class DemoVRP {
 		
 		mapPoint2ID = new HashMap<Point, Integer>();
 		// khoi tao cac diem bat dau va ket thuc cua cac xe (route)
-		capacity = demand[0];
-		demand[0] = 0;
 		for(int k = 1; k <= K; k++){
 			Point s = new Point(0);
 			Point t = new Point(0);
@@ -160,8 +159,9 @@ public class DemoVRP {
 		for(int k = 1; k <= K; k++){
 			Point tk = XR.endPoint(k);// diem cuoi cung cua route thu k
 			d[k-1] = new AccumulatedNodeWeightsOnPathVR(accDemand, tk);
-			CS.post(new Leq(d[k-1],capacity));
+			//CS.post(new Leq(d[k-1],capacity));
 		}
+		
 		cost = new IFunctionVR[K];
 		for(int k =1; k <= K; k++){
 			Point tk = XR.endPoint(k);
@@ -169,9 +169,19 @@ public class DemoVRP {
 		}
 		
 		
+		// demo routeIndex
+		Point pickup = clientPoints.get(3);
+		Point dropoff = clientPoints.get(4);
+		IFunctionVR ip = new RouteIndex(XR, pickup);
+		IFunctionVR id = new RouteIndex(XR,dropoff);
+		//CS.post(new Eq(ip,id));
+		
+		
+		
+		
 		obj = new TotalCostVR(XR, awm);// tong khoang cach di chuyen cua K xe (route)
 		F = new LexMultiFunctions();
-		F.add(new ConstraintViolationsVR(CS));
+		//F.add(new ConstraintViolationsVR(CS));
 		F.add(obj);		
 		mgr.close();
 	}
@@ -186,6 +196,7 @@ public class DemoVRP {
 			System.out.println(XR.endPoint(k).ID + " d[k] = " + d[k-1].getValue() + 
 					", cost[k] = " + cost[k-1].getValue());
 		}
+		System.out.println("length = " + obj.getValue());
 	}
 	
 	public void init(){
@@ -204,19 +215,27 @@ public class DemoVRP {
 		
 		mgr.performAddOnePoint(clientPoints.get(0), XR.startPoint(2));
 		mgr.performAddOnePoint(clientPoints.get(3), clientPoints.get(0));
+		Point x = clientPoints.get(0);
+		Point y = clientPoints.get(2);
 		
+		print();
+		double eval = obj.evaluateOnePointMove(x, y);
+		mgr.performOnePointMove(x, y);
+		System.out.println("eval = " + eval + ", obj = " + obj.getValue());
+		print();
 	}
 	
 	public void search(){
 		ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
 		NE.add(new GreedyOnePointMoveExplorer(XR, F));
+		//NE.add(new GreedyTwoOptMoveOneRouteExplorer(XR, F)); not complete implementation of all functions (except TotalCostVR) for this operator (TwoOptMoveOneRoute)
 
 		GenericLocalSearch se = new GenericLocalSearch(mgr);
 		se.setNeighborhoodExplorer(NE);
 		se.setObjectiveFunction(F);
 		se.setMaxStable(50);
 
-		se.search(1000, 10);
+		se.search(10, 3);
 		
 		
 	}
@@ -225,15 +244,15 @@ public class DemoVRP {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		DemoVRP A = new DemoVRP();
-		A.readData("data/testdemo/cvrp-2-11.inp");
+		A.readData("cvrp.txt");
 		A.mapping();
 		A.stateModel();
 		A.print();
 		A.step();
-		A.print();
+		//A.print();
 		A.search();
 		//A.init();
-		System.out.println("-------------");
+		//System.out.println("-------------");
 		A.print();	
 	}
 

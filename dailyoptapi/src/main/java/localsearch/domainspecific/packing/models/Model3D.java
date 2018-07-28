@@ -84,15 +84,8 @@ public class Model3D {
 	private int[] x_l;// coordinates in length axis
 	private int[] x_h;// coordinates in height axis
 	
-	private String code;
 	
 	
-	public String getCode() {
-		return code;
-	}
-	public void setCode(String code) {
-		this.code = code;
-	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 

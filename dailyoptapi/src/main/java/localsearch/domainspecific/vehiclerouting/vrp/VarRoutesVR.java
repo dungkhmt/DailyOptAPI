@@ -183,35 +183,9 @@ public class VarRoutesVR{
 		mgr.initPropagation();
 	}
 	
-	
 	public String toString(){
 		String s = "";
 		for(int k = 1; k <= K; k++){
-			s += "route[" + k + "] = ";
-			Point x = getStartingPointOfRoute(k);
-			while(x != getTerminatingPointOfRoute(k)){
-				s = s + x.getID() + " " + " -> ";
-				x = next(x);
-			}
-			s = s + x.getID() + "\n";
-		}
-		return s;
-	}
-	public String toStringRoute(int k){
-		String s = "";
-			s += "route[" + k + "] = ";
-			Point x = getStartingPointOfRoute(k);
-			while(x != getTerminatingPointOfRoute(k)){
-				s = s + x.getID() + " " + " -> ";
-				x = next(x);
-			}
-			s = s + x.getID() + "\n";
-		return s;
-	}
-
-	public String toStringShort(){
-		String s = "";
-		for(int k = 1; k <= K; k++)if(next(startPoint(k)) != endPoint(k)){
 			s += "route[" + k + "] = ";
 			Point x = getStartingPointOfRoute(k);
 			while(x != getTerminatingPointOfRoute(k)){
@@ -488,6 +462,48 @@ public class VarRoutesVR{
 		int v = getIndex(p);
 		return v >= 0 && pointType[v] == PointType.CLIENT;
 	}
+	
+    public boolean checkPerformTwoOptMoveOneRoute(Point x, Point y){
+    	// x and y are in the same route, x is before y
+    	// remove (x,next[x]) and (y,next[y])
+    	// add (x,y) and (next[x],next[y]), reverse path from y to next[x]
+    	int idx = getIndex(x);
+    	int idy = getIndex(y);
+    	//if(idx != idy) return false;
+    	if(!isBefore(x, y)) return false;
+    	if(y == endPoint(route(y))) return false;    		
+    	return true;
+    	
+    }
+    public void performTwoOptMoveOneRoute(Point x, Point y){
+    	// x and y are in the same route, x is before y
+    	// remove (x,next[x]) and (y,next[y])
+    	// add (x,y) and (next[x],next[y]), reverse path from y to next[x]
+    	if(!checkPerformTwoOptMoveOneRoute(x,y)){
+    		System.out.println(name() + ":: Error performTwoOptMoveOneRoute: " + x + " " + y + "\n" + toString());
+    		System.exit(-1);
+    	}
+    	int idx = getIndex(x);
+    	int idy = getIndex(y);
+    	performTwoOptMoveOneRoute(idx, idy);
+    }
+    private void performTwoOptMoveOneRoute(int x, int y){
+    	// x and y are in the same route, x is before y
+    	// remove (x,next[x]) and (y,next[y])
+    	// add (x,y) and (next[x],next[y]), reverse path from y to next[x]
+    	copySolution();
+    	int nx = next[x];
+    	int ny = next[y];
+    	reverse(y,nx);
+    	next[x] = y;
+    	prev[y] = x;
+    	next[nx] = ny;
+    	prev[ny] = nx;
+    	int rX = route[x];
+    	update(rX); 
+    }
+
+    
     // move of type a [Groer et al., 2010]
     // move customer x to from route of x to route of y; insert x into the position between y and next[y]
     // x and y are not the depot
@@ -1898,7 +1914,32 @@ public class VarRoutesVR{
     	}
     	return sz;
     }
-	public static void main(String[] args) {
+	public String toStringShort(){
+		String s = "";
+		for(int k = 1; k <= K; k++)if(next(startPoint(k)) != endPoint(k)){
+			s += "route[" + k + "] = ";
+			Point x = getStartingPointOfRoute(k);
+			while(x != getTerminatingPointOfRoute(k)){
+				s = s + x.getID() + " " + " -> ";
+				x = next(x);
+			}
+			s = s + x.getID() + "\n";
+		}
+		return s;
+	}
+	public String toStringRoute(int k){
+		String s = "";
+			s += "route[" + k + "] = ";
+			Point x = getStartingPointOfRoute(k);
+			while(x != getTerminatingPointOfRoute(k)){
+				s = s + x.getID() + " " + " -> ";
+				x = next(x);
+			}
+			s = s + x.getID() + "\n";
+		return s;
+	}
+
+    public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		VRManager mgr = new VRManager();
 		VarRoutesVR XR = new VarRoutesVR(mgr);

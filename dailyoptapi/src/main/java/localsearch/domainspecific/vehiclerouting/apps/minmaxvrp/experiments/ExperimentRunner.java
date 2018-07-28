@@ -163,6 +163,7 @@ public class ExperimentRunner {
 					
 					fo = out_dir + "MinMaxCVRPMultiNeighborhoodsWithTotalCostNotPerturbNeighborhood-ins-" + 
 							fn[i] + "-run-" + r + ".txt";
+					
 					MinMaxCVRPMultiNeighborhoodsWithTotalCostNotPerturbNeighborhood.run(fi, fo, timeLimit);
 			
 				}
@@ -348,6 +349,10 @@ public class ExperimentRunner {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		//ExperimentRunner.runStatistics( "output/MinMaxVRP/Christophides/std-all-round-euclide-distance/","output/MinMaxVRP/Christophides/std-all-round-euclide-distance/statistic.txt");
+		
+		//ExperimentRunner.runStatistics( "output/MinMaxVRP/Kelly/std_all/","output/MinMaxVRP/Kelly/std_all/statistic.txt");
+		
 		
 		//ExperimentRunner.runStatistics( "output/MinMaxVRP/Christophides/std-all-round-euclide-distance/","output/MinMaxVRP/Christophides/std-all-round-euclide-distance/statistic.txt");
 		String[] type = new String[]{"F-VRP", "CMT", "CE-VRP"};

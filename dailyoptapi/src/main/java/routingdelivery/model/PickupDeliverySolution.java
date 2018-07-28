@@ -7,7 +7,14 @@ public class PickupDeliverySolution {
 	private Item[] unScheduledItems;
 	private PickupDeliveryRequest[] unScheduledRequests;
 	private String description;
+	private String errorMSG;
 	
+	public String getErrorMSG() {
+		return errorMSG;
+	}
+	public void setErrorMSG(String errorMSG) {
+		this.errorMSG = errorMSG;
+	}
 	public PickupDeliverySolution(RoutingSolution[] routes,
 			Item[] unScheduledItems,
 			PickupDeliveryRequest[] unScheduledRequests, String description) {

@@ -7,10 +7,8 @@ public class RotationGenerator {
 	private int w;
 	private int l;
 	private int h;
-	private int ID;
 	public RotationGenerator(Item3D I){
 		w = I.getWidth(); l = I.getLength(); h = I.getHeight();
-		ID = I.getItemID();
 		items =new ArrayList<Item3D>();
 	}
 	public RotationGenerator(int w, int l, int h){
@@ -20,12 +18,12 @@ public class RotationGenerator {
 	
 	public void generate(){
 		items.clear();
-		items.add(new Item3D(ID,w,l,h));
-		//items.add(new Item3D(ID,w,h,l));
-		//items.add(new Item3D(ID,l,w,h));
-		//items.add(new Item3D(ID,l,h,w));
-		//items.add(new Item3D(ID,h,w,l));
-		//items.add(new Item3D(ID,h,l,w));
+		items.add(new Item3D(w,l,h));
+		items.add(new Item3D(w,h,l));
+		items.add(new Item3D(l,w,h));
+		items.add(new Item3D(l,h,w));
+		items.add(new Item3D(h,w,l));
+		items.add(new Item3D(h,l,w));
 	}
 	public ArrayList<Item3D> getItems() {
 		return items;
