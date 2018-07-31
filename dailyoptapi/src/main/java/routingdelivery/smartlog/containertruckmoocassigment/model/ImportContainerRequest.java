@@ -6,6 +6,7 @@ public class ImportContainerRequest {
 	private String shipCompanyCode;
 	private String depotContainerCode;
 	private String containerCategory;// 20, 40, 45
+	private String containerCode;
 	private double weight;
 	private String portCode;
 	private String earlyDateTimePickupAtPort;
@@ -19,6 +20,41 @@ public class ImportContainerRequest {
 	
 	private String earlyDateTimeDeliveryAtDepot;
 	private String lateDateTimeDeliveryAtDepot;
+	
+	
+	public ImportContainerRequest(String orderItemID, String shipCompanyCode,
+			String depotContainerCode, String containerCategory,
+			String containerCode, double weight, String portCode,
+			String earlyDateTimePickupAtPort, String lateDateTimePickupAtPort,
+			int loadDuration, String wareHouseCode,
+			String earlyDateTimeUnloadAtWarehouse,
+			String lateDateTimeUnloadAtWarehouse, int unloadDuration,
+			String earlyDateTimeDeliveryAtDepot,
+			String lateDateTimeDeliveryAtDepot) {
+		super();
+		this.orderItemID = orderItemID;
+		this.shipCompanyCode = shipCompanyCode;
+		this.depotContainerCode = depotContainerCode;
+		this.containerCategory = containerCategory;
+		this.containerCode = containerCode;
+		this.weight = weight;
+		this.portCode = portCode;
+		this.earlyDateTimePickupAtPort = earlyDateTimePickupAtPort;
+		this.lateDateTimePickupAtPort = lateDateTimePickupAtPort;
+		this.loadDuration = loadDuration;
+		this.wareHouseCode = wareHouseCode;
+		this.earlyDateTimeUnloadAtWarehouse = earlyDateTimeUnloadAtWarehouse;
+		this.lateDateTimeUnloadAtWarehouse = lateDateTimeUnloadAtWarehouse;
+		this.unloadDuration = unloadDuration;
+		this.earlyDateTimeDeliveryAtDepot = earlyDateTimeDeliveryAtDepot;
+		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
+	}
+	public String getContainerCode() {
+		return containerCode;
+	}
+	public void setContainerCode(String containerCode) {
+		this.containerCode = containerCode;
+	}
 	public String getOrderItemID() {
 		return orderItemID;
 	}

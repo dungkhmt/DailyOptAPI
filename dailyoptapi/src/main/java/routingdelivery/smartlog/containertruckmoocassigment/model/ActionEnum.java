@@ -14,6 +14,7 @@ public class ActionEnum {
 	public static final String REST_AT_DEPOT = "REST_AT_DEPOT"; 
 	
 	// sequence action import order
+	public static final String WAIT_LOADED_CONTAINER_AT_PORT = "WAIT_LOADED_CONTAINER_AT_PORT";
 	public static final String LINK_LOADED_CONTAINER_AT_PORT = "LINK_LOADED_CONTAINER_AT_PORT";
 	public static final String WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE = "WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE";
 	public static final String LINK_EMPTY_CONTAINER_AT_WAREHOUSE = "LINK_EMPTY_CONTAINER_AT_WAREHOUSE";

@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 //import org.apache.log4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ import routingdelivery.smartlog.brenntag.service.BrenntagPickupDeliverySolver;
 import routingdelivery.smartlog.brenntag.service.RBrennTagPickupDeliverySolver;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocInput;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocSolution;
+import routingdelivery.smartlog.containertruckmoocassigment.service.ContainerTruckMoocService;
 import routingdelivery.smartlog.containertruckmoocassigment.service.ContainerTruckMoocSolver;
 import routingdelivery.smartlog.sem.model.SEMPickupDeliveryInput;
 import routingdelivery.smartlog.sem.model.SEMPickupDeliverySolution;
@@ -151,9 +153,10 @@ public class TestAPI {
 			ex.printStackTrace();
 		}
 		//PickupDeliverySolver solver = new PickupDeliverySolver();
-		ContainerTruckMoocSolver solver = new ContainerTruckMoocSolver();
+		//ContainerTruckMoocSolver solver = new ContainerTruckMoocSolver();
 		//return solver.compute(input);
-		return solver.solve(input);
+		ContainerTruckMoocService service = new ContainerTruckMoocService();
+		return service.solve(input);
 		
 	}
 
