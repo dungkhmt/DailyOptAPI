@@ -21,6 +21,11 @@ public class RouteElement {
 	private String departureTime;
 	private double distance;
 	
+	public String toString(){
+		String s = "";
+		s = s + getLocationCode() + ", Action " + getAction();
+		return s;
+	}
 	public void deriveFrom(RouteElement e){
 		//this.depotTruck = e.depotTruck;
 		//this.depotMooc = e.depotMooc;

@@ -82,44 +82,49 @@ public class SEMPickupDeliverySolver {
 	protected Random R = new Random();
 	protected HashSet<Integer> cand;
 
-	private RoutingElement createRoutingElementFirstPoint(int s){
+	private RoutingElement createRoutingElementFirstPoint(int s) {
 		String code = shippers[s].getStartLocationCode();
 		String orderId = "";
 		String address = "";
 		String latlng = "";
 		double lat = shippers[s].getStartLat();
 		double lng = shippers[s].getStartLng();
-		String arrivalTime = DateTimeUtils.unixTimeStamp2DateTime((long)eat.getEarliestArrivalTime(XR.startPoint(s+1)));
-		String departureTime = DateTimeUtils.unixTimeStamp2DateTime((long)eat.getEarliestArrivalTime(XR.startPoint(s+1)));
+		String arrivalTime = DateTimeUtils.unixTimeStamp2DateTime((long) eat
+				.getEarliestArrivalTime(XR.startPoint(s + 1)));
+		String departureTime = DateTimeUtils.unixTimeStamp2DateTime((long) eat
+				.getEarliestArrivalTime(XR.startPoint(s + 1)));
 		String description = "S";
 		double load = 0;
 		double distance = 0;
 
-		RoutingElement e = new RoutingElement(code, address, latlng,
-				lat, lng, arrivalTime, departureTime, description,
-				orderId, load, distance);
+		RoutingElement e = new RoutingElement(code, address, latlng, lat, lng,
+				arrivalTime, departureTime, description, orderId, load,
+				distance);
 		return e;
 	}
-	
-	private RoutingElement createRoutingElementEndPoint(int s){
+
+	private RoutingElement createRoutingElementEndPoint(int s) {
 		String code = shippers[s].getEndLocationCode();
 		String orderId = "";
 		String address = "";
 		String latlng = "";
 		double lat = shippers[s].getEndLat();
 		double lng = shippers[s].getEndLng();
-		String arrivalTime = DateTimeUtils.unixTimeStamp2DateTime((long)eat.getEarliestArrivalTime(XR.endPoint(s+1)));
-		String departureTime = DateTimeUtils.unixTimeStamp2DateTime((long)eat.getEarliestArrivalTime(XR.endPoint(s+1)));
+		String arrivalTime = DateTimeUtils.unixTimeStamp2DateTime((long) eat
+				.getEarliestArrivalTime(XR.endPoint(s + 1)));
+		String departureTime = DateTimeUtils.unixTimeStamp2DateTime((long) eat
+				.getEarliestArrivalTime(XR.endPoint(s + 1)));
 		String description = "S";
 		double load = weightTripOfShipper[s].getValue();
 		double distance = distanceRoutes[s].getValue();
 
-		RoutingElement e = new RoutingElement(code, address, latlng,
-				lat, lng, arrivalTime, departureTime, description,
-				orderId, load, distance);
+		RoutingElement e = new RoutingElement(code, address, latlng, lat, lng,
+				arrivalTime, departureTime, description, orderId, load,
+				distance);
 		return e;
 	}
-	private RoutingElement createRoutingElementForPoint(Point p){
+
+	private RoutingElement createRoutingElementForPoint(Point p) {
 		SEMPickupDeliveryRequest r = mPoint2Request.get(p);
 		String code = r.getPickupLocationCode();
 		String orderId = r.getOrderID();
@@ -127,24 +132,25 @@ public class SEMPickupDeliverySolver {
 		String latlng = "";
 		double lat = r.getPickupLat();
 		double lng = r.getPickupLng();
-		long at = (long)eat.getEarliestArrivalTime(p);
-		if(at < earliestAllowedArrivalTime.get(p)) at = earliestAllowedArrivalTime.get(p);
+		long at = (long) eat.getEarliestArrivalTime(p);
+		if (at < earliestAllowedArrivalTime.get(p))
+			at = earliestAllowedArrivalTime.get(p);
 		long dt = at + serviceDuration.get(p);
 		String arrivalTime = DateTimeUtils.unixTimeStamp2DateTime(at);
 		String departureTime = DateTimeUtils.unixTimeStamp2DateTime(dt);
 		String description = mPoint2Type.get(p);
 		double load = accWeightPoint.getSumWeights(p);
 		double distance = accDistance.getCostRight(p);
-		
+
 		if (mPoint2Type.get(p).equals("D")) {
 			code = r.getDeliveryLocationCode();
 			lat = r.getDeliveryLat();
 			lng = r.getDeliveryLng();
 		}
 
-		RoutingElement e = new RoutingElement(code, address, latlng,
-				lat, lng, arrivalTime, departureTime, description,
-				orderId, load, distance);
+		RoutingElement e = new RoutingElement(code, address, latlng, lat, lng,
+				arrivalTime, departureTime, description, orderId, load,
+				distance);
 		return e;
 	}
 
@@ -168,31 +174,35 @@ public class SEMPickupDeliverySolver {
 			RoutingElement fe = createRoutingElementFirstPoint(s);
 			for (p = XR.next(XR.startPoint(s + 1)); p != XR.endPoint(s + 1); p = XR
 					.next(p)) {
-				if(mPoint2Type.get(p).equals("P")){
+				if (mPoint2Type.get(p).equals("P")) {
 					totalWeight += weightPointManager.getWeight(p);
-					if(maxWeight < accWeightPoint.getSumWeights(p))
+					if (maxWeight < accWeightPoint.getSumWeights(p))
 						maxWeight = accWeightPoint.getSumWeights(p);
 				}
-				
+
 				RoutingElement e = createRoutingElementForPoint(p);
 				l_elements.add(e);
 			}
-			p = XR.endPoint(s+1);
+			p = XR.endPoint(s + 1);
 			RoutingElement te = createRoutingElementEndPoint(s);
-			
+
 			RoutingElement[] elements = new RoutingElement[l_elements.size()];
 			for (int i = 0; i < l_elements.size(); i++)
 				elements[i] = l_elements.get(i);
-			routes[s] = new SEMRoutingSolution(shippers[s], elements, (int)nbOrderOfShipper[s].getValue(), 
-					amountMoneyOfShipper[s].getValue(), maxWeight, totalWeight, distanceRoutes[s].getValue());
+			routes[s] = new SEMRoutingSolution(shippers[s], elements,
+					(int) nbOrderOfShipper[s].getValue(),
+					amountMoneyOfShipper[s].getValue(), maxWeight, totalWeight,
+					distanceRoutes[s].getValue());
 		}
-		SEMPickupDeliveryRequest[] unServedRequests = new SEMPickupDeliveryRequest[cand.size()];
+		SEMPickupDeliveryRequest[] unServedRequests = new SEMPickupDeliveryRequest[cand
+				.size()];
 		int idx = -1;
-		for(int i: cand){
+		for (int i : cand) {
 			idx++;
 			unServedRequests[idx] = requests[i];
 		}
-		SEMPickupDeliverySolution sol = new SEMPickupDeliverySolution(routes, unServedRequests);
+		SEMPickupDeliverySolution sol = new SEMPickupDeliverySolution(routes,
+				unServedRequests);
 		return sol;
 	}
 
@@ -351,14 +361,18 @@ public class SEMPickupDeliverySolver {
 
 			earliestAllowedArrivalTime.put(s, (int) DateTimeUtils
 					.dateTime2Int(shippers[i].getStartWorkingTime()));
-			lastestAllowedArrivalTime.put(s, (int) DateTimeUtils
-					.dateTime2Int(shippers[i].getEndWorkingTime()));
+
+			if (shippers[i].getEndWorkingTime() != null)
+				lastestAllowedArrivalTime.put(s, (int) DateTimeUtils
+						.dateTime2Int(shippers[i].getEndWorkingTime()));
 			serviceDuration.put(s, 0);
 
 			earliestAllowedArrivalTime.put(t, (int) DateTimeUtils
 					.dateTime2Int(shippers[i].getStartWorkingTime()));
-			lastestAllowedArrivalTime.put(t, (int) DateTimeUtils
-					.dateTime2Int(shippers[i].getEndWorkingTime()));
+
+			if (shippers[i].getEndWorkingTime() != null)
+				lastestAllowedArrivalTime.put(t, (int) DateTimeUtils
+						.dateTime2Int(shippers[i].getEndWorkingTime()));
 			serviceDuration.put(t, 0);
 		}
 	}
@@ -376,19 +390,16 @@ public class SEMPickupDeliverySolver {
 		}
 		CS = new ConstraintSystemVR(mgr);
 
-		accWeightPoint = new AccumulatedWeightNodesVR(
-				XR, weightPointManager);
-		accMoneyPoint = new AccumulatedWeightNodesVR(
-				XR, moneyPointManager);
-		accNbPoints = new AccumulatedWeightNodesVR(XR,
-				nwm);
+		accWeightPoint = new AccumulatedWeightNodesVR(XR, weightPointManager);
+		accMoneyPoint = new AccumulatedWeightNodesVR(XR, moneyPointManager);
+		accNbPoints = new AccumulatedWeightNodesVR(XR, nwm);
 		accDistance = new AccumulatedWeightEdgesVR(XR, awm);
-		
+
 		nbOrderOfShipper = new IFunctionVR[XR.getNbRoutes()];
 		amountMoneyOfShipper = new IFunctionVR[XR.getNbRoutes()];
 		weightTripOfShipper = new IFunctionVR[XR.getNbRoutes()];
 		distanceRoutes = new IFunctionVR[XR.getNbRoutes()];
-		
+
 		for (int i = 0; i < XR.getNbRoutes(); i++) {
 			nbOrderOfShipper[i] = new AccumulatedNodeWeightsOnPathVR(
 					accNbPoints, XR.endPoint(i + 1));
@@ -396,9 +407,11 @@ public class SEMPickupDeliverySolver {
 					accMoneyPoint, XR.endPoint(i + 1));
 			weightTripOfShipper[i] = new AccumulatedNodeWeightsOnPathVR(
 					accWeightPoint, XR.endPoint(i + 1));
-			distanceRoutes[i] = new AccumulatedEdgeWeightsOnPathVR(accDistance, XR.endPoint(i+1));
-			
-			CS.post(new Leq(nbOrderOfShipper[i], shippers[i].getMaxOrder() - shippers[i].getCurrentNbOrders()));
+			distanceRoutes[i] = new AccumulatedEdgeWeightsOnPathVR(accDistance,
+					XR.endPoint(i + 1));
+
+			CS.post(new Leq(nbOrderOfShipper[i], shippers[i].getMaxOrder()
+					- shippers[i].getCurrentNbOrders()));
 			CS.post(new Leq(amountMoneyOfShipper[i], shippers[i]
 					.getMaxAmountMoney() - shippers[i].getCurrentMoney()));
 			CS.post(new Leq(weightTripOfShipper[i], shippers[i]
@@ -445,7 +458,8 @@ public class SEMPickupDeliverySolver {
 				System.out.println("Cannot select shipper --> BREAK");
 				break;
 			}
-			sel_s = cand_s.get(R.nextInt(cand_s.size()));
+			//sel_s = cand_s.get(R.nextInt(cand_s.size()));
+			sel_s = cand_s.get(0);
 			System.out.println("sel_s = " + sel_s);
 			// select requests
 			double min_eval_distance = Integer.MAX_VALUE;

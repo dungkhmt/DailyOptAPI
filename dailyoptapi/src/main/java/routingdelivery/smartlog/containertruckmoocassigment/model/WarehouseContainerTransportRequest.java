@@ -6,6 +6,7 @@ public class WarehouseContainerTransportRequest {
 	private String containerCategory;
 	private double weight;
 	
+	private String shipCompanyCode;
 	private String fromWarehouseCode;
 	private String earlyDateTimeLoad;
 	private String lateDateTimeLoad;
@@ -15,6 +16,14 @@ public class WarehouseContainerTransportRequest {
 	private String earlyDateTimeUnload;
 	private String lateDateTimeUnload;
 	private int unloadDuration;
+	
+	
+	public String getShipCompanyCode() {
+		return shipCompanyCode;
+	}
+	public void setShipCompanyCode(String shipCompanyCode) {
+		this.shipCompanyCode = shipCompanyCode;
+	}
 	public String getItemOrderID() {
 		return itemOrderID;
 	}

@@ -33,6 +33,11 @@ public class VehicleTrip {
 				lst_pickup.add(seqPoints.get(i));
 		}
 	}
+	public boolean contains(Point p){
+		for(Point x: seqPoints)
+			if(x == p) return true;
+		return false;
+	}
 	public ArrayList<Point> getPickupSeqPoints(){
 		return lst_pickup;
 		/*

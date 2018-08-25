@@ -7,7 +7,8 @@ public class ContainerTruckMoocService {
 
 	public ContainerTruckMoocSolution solve(ContainerTruckMoocInput input) {
 		GreedyDirectServiceSolver solver = new GreedyDirectServiceSolver();
-		return solver.solve(input);
+		//return solver.solve(input);
+		return solver.solveDirect(input);
 	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

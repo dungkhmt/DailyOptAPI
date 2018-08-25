@@ -280,7 +280,7 @@ public class ContainerTruckMoocInput {
 		companies[1] = new ShipCompany("Com02",depotContainerCode);
 		
 		DepotContainer[] depotContainers = new DepotContainer[3];
-		depotContainers[0] = new DepotContainer("DepotContainer001","0007",1800,1800);
+		depotContainers[0] = new DepotContainer("DepotContainer001","0010",1800,1800);
 		depotContainers[1] = new DepotContainer("DepotContainer002","0009",1800,1800);
 		depotContainers[2] = new DepotContainer("DepotContainer003","0011",1800,1800);
 		
@@ -290,7 +290,7 @@ public class ContainerTruckMoocInput {
 		
 		DepotMooc[] depotMoocs = new DepotMooc[2];
 		depotMoocs[0] = new DepotMooc("DepotMooc001","0008",900,900);
-		depotMoocs[1] = new DepotMooc("DepotMooc002","0010",900,900);
+		depotMoocs[1] = new DepotMooc("DepotMooc002","0007",900,900);
 		
 		Warehouse[] warehouses = new Warehouse[warehouseCode.length];
 		warehouses[0] = new Warehouse("Warehouse001","0001");
@@ -333,31 +333,31 @@ public class ContainerTruckMoocInput {
 				"DepotContainer001",
 				"20", 20,
 				"2018-07-17 08:00:00",
-				"2018-07-17 12:00:00",
+				"2018-07-20 12:00:00",
 				"Warehouse004",
 				"2018-07-17 08:00:00",
-				"2018-07-17 14:00:00",
+				"2018-07-20 14:00:00",
 				36000,
 				"Port001",
 				"2018-07-17 08:00:00",
-				"2018-07-17 20:00:00",
+				"2018-07-20 20:00:00",
 				36000
 				);
 		
 		exContReq[1] = new ExportContainerRequest(
-				"ORD0001",
+				"ORD0002",
 				"Com01",
 				"DepotContainer001",
 				"20", 20,
 				"2018-07-17 08:00:00",
-				"2018-07-17 12:00:00",
+				"2018-07-20 12:00:00",
 				"Warehouse001",
 				"2018-07-17 08:00:00",
-				"2018-07-17 14:00:00",
+				"2018-07-20 14:00:00",
 				36000,
 				"Port002",
 				"2018-07-17 08:00:00",
-				"2018-07-17 20:00:00",
+				"2018-07-20 20:00:00",
 				36000
 				);
 		exContReq[2] = new ExportContainerRequest(
@@ -366,14 +366,14 @@ public class ContainerTruckMoocInput {
 				"DepotContainer001",
 				"40", 40,
 				"2018-07-17 08:00:00",
-				"2018-07-17 12:00:00",
+				"2018-07-20 12:00:00",
 				"Warehouse002",
 				"2018-07-17 08:00:00",
-				"2018-07-17 14:00:00",
+				"2018-07-20 14:00:00",
 				36000,
 				"Port001",
 				"2018-07-17 08:00:00",
-				"2018-07-17 20:00:00",
+				"2018-07-20 20:00:00",
 				36000
 				);
 		
@@ -385,14 +385,14 @@ public class ContainerTruckMoocInput {
 				"20", 20,
 				"Port001",
 				"2018-07-17 08:00:00",
-				"2018-07-17 12:00:00",
+				"2018-07-20 12:00:00",
 				36000,
 				"Warehouse004",
 				"2018-07-17 08:00:00",
-				"2018-07-17 14:00:00",
+				"2018-07-20 14:00:00",
 				36000,
 				"2018-07-17 08:00:00",
-				"2018-07-17 20:00:00"
+				"2018-07-20 20:00:00"
 				);
 		imContReq[1] = new ImportContainerRequest(
 				"ORD0005",
@@ -401,14 +401,14 @@ public class ContainerTruckMoocInput {
 				"20", 20,
 				"Port001",
 				"2018-07-17 08:00:00",
-				"2018-07-17 12:00:00",
+				"2018-07-20 12:00:00",
 				36000,
 				"Warehouse002",
 				"2018-07-17 08:00:00",
-				"2018-07-17 14:00:00",
+				"2018-07-20 14:00:00",
 				36000,
 				"2018-07-17 08:00:00",
-				"2018-07-17 20:00:00"
+				"2018-07-20 20:00:00"
 				);
 		imContReq[2] = new ImportContainerRequest(
 				"ORD0006",
@@ -417,14 +417,14 @@ public class ContainerTruckMoocInput {
 				"45", 45,
 				"Port001",
 				"2018-07-17 08:00:00",
-				"2018-07-17 12:00:00",
+				"2018-07-20 12:00:00",
 				36000,
 				"Warehouse001",
 				"2018-07-17 08:00:00",
-				"2018-07-17 14:00:00",
+				"2018-07-20 14:00:00",
 				36000,
 				"2018-07-17 08:00:00",
-				"2018-07-17 20:00:00"
+				"2018-07-20 20:00:00"
 				);
 
 		WarehouseContainerTransportRequest[] wReq = new WarehouseContainerTransportRequest[2];
@@ -434,11 +434,11 @@ public class ContainerTruckMoocInput {
 				20, 
 				"Warehouse002", 
 				"2018-07-17 08:00:00", 
-				"2018-07-17 20:00:00", 
+				"2018-07-20 20:00:00", 
 				18000, 
 				"Warehouse001",
 				"2018-07-17 08:00:00", 
-				"2018-07-17 20:00:00", 
+				"2018-07-20 20:00:00", 
 				18000
 				);
 		
@@ -448,11 +448,11 @@ public class ContainerTruckMoocInput {
 				20, 
 				"Warehouse003", 
 				"2018-07-17 08:00:00", 
-				"2018-07-17 20:00:00", 
+				"2018-07-20 20:00:00", 
 				18000, 
 				"Warehouse002",
 				"2018-07-17 08:00:00", 
-				"2018-07-17 20:00:00", 
+				"2018-07-20 20:00:00", 
 				18000
 				);
 		
@@ -494,7 +494,7 @@ public class ContainerTruckMoocInput {
 		String json = gson.toJson(input);
 		
 		try{
-			PrintWriter out = new PrintWriter("C:/tmp/contaier.json");
+			PrintWriter out = new PrintWriter("C:/tmp/container.json");
 			out.print(json);
 			out.close();
 		}catch(Exception ex){

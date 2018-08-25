@@ -80,12 +80,14 @@ public class BrennTagRouteSolverForOneVehicle {
 		solver.earliestAllowedArrivalTime.put(s,
 				(int) DateTimeUtils.dateTime2Int(vh.getStartWorkingTime()));
 		solver.serviceDuration.put(s, 0);
+		if(vh.getEndWorkingTime() != null)
 		solver.lastestAllowedArrivalTime.put(s,
 				(int) DateTimeUtils.dateTime2Int(vh.getEndWorkingTime()));
 
 		solver.earliestAllowedArrivalTime.put(t,
 				(int) DateTimeUtils.dateTime2Int(vh.getStartWorkingTime()));
 		solver.serviceDuration.put(t, 0);
+		if(vh.getEndWorkingTime() != null)
 		solver.lastestAllowedArrivalTime.put(t,
 				(int) DateTimeUtils.dateTime2Int(vh.getEndWorkingTime()));
 
@@ -193,12 +195,14 @@ public class BrennTagRouteSolverForOneVehicle {
 		solver.earliestAllowedArrivalTime.put(s,
 				(int) DateTimeUtils.dateTime2Int(vh.getStartWorkingTime()));
 		solver.serviceDuration.put(s, 0);
+		if(vh.getEndWorkingTime() != null)
 		solver.lastestAllowedArrivalTime.put(s,
 				(int) DateTimeUtils.dateTime2Int(vh.getEndWorkingTime()));
 
 		solver.earliestAllowedArrivalTime.put(t,
 				(int) DateTimeUtils.dateTime2Int(vh.getStartWorkingTime()));
 		solver.serviceDuration.put(t, 0);
+		if(vh.getEndWorkingTime() != null)
 		solver.lastestAllowedArrivalTime.put(t,
 				(int) DateTimeUtils.dateTime2Int(vh.getEndWorkingTime()));
 

@@ -6,6 +6,15 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class DateTimeUtils {
+	public static final String START_DATE_TIME = "2000-01-01 00:00:00";
+
+	public static String next(String dt, int numberDays){
+		Date d = convertDateTimeStr2Date(dt);
+		Date nd = next(d,numberDays);
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String new_dt = dateFormat.format(nd);
+		return new_dt;
+	}
 	public static Date next(Date d){
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(d);
@@ -62,6 +71,20 @@ public class DateTimeUtils {
 			//String[] s = dt.split(":");
 			//if(s.length < 3) dt += ":00";// add :ss to hh:mm --> hh:mm::ss
 			dt += " 00:00:00";
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date date = dateFormat.parse(dt);
+			return date;
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		return null;
+	}
+	public static Date convertDateTimeStr2Date(String dt){
+		try{
+			//System.out.println(name() + "::dateTime2Int, dt = " + dt);
+			//String[] s = dt.split(":");
+			//if(s.length < 3) dt += ":00";// add :ss to hh:mm --> hh:mm::ss
+			//dt += " 00:00:00";
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date date = dateFormat.parse(dt);
 			return date;
@@ -162,22 +185,41 @@ public class DateTimeUtils {
 		String[] s = DT.split(":");
 		return s[0] + s[1] + s[2];
 	}
+	public static String getRelativeDateTime(String dt){
+		long start = dateTime2Int(START_DATE_TIME);
+		long d = dateTime2Int(dt);
+		long new_d = d - start;
+		String new_date_time = unixTimeStamp2DateTime(new_d);
+		return new_date_time;
+	}
+	public static String recoverDateTimeFromRelative(String dt){
+		long start = dateTime2Int(START_DATE_TIME);
+		long d = dateTime2Int(dt);
+		long new_d = d + start;
+		String new_date_time = unixTimeStamp2DateTime(new_d);
+		return new_date_time;
+	}
 	public static void main(String[] args){
-		String DT1 = "2016-10-04 10:30:15";
-		String DT2 = "2016-10-04 10:31:10";
 		
+		String DT1 = "2200-10-04 10:30:15";
+		String DT2 = "2000-01-01 00:00:00";
+		System.out.println("next 30 days of " + DT1 + " = " + next(DT1,30));
+		
+		System.out.println("new date time of " + DT1 + " = " + getRelativeDateTime(DT1) + 
+				", recover = " + recoverDateTimeFromRelative(getRelativeDateTime(DT1)));
 		long t1 = (long)DateTimeUtils.dateTime2Int(DT1);
 		long t2 = (long)DateTimeUtils.dateTime2Int(DT2);
 		long t = t1 - t2;
 		String dt1 = DateTimeUtils.unixTimeStamp2DateTime(t1);
 		
 		System.out.println("t1 = " + t1 + ", t2 = " + t2 + ", t = " + t + ", dt1 = " + dt1);
+		
 		String dt = "2016-03-10 10:30:03";
 		System.out.println("hour of " + dt + " is " + DateTimeUtils.getHour(dt));
 		
 		System.out.println(meanDatetime(DT1, DT2));
 		
-		System.out.println(DateTimeUtils.unixTimeStamp2DateTime(Integer.MAX_VALUE));
+		System.out.println("MAX DATETIME = " + DateTimeUtils.unixTimeStamp2DateTime(Integer.MAX_VALUE));
 		
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");

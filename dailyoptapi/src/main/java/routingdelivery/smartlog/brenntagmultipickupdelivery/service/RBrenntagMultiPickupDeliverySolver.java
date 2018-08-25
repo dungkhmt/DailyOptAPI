@@ -1,13 +1,10 @@
-package routingdelivery.smartlog.brenntag.service;
+package routingdelivery.smartlog.brenntagmultipickupdelivery.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
 import localsearch.domainspecific.vehiclerouting.vrp.entities.Point;
-
-import com.google.gson.Gson;
-
 import routingdelivery.model.Item;
 import routingdelivery.model.PickupDeliveryRequest;
 import routingdelivery.model.PickupDeliverySolution;
@@ -16,18 +13,22 @@ import routingdelivery.model.RoutingSolution;
 import routingdelivery.model.Vehicle;
 import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
 import routingdelivery.smartlog.brenntag.model.ClusterItems;
-import routingdelivery.smartlog.brenntag.model.GreedyMatchingVehicleTrip;
 import routingdelivery.smartlog.brenntag.model.ModelRoute;
 import routingdelivery.smartlog.brenntag.model.VehicleTrip;
 import routingdelivery.smartlog.brenntag.model.VehicleTripCollection;
+import routingdelivery.smartlog.brenntag.service.BrennTagRouteSolverForOneVehicle;
+import routingdelivery.smartlog.brenntag.service.BrenntagPickupDeliverySolver;
+import routingdelivery.smartlog.brenntag.service.ConflictBasedExtractor;
+import routingdelivery.smartlog.brenntag.service.ItemAmount;
+import routingdelivery.smartlog.brenntag.service.Trip;
 import utils.DateTimeUtils;
 
-public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver {
+public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySolver {
 
 	public static int DAYS_MOVE = 100;
 	
 	public String name() {
-		return "RBrennTagPickupDeliverySolver";
+		return "RBrenntagMultiPickupDeliverySolver";
 	}
 
 	public void processMergeOrderItemsFTL(String pickuplocationCode,

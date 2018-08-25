@@ -6,7 +6,7 @@ import java.util.Date;
 
 
 public class Utility {
-
+	public static final double EPS = 0.000001;
 	public static double getInducedValue(int x1, double y1, int x2, double y2, int x){
 		if(x1 > x2){
 			int tmp = x1; x1 = x2; x2 = tmp;
