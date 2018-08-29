@@ -6,9 +6,14 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruck
 public class ContainerTruckMoocService {
 
 	public ContainerTruckMoocSolution solve(ContainerTruckMoocInput input) {
-		GreedyDirectServiceSolver solver = new GreedyDirectServiceSolver();
+		//GreedyDirectServiceSolver solver = new GreedyDirectServiceSolver();
 		//return solver.solve(input);
-		return solver.solveDirect(input);
+		
+		if(true) return new ContainerTruckMoocSolution();
+		InitGreedyImproveSpecialOperatorSolver solver = new InitGreedyImproveSpecialOperatorSolver();
+		return solver.solve(input);
+		
+		//return solver.solveDirect(input);
 	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

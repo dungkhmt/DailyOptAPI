@@ -5,6 +5,24 @@ public class Truck {
 	private String depotTruckCode;
 	private String startWorkingTime;
 	private String endWorkingTime;
+	private String[] returnDepotCodes;// possible depots when finishing services
+	
+	
+	public Truck(String code, String depotTruckCode, String startWorkingTime,
+			String endWorkingTime, String[] returnDepotCodes) {
+		super();
+		this.code = code;
+		this.depotTruckCode = depotTruckCode;
+		this.startWorkingTime = startWorkingTime;
+		this.endWorkingTime = endWorkingTime;
+		this.returnDepotCodes = returnDepotCodes;
+	}
+	public String[] getReturnDepotCodes() {
+		return returnDepotCodes;
+	}
+	public void setReturnDepotCodes(String[] returnDepotCodes) {
+		this.returnDepotCodes = returnDepotCodes;
+	}
 	public String getCode() {
 		return code;
 	}

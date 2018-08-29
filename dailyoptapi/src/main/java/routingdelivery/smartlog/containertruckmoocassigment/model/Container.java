@@ -5,7 +5,23 @@ public class Container {
 	private int weight;
 	private String categoryCode;
 	private String depotContainerCode;
+	private String[] returnDepotCodes;// possible depots when finishing services
 	
+	public Container(String code, int weight, String categoryCode,
+			String depotContainerCode, String[] returnDepotCodes) {
+		super();
+		this.code = code;
+		this.weight = weight;
+		this.categoryCode = categoryCode;
+		this.depotContainerCode = depotContainerCode;
+		this.returnDepotCodes = returnDepotCodes;
+	}
+	public String[] getReturnDepotCodes() {
+		return returnDepotCodes;
+	}
+	public void setReturnDepotCodes(String[] returnDepotCodes) {
+		this.returnDepotCodes = returnDepotCodes;
+	}
 	public String getCode() {
 		return code;
 	}

@@ -5,6 +5,23 @@ public class Mooc {
 	private String category;// 20, 40, 45
 	private double weight;//20, 40, 45
 	private String depotMoocCode;
+	private String[] returnDepotCodes;// possible depots when finishing services
+	
+	public Mooc(String code, String category, double weight,
+			String depotMoocCode, String[] returnDepotCodes) {
+		super();
+		this.code = code;
+		this.category = category;
+		this.weight = weight;
+		this.depotMoocCode = depotMoocCode;
+		this.returnDepotCodes = returnDepotCodes;
+	}
+	public String[] getReturnDepotCodes() {
+		return returnDepotCodes;
+	}
+	public void setReturnDepotCodes(String[] returnDepotCodes) {
+		this.returnDepotCodes = returnDepotCodes;
+	}
 	public String getCode() {
 		return code;
 	}

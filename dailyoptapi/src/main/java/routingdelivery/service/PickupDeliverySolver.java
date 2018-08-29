@@ -3740,12 +3740,31 @@ public class PickupDeliverySolver {
 						e.setLoad(e_load);
 						e.setDistance(e_distance);
 
-						Integer[] L = mPoint2IndexItems.get(p);
 						Item[] pitems = null;
-						if (L != null) {
-							pitems = new Item[L.length];
-							for (int ii = 0; ii < L.length; ii++)
-								pitems[ii] = items.get(L[ii]);
+						if (mPoint2Type.get(p).equals("P")){
+							
+							Integer[] L = mPoint2IndexItems.get(p);
+						
+							if (L != null) {
+								pitems = new Item[L.length];
+								for (int ii = 0; ii < L.length; ii++)
+									pitems[ii] = items.get(L[ii]);
+							}else{
+							
+							}
+						}else if (mPoint2Type.get(p).equals("D")){
+							int idx = mDeliveryPoint2DeliveryIndex.get(p);
+							Point pickup = pickupPoints.get(idx);
+							Integer[] L = mPoint2IndexItems.get(pickup);
+							
+							if (L != null) {
+								pitems = new Item[L.length];
+								for (int ii = 0; ii < L.length; ii++)
+									pitems[ii] = items.get(L[ii]);
+							}else{
+							
+							}
+							
 						}
 						e.setItems(pitems);
 					}
@@ -3952,12 +3971,31 @@ public class PickupDeliverySolver {
 						e.setLoad(e_load);
 						e.setDistance(e_distance);
 
-						Integer[] L = mPoint2IndexItems.get(p);
 						Item[] pitems = null;
-						if (L != null) {
-							pitems = new Item[L.length];
-							for (int ii = 0; ii < L.length; ii++)
-								pitems[ii] = items.get(L[ii]);
+						if (mPoint2Type.get(p).equals("P")){
+							
+							Integer[] L = mPoint2IndexItems.get(p);
+						
+							if (L != null) {
+								pitems = new Item[L.length];
+								for (int ii = 0; ii < L.length; ii++)
+									pitems[ii] = items.get(L[ii]);
+							}else{
+							
+							}
+						}else if (mPoint2Type.get(p).equals("D")){
+							int idx = mDeliveryPoint2DeliveryIndex.get(p);
+							Point pickup = pickupPoints.get(idx);
+							Integer[] L = mPoint2IndexItems.get(pickup);
+							
+							if (L != null) {
+								pitems = new Item[L.length];
+								for (int ii = 0; ii < L.length; ii++)
+									pitems[ii] = items.get(L[ii]);
+							}else{
+							
+							}
+							
 						}
 						e.setItems(pitems);
 					}

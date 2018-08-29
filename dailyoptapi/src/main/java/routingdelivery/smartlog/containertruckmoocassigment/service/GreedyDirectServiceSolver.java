@@ -601,7 +601,7 @@ public class GreedyDirectServiceSolver extends ContainerTruckMoocSolver{
 		
 		return sol;
 	}
-
+d
 	public TruckRoute createDirectRoute4ImportRequest(ImportContainerRequest r){
 		String portCode = r.getPortCode();
 		Port port = mCode2Port.get(portCode);
@@ -814,7 +814,8 @@ public class GreedyDirectServiceSolver extends ContainerTruckMoocSolver{
 			//TruckRoute tr = mTruck2Route.get(truck);
 			RouteElement e = sel_combo.routeElement;
 			
-			System.out.println(name() + "::createDirectRoute4ImportRequest, routeElement e = " + e.toString());
+			System.out.println(name() + "::createDirectRoute4ImportRequest, routeElement e = " + e.toString()
+					+ ", e.getDepartureTime = " + e.getDepartureTime());
 			
 			int departureTime = (int)DateTimeUtils.dateTime2Int(e.getDepartureTime());
 			
