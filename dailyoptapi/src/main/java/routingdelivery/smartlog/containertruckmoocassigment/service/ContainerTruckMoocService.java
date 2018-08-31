@@ -9,7 +9,7 @@ public class ContainerTruckMoocService {
 		//GreedyDirectServiceSolver solver = new GreedyDirectServiceSolver();
 		//return solver.solve(input);
 		
-		if(true) return new ContainerTruckMoocSolution();
+		//if(true) return new ContainerTruckMoocSolution();
 		InitGreedyImproveSpecialOperatorSolver solver = new InitGreedyImproveSpecialOperatorSolver();
 		return solver.solve(input);
 		

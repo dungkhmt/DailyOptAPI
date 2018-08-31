@@ -3,6 +3,7 @@ package routingdelivery.smartlog.containertruckmoocassigment.service;
 import java.util.ArrayList;
 
 import routingdelivery.smartlog.containertruckmoocassigment.model.ActionEnum;
+import routingdelivery.smartlog.containertruckmoocassigment.model.ComboContainerMoocTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Container;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerCategoryEnum;
 import routingdelivery.smartlog.containertruckmoocassigment.model.DepotContainer;
@@ -13,64 +14,93 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.Port;
 import routingdelivery.smartlog.containertruckmoocassigment.model.RouteElement;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Truck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.TruckRoute;
+import routingdelivery.smartlog.containertruckmoocassigment.model.TruckRouteInfo4Request;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Warehouse;
 import utils.DateTimeUtils;
 
 public class RouteDoubleImportCreator {
-	
+
 	public ContainerTruckMoocSolver solver;
-	
-	public RouteDoubleImportCreator(ContainerTruckMoocSolver solver){
+
+	public RouteDoubleImportCreator(ContainerTruckMoocSolver solver) {
 		this.solver = solver;
 	}
-	public String name(){
+
+	public String name() {
 		return "RouteDoubleImportCreator";
 	}
+
 	public boolean checkCapacityForDoubleImport(Truck truck, Mooc mooc,
-			ImportContainerRequest ir1, ImportContainerRequest ir2){
-		if(!ir1.getContainerCategory().equals(ContainerCategoryEnum.CATEGORY20)
-				|| !ir2.getContainerCategory().equals(ContainerCategoryEnum.CATEGORY20)) return false;
-		if(mooc.getCategory().equals(MoocCategoryEnum.CATEGORY20)) return false;
-		
+			ImportContainerRequest ir1, ImportContainerRequest ir2) {
+		if (!ir1.getContainerCategory()
+				.equals(ContainerCategoryEnum.CATEGORY20)
+				|| !ir2.getContainerCategory().equals(
+						ContainerCategoryEnum.CATEGORY20))
+			return false;
+		if (mooc.getCategory().equals(MoocCategoryEnum.CATEGORY20))
+			return false;
+
 		return true;
 	}
-	public TruckRoute createDoubleImportRequest(Truck truck, Mooc mooc,
-			ImportContainerRequest ir1, ImportContainerRequest ir2) {
+
+	public TruckRouteInfo4Request createDoubleImportRequest(Truck truck,
+			Mooc mooc, ImportContainerRequest ir1, ImportContainerRequest ir2) {
 		// truck-mooc -> port(ir1) -> port(ir2) -> warehouse(ir1/ir2) ->
 		// warehouse(ir2/ir1)
-		//System.out.println(name() + "::createDoubleImportRequest, ir1.portCode = " + ir1.getPortCode());
-		
-		if(!checkCapacityForDoubleImport(truck, mooc, ir1, ir2)) return null;
-		
+		// System.out.println(name() +
+		// "::createDoubleImportRequest, ir1.portCode = " + ir1.getPortCode());
+
+		if (!checkCapacityForDoubleImport(truck, mooc, ir1, ir2))
+			return null;
+
 		Port port1 = solver.mCode2Port.get(ir1.getPortCode());
 		Port port2 = solver.mCode2Port.get(ir2.getPortCode());
 		Warehouse wh1 = solver.mCode2Warehouse.get(ir1.getWareHouseCode());
 		Warehouse wh2 = solver.mCode2Warehouse.get(ir2.getWareHouseCode());
-		Container container1 = solver.mCode2Container.get(ir1.getContainerCode());
-		Container container2 = solver.mCode2Container.get(ir2.getContainerCode());
-		
-		
-		ArrayList<RouteElement> L = new ArrayList<RouteElement>();
-		RouteElement e0 = new RouteElement();
-		L.add(e0);
-		e0.setAction(ActionEnum.DEPART_FROM_DEPOT);
-		e0.setDepotTruck(solver.mTruck2LastDepot.get(truck));
-		int departureTime = solver.mTruck2LastTime.get(truck);
-		solver.mPoint2DepartureTime.put(e0, departureTime);
+		Container container1 = solver.mCode2Container.get(ir1
+				.getContainerCode());
+		Container container2 = solver.mCode2Container.get(ir2
+				.getContainerCode());
 
-		RouteElement e1 = new RouteElement();
-		L.add(e1);
-		e1.deriveFrom(e0);
-		e1.setAction(ActionEnum.TAKE_MOOC_AT_DEPOT);
-		e1.setDepotMooc(solver.mMooc2LastDepot.get(mooc));
-		int arrivalTime = departureTime
-				+ solver.getTravelTime(e0.getDepotTruck().getLocationCode(), e1
-						.getDepotMooc().getLocationCode());
-		int serviceTime = Utils.MAX(arrivalTime, solver.mMooc2LastTime.get(mooc));
-		int duration = e1.getDepotMooc().getPickupMoocDuration();
-		departureTime = serviceTime + duration;
-		solver.mPoint2ArrivalTime.put(e1, arrivalTime);
-		solver.mPoint2DepartureTime.put(e1, departureTime);
+		ComboContainerMoocTruck combo = solver.findLastAvailable(truck, mooc);
+		if (combo == null)
+			return null;
+
+		ArrayList<RouteElement> L = new ArrayList<RouteElement>();
+		RouteElement lastElement = combo.routeElement;
+		int departureTime = combo.startTime;
+		int arrivalTime = -1;
+		int serviceTime = -1;
+		int duration = -1;
+		double distance = -1;
+		
+		if (combo.routeElement == null) {
+
+			RouteElement e0 = new RouteElement();
+			L.add(e0);
+			e0.setAction(ActionEnum.DEPART_FROM_DEPOT);
+			e0.setDepotTruck(solver.mTruck2LastDepot.get(truck));
+			departureTime = solver.mTruck2LastTime.get(truck);
+			solver.mPoint2DepartureTime.put(e0, departureTime);
+
+			RouteElement e1 = new RouteElement();
+			L.add(e1);
+			e1.deriveFrom(e0);
+			e1.setAction(ActionEnum.TAKE_MOOC_AT_DEPOT);
+			e1.setDepotMooc(solver.mMooc2LastDepot.get(mooc));
+			arrivalTime = departureTime
+					+ solver.getTravelTime(
+							e0.getDepotTruck().getLocationCode(), e1
+									.getDepotMooc().getLocationCode());
+			serviceTime = Utils.MAX(arrivalTime,
+					solver.mMooc2LastTime.get(mooc));
+			duration = e1.getDepotMooc().getPickupMoocDuration();
+			departureTime = serviceTime + duration;
+			solver.mPoint2ArrivalTime.put(e1, arrivalTime);
+			solver.mPoint2DepartureTime.put(e1, departureTime);
+			
+			lastElement = e1;
+		}
 
 		boolean ir1First = true;
 		if (DateTimeUtils.dateTime2Int(ir1.getLateDateTimePickupAtPort()) > DateTimeUtils
@@ -83,19 +113,23 @@ public class RouteDoubleImportCreator {
 		L.add(e3);
 
 		if (ir1First) {
-			e2.deriveFrom(e1);
+			e2.deriveFrom(lastElement);
 			e2.setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_PORT);
 
 			e2.setPort(port1);
 			e2.setImportRequest(ir1);
 			arrivalTime = departureTime
-					+ solver.getTravelTime(e1.getDepotMooc().getLocationCode(), e2
-							.getPort().getLocationCode());
+					+ solver.getTravelTime(lastElement.getDepotMooc().getLocationCode(),
+							e2.getPort().getLocationCode());
+			distance = combo.extraDistance
+					+ solver.getDistance(combo.lastLocationCode,
+							e2.getLocationCode());
+			
 			if (arrivalTime > (int) DateTimeUtils.dateTime2Int(ir1
 					.getLateDateTimePickupAtPort()))
 				return null;
-			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils.dateTime2Int(ir1
-					.getEarlyDateTimePickupAtPort()));
+			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
+					.dateTime2Int(ir1.getEarlyDateTimePickupAtPort()));
 			duration = ir1.getLoadDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e2, arrivalTime);
@@ -112,27 +146,32 @@ public class RouteDoubleImportCreator {
 			if (arrivalTime > (int) DateTimeUtils.dateTime2Int(ir2
 					.getLateDateTimePickupAtPort()))
 				return null;
-			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils.dateTime2Int(ir2
-					.getEarlyDateTimePickupAtPort()));
+			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
+					.dateTime2Int(ir2.getEarlyDateTimePickupAtPort()));
 			duration = ir2.getLoadDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e3, arrivalTime);
 			solver.mPoint2DepartureTime.put(e3, departureTime);
 
 		} else {
-			e2.deriveFrom(e1);
+			e2.deriveFrom(lastElement);
 			e2.setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_PORT);
 
 			e2.setPort(port2);
 			e2.setImportRequest(ir2);
 			arrivalTime = departureTime
-					+ solver.getTravelTime(e1.getDepotMooc().getLocationCode(), e2
-							.getPort().getLocationCode());
+					+ solver.getTravelTime(lastElement.getDepotMooc().getLocationCode(),
+							e2.getPort().getLocationCode());
+			
+			distance = combo.extraDistance
+					+ solver.getDistance(combo.lastLocationCode,
+							e2.getLocationCode());
+			
 			if (arrivalTime > (int) DateTimeUtils.dateTime2Int(ir2
 					.getLateDateTimePickupAtPort()))
 				return null;
-			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils.dateTime2Int(ir2
-					.getEarlyDateTimePickupAtPort()));
+			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
+					.dateTime2Int(ir2.getEarlyDateTimePickupAtPort()));
 			duration = ir2.getLoadDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e2, arrivalTime);
@@ -149,8 +188,8 @@ public class RouteDoubleImportCreator {
 			if (arrivalTime > (int) DateTimeUtils.dateTime2Int(ir1
 					.getLateDateTimePickupAtPort()))
 				return null;
-			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils.dateTime2Int(ir1
-					.getEarlyDateTimePickupAtPort()));
+			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
+					.dateTime2Int(ir1.getEarlyDateTimePickupAtPort()));
 			duration = ir1.getLoadDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e3, arrivalTime);
@@ -159,8 +198,9 @@ public class RouteDoubleImportCreator {
 		}
 
 		ir1First = true;
-		if (solver.getDistance(e3.getPort().getLocationCode(), wh1.getLocationCode()) > solver.getDistance(
-				e3.getPort().getLocationCode(), wh2.getLocationCode())) {
+		if (solver.getDistance(e3.getPort().getLocationCode(),
+				wh1.getLocationCode()) > solver.getDistance(e3.getPort()
+				.getLocationCode(), wh2.getLocationCode())) {
 			ir1First = false;
 		}
 		RouteElement e4 = new RouteElement();
@@ -182,8 +222,8 @@ public class RouteDoubleImportCreator {
 			if (arrivalTime > (int) DateTimeUtils.dateTime2Int(ir1
 					.getLateDateTimeUnloadAtWarehouse()))
 				return null;
-			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils.dateTime2Int(ir1
-					.getEarlyDateTimeUnloadAtWarehouse()));
+			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
+					.dateTime2Int(ir1.getEarlyDateTimeUnloadAtWarehouse()));
 			duration = 0;
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e4, arrivalTime);
@@ -203,19 +243,22 @@ public class RouteDoubleImportCreator {
 			e6.deriveFrom(e5);
 			e6.setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
 			e6.setWarehouse(wh2);
-			//if(e5.getWarehouse() == null){
-			//	System.out.println(name() + "::createDoubleImportRequest, warehouse e5 = NULL");
-			//}else{
-			//	System.out.println(name() + "::createDoubleImportRequest, warehouse e5 = " + e5.getWarehouse().getLocationCode());
-			//}
+			// if(e5.getWarehouse() == null){
+			// System.out.println(name() +
+			// "::createDoubleImportRequest, warehouse e5 = NULL");
+			// }else{
+			// System.out.println(name() +
+			// "::createDoubleImportRequest, warehouse e5 = " +
+			// e5.getWarehouse().getLocationCode());
+			// }
 			arrivalTime = departureTime
-					+ solver.getTravelTime(e5.getWarehouse().getLocationCode(), e6
-							.getWarehouse().getLocationCode());
+					+ solver.getTravelTime(e5.getWarehouse().getLocationCode(),
+							e6.getWarehouse().getLocationCode());
 			if (arrivalTime > (int) DateTimeUtils.dateTime2Int(ir2
 					.getLateDateTimeUnloadAtWarehouse()))
 				return null;
-			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils.dateTime2Int(ir2
-					.getEarlyDateTimeUnloadAtWarehouse()));
+			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
+					.dateTime2Int(ir2.getEarlyDateTimeUnloadAtWarehouse()));
 			duration = 0;
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e6, arrivalTime);
@@ -241,8 +284,8 @@ public class RouteDoubleImportCreator {
 			if (arrivalTime > (int) DateTimeUtils.dateTime2Int(ir2
 					.getLateDateTimeUnloadAtWarehouse()))
 				return null;
-			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils.dateTime2Int(ir2
-					.getEarlyDateTimeUnloadAtWarehouse()));
+			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
+					.dateTime2Int(ir2.getEarlyDateTimeUnloadAtWarehouse()));
 			duration = 0;
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e4, arrivalTime);
@@ -263,13 +306,13 @@ public class RouteDoubleImportCreator {
 			e6.setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
 			e6.setWarehouse(wh1);
 			arrivalTime = departureTime
-					+ solver.getTravelTime(e5.getWarehouse().getLocationCode(), e6
-							.getWarehouse().getLocationCode());
+					+ solver.getTravelTime(e5.getWarehouse().getLocationCode(),
+							e6.getWarehouse().getLocationCode());
 			if (arrivalTime > (int) DateTimeUtils.dateTime2Int(ir1
 					.getLateDateTimeUnloadAtWarehouse()))
 				return null;
-			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils.dateTime2Int(ir1
-					.getEarlyDateTimeUnloadAtWarehouse()));
+			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
+					.dateTime2Int(ir1.getEarlyDateTimeUnloadAtWarehouse()));
 			duration = 0;
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e6, arrivalTime);
@@ -286,27 +329,33 @@ public class RouteDoubleImportCreator {
 			solver.mPoint2DepartureTime.put(e7, departureTime);
 
 		}
-		DepotContainer depotContainer1 = solver.findDepotForReleaseContainer(container1);
-		DepotContainer depotContainer2 = solver.findDepotForReleaseContainer(container2);
+		DepotContainer depotContainer1 = solver
+				.findDepotForReleaseContainer(container1);
+		DepotContainer depotContainer2 = solver
+				.findDepotForReleaseContainer(container2);
 
-		if(depotContainer1 == null){
-			depotContainer1 = solver.mCode2DepotContainer.get(ir1.getDepotContainerCode());
+		if (depotContainer1 == null) {
+			depotContainer1 = solver.mCode2DepotContainer.get(ir1
+					.getDepotContainerCode());
 		}
-		if(depotContainer2 == null){
-			depotContainer2 = solver.mCode2DepotContainer.get(ir2.getDepotContainerCode());
+		if (depotContainer2 == null) {
+			depotContainer2 = solver.mCode2DepotContainer.get(ir2
+					.getDepotContainerCode());
 		}
-		
-		
-		//if(depotContainer1 == null){
-		//	System.out.println(name() + "::createDoubleImportRequest depotContainer1 = NULL");
-		//}else{
-		//	System.out.println(name() + "::createDoubleImportRequest depotContainer1 = " + depotContainer1.getLocationCode());
-		//}
+
+		// if(depotContainer1 == null){
+		// System.out.println(name() +
+		// "::createDoubleImportRequest depotContainer1 = NULL");
+		// }else{
+		// System.out.println(name() +
+		// "::createDoubleImportRequest depotContainer1 = " +
+		// depotContainer1.getLocationCode());
+		// }
 		ir1First = true;
 		if (solver.getDistance(e7.getWarehouse().getLocationCode(),
 				depotContainer1.getLocationCode()) > solver.getDistance(e7
-				.getWarehouse().getLocationCode(),
-				depotContainer2.getLocationCode())) {
+				.getWarehouse().getLocationCode(), depotContainer2
+				.getLocationCode())) {
 			ir1First = false;
 		}
 
@@ -319,73 +368,86 @@ public class RouteDoubleImportCreator {
 			e8.deriveFrom(e7);
 			e8.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 			e8.setDepotContainer(depotContainer1);
-			arrivalTime = departureTime + solver.getTravelTime(e7.getWarehouse().getLocationCode(), e8.getDepotContainer().getLocationCode());
+			arrivalTime = departureTime
+					+ solver.getTravelTime(e7.getWarehouse().getLocationCode(),
+							e8.getDepotContainer().getLocationCode());
 			serviceTime = arrivalTime;
 			duration = e8.getDepotContainer().getDeliveryContainerDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e8, arrivalTime);
 			solver.mPoint2DepartureTime.put(e8, departureTime);
-			
+
 			// release container2
 			e9.deriveFrom(e8);
 			e9.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 			e9.setDepotContainer(depotContainer2);
-			arrivalTime = departureTime + solver.getTravelTime(e8.getDepotContainer().getLocationCode(),e9.getDepotContainer().getLocationCode());
+			arrivalTime = departureTime
+					+ solver.getTravelTime(e8.getDepotContainer()
+							.getLocationCode(), e9.getDepotContainer()
+							.getLocationCode());
 			serviceTime = arrivalTime;
 			duration = e9.getDepotContainer().getDeliveryContainerDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e9, arrivalTime);
 			solver.mPoint2DepartureTime.put(e9, departureTime);
-			
+
 		} else {
 			e8.deriveFrom(e7);
 			e8.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 			e8.setDepotContainer(depotContainer2);
-			arrivalTime = departureTime + solver.getTravelTime(e7.getWarehouse().getLocationCode(), e8.getDepotContainer().getLocationCode());
+			arrivalTime = departureTime
+					+ solver.getTravelTime(e7.getWarehouse().getLocationCode(),
+							e8.getDepotContainer().getLocationCode());
 			serviceTime = arrivalTime;
 			duration = e8.getDepotContainer().getDeliveryContainerDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e8, arrivalTime);
 			solver.mPoint2DepartureTime.put(e8, departureTime);
-			
+
 			// release container2
 			e9.deriveFrom(e8);
 			e9.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 			e9.setDepotContainer(depotContainer1);
-			arrivalTime = departureTime + solver.getTravelTime(e8.getDepotContainer().getLocationCode(),e9.getDepotContainer().getLocationCode());
+			arrivalTime = departureTime
+					+ solver.getTravelTime(e8.getDepotContainer()
+							.getLocationCode(), e9.getDepotContainer()
+							.getLocationCode());
 			serviceTime = arrivalTime;
 			duration = e9.getDepotContainer().getDeliveryContainerDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e9, arrivalTime);
 			solver.mPoint2DepartureTime.put(e9, departureTime);
-			
-	
+
 		}
 		RouteElement e10 = new RouteElement();
 		L.add(e10);
 		e10.deriveFrom(e9);
 		e10.setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
 		e10.setDepotMooc(solver.findDepotForReleaseMooc(mooc));
-		arrivalTime = departureTime + solver.getTravelTime(e9.getDepotContainer().getLocationCode(),e10.getDepotMooc().getLocationCode());
+		arrivalTime = departureTime
+				+ solver.getTravelTime(
+						e9.getDepotContainer().getLocationCode(), e10
+								.getDepotMooc().getLocationCode());
 		serviceTime = arrivalTime;
 		duration = e10.getDepotMooc().getDeliveryMoocDuration();
 		departureTime = serviceTime + duration;
 		solver.mPoint2ArrivalTime.put(e10, arrivalTime);
 		solver.mPoint2DepartureTime.put(e10, departureTime);
-	
+
 		RouteElement e11 = new RouteElement();
 		L.add(e11);
 		e11.deriveFrom(e10);
 		e11.setAction(ActionEnum.REST_AT_DEPOT);
 		e11.setDepotTruck(solver.findDepotForReleaseTruck(truck));
-		arrivalTime = departureTime + solver.getTravelTime(e10.getDepotMooc().getLocationCode(),e11.getDepotTruck().getLocationCode());
+		arrivalTime = departureTime
+				+ solver.getTravelTime(e10.getDepotMooc().getLocationCode(),
+						e11.getDepotTruck().getLocationCode());
 		serviceTime = arrivalTime;
 		duration = 0;
 		departureTime = serviceTime + duration;
 		solver.mPoint2ArrivalTime.put(e11, arrivalTime);
 		solver.mPoint2DepartureTime.put(e11, departureTime);
-		
-		
+
 		TruckRoute r = new TruckRoute();
 		RouteElement[] e = new RouteElement[L.size()];
 		for (int i = 0; i < e.length; i++)
@@ -395,8 +457,11 @@ public class RouteDoubleImportCreator {
 
 		solver.propagate(r);
 
-		return r;
-
+		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		tri.route = r;
+		tri.lastUsedIndex = -1;
+		tri.additionalDistance = distance;
+		return tri;
 
 	}
 

@@ -1,20 +1,30 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
+import routingdelivery.smartlog.containertruckmoocassigment.service.InitGreedyImproveSpecialOperatorSolver;
+
 public class KepLechRouteComposer implements RouteComposer {
+	private InitGreedyImproveSpecialOperatorSolver solver;
 	private Truck truck;
 	private Mooc mooc;
 	private Container container;
 	private ImportContainerRequest imReq;
 	private ExportContainerRequest exReq;
+	private TruckRouteInfo4Request tri;
 	private double distance;
-	public KepLechRouteComposer(Truck truck, Mooc mooc, Container container,
-			ImportContainerRequest imReq, ExportContainerRequest exReq, double distance) {
+	
+
+	public KepLechRouteComposer(InitGreedyImproveSpecialOperatorSolver solver,
+			Truck truck, Mooc mooc, Container container,
+			ImportContainerRequest imReq, ExportContainerRequest exReq,
+			TruckRouteInfo4Request tri, double distance) {
 		super();
+		this.solver = solver;
 		this.truck = truck;
 		this.mooc = mooc;
 		this.container = container;
 		this.imReq = imReq;
 		this.exReq = exReq;
+		this.tri = tri;
 		this.distance = distance;
 	}
 
@@ -33,7 +43,9 @@ public class KepLechRouteComposer implements RouteComposer {
 	@Override
 	public void acceptRoute() {
 		// TODO Auto-generated method stub
-
+		solver.markServed(exReq);
+		solver.markServed(imReq);
+		solver.addRoute(tri.route, tri.lastUsedIndex);
 	}
 
 }

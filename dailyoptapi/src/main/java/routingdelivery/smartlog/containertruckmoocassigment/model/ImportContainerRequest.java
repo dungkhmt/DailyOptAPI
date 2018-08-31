@@ -13,48 +13,19 @@ public class ImportContainerRequest {
 	private String lateDateTimePickupAtPort;
 	private int loadDuration;
 	
+	
 	private String wareHouseCode;
 	private String earlyDateTimeUnloadAtWarehouse;
 	private String lateDateTimeUnloadAtWarehouse;
 	private int unloadDuration;
+	private int detachLoadedMoocContainerDuration;
+	
+	private String earlyPickupEmptyContainerAtWarehouse;
+	private String latePickupEmptyContainerAtWarehouse;
+	private int attachEmptyMoocContainerDuration;
 	
 	private String earlyDateTimeDeliveryAtDepot;
 	private String lateDateTimeDeliveryAtDepot;
-	
-	
-	public ImportContainerRequest(String orderItemID, String shipCompanyCode,
-			String depotContainerCode, String containerCategory,
-			String containerCode, double weight, String portCode,
-			String earlyDateTimePickupAtPort, String lateDateTimePickupAtPort,
-			int loadDuration, String wareHouseCode,
-			String earlyDateTimeUnloadAtWarehouse,
-			String lateDateTimeUnloadAtWarehouse, int unloadDuration,
-			String earlyDateTimeDeliveryAtDepot,
-			String lateDateTimeDeliveryAtDepot) {
-		super();
-		this.orderItemID = orderItemID;
-		this.shipCompanyCode = shipCompanyCode;
-		this.depotContainerCode = depotContainerCode;
-		this.containerCategory = containerCategory;
-		this.containerCode = containerCode;
-		this.weight = weight;
-		this.portCode = portCode;
-		this.earlyDateTimePickupAtPort = earlyDateTimePickupAtPort;
-		this.lateDateTimePickupAtPort = lateDateTimePickupAtPort;
-		this.loadDuration = loadDuration;
-		this.wareHouseCode = wareHouseCode;
-		this.earlyDateTimeUnloadAtWarehouse = earlyDateTimeUnloadAtWarehouse;
-		this.lateDateTimeUnloadAtWarehouse = lateDateTimeUnloadAtWarehouse;
-		this.unloadDuration = unloadDuration;
-		this.earlyDateTimeDeliveryAtDepot = earlyDateTimeDeliveryAtDepot;
-		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
-	}
-	public String getContainerCode() {
-		return containerCode;
-	}
-	public void setContainerCode(String containerCode) {
-		this.containerCode = containerCode;
-	}
 	public String getOrderItemID() {
 		return orderItemID;
 	}
@@ -67,7 +38,6 @@ public class ImportContainerRequest {
 	public void setShipCompanyCode(String shipCompanyCode) {
 		this.shipCompanyCode = shipCompanyCode;
 	}
-	
 	public String getDepotContainerCode() {
 		return depotContainerCode;
 	}
@@ -79,6 +49,12 @@ public class ImportContainerRequest {
 	}
 	public void setContainerCategory(String containerCategory) {
 		this.containerCategory = containerCategory;
+	}
+	public String getContainerCode() {
+		return containerCode;
+	}
+	public void setContainerCode(String containerCode) {
+		this.containerCode = containerCode;
 	}
 	public double getWeight() {
 		return weight;
@@ -136,6 +112,34 @@ public class ImportContainerRequest {
 	public void setUnloadDuration(int unloadDuration) {
 		this.unloadDuration = unloadDuration;
 	}
+	public int getDetachLoadedMoocContainerDuration() {
+		return detachLoadedMoocContainerDuration;
+	}
+	public void setDetachLoadedMoocContainerDuration(
+			int detachLoadedMoocContainerDuration) {
+		this.detachLoadedMoocContainerDuration = detachLoadedMoocContainerDuration;
+	}
+	public String getEarlyPickupEmptyContainerAtWarehouse() {
+		return earlyPickupEmptyContainerAtWarehouse;
+	}
+	public void setEarlyPickupEmptyContainerAtWarehouse(
+			String earlyPickupEmptyContainerAtWarehouse) {
+		this.earlyPickupEmptyContainerAtWarehouse = earlyPickupEmptyContainerAtWarehouse;
+	}
+	public String getLatePickupEmptyContainerAtWarehouse() {
+		return latePickupEmptyContainerAtWarehouse;
+	}
+	public void setLatePickupEmptyContainerAtWarehouse(
+			String latePickupEmptyContainerAtWarehouse) {
+		this.latePickupEmptyContainerAtWarehouse = latePickupEmptyContainerAtWarehouse;
+	}
+	public int getAttachEmptyMoocContainerDuration() {
+		return attachEmptyMoocContainerDuration;
+	}
+	public void setAttachEmptyMoocContainerDuration(
+			int attachEmptyMoocContainerDuration) {
+		this.attachEmptyMoocContainerDuration = attachEmptyMoocContainerDuration;
+	}
 	public String getEarlyDateTimeDeliveryAtDepot() {
 		return earlyDateTimeDeliveryAtDepot;
 	}
@@ -148,14 +152,17 @@ public class ImportContainerRequest {
 	public void setLateDateTimeDeliveryAtDepot(String lateDateTimeDeliveryAtDepot) {
 		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
 	}
-
-	
 	public ImportContainerRequest(String orderItemID, String shipCompanyCode,
-			String depotContainerCode, String containerCategory, double weight,
-			String portCode, String earlyDateTimePickupAtPort,
-			String lateDateTimePickupAtPort, int loadDuration,
-			String wareHouseCode, String earlyDateTimeUnloadAtWarehouse,
+			String depotContainerCode, String containerCategory,
+			String containerCode, double weight, String portCode,
+			String earlyDateTimePickupAtPort, String lateDateTimePickupAtPort,
+			int loadDuration, String wareHouseCode,
+			String earlyDateTimeUnloadAtWarehouse,
 			String lateDateTimeUnloadAtWarehouse, int unloadDuration,
+			int detachLoadedMoocContainerDuration,
+			String earlyPickupEmptyContainerAtWarehouse,
+			String latePickupEmptyContainerAtWarehouse,
+			int attachEmptyMoocContainerDuration,
 			String earlyDateTimeDeliveryAtDepot,
 			String lateDateTimeDeliveryAtDepot) {
 		super();
@@ -163,6 +170,7 @@ public class ImportContainerRequest {
 		this.shipCompanyCode = shipCompanyCode;
 		this.depotContainerCode = depotContainerCode;
 		this.containerCategory = containerCategory;
+		this.containerCode = containerCode;
 		this.weight = weight;
 		this.portCode = portCode;
 		this.earlyDateTimePickupAtPort = earlyDateTimePickupAtPort;
@@ -172,6 +180,10 @@ public class ImportContainerRequest {
 		this.earlyDateTimeUnloadAtWarehouse = earlyDateTimeUnloadAtWarehouse;
 		this.lateDateTimeUnloadAtWarehouse = lateDateTimeUnloadAtWarehouse;
 		this.unloadDuration = unloadDuration;
+		this.detachLoadedMoocContainerDuration = detachLoadedMoocContainerDuration;
+		this.earlyPickupEmptyContainerAtWarehouse = earlyPickupEmptyContainerAtWarehouse;
+		this.latePickupEmptyContainerAtWarehouse = latePickupEmptyContainerAtWarehouse;
+		this.attachEmptyMoocContainerDuration = attachEmptyMoocContainerDuration;
 		this.earlyDateTimeDeliveryAtDepot = earlyDateTimeDeliveryAtDepot;
 		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
 	}
@@ -179,6 +191,7 @@ public class ImportContainerRequest {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	
 	
 	
 }

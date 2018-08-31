@@ -14,11 +14,18 @@ public class ExportContainerRequest {
 	private String earlyDateTimeLoadAtWarehouse;
 	private String lateDateTimeLoadAtWarehouse;
 	private int loadDuration;
+	private int detachEmptyMoocContainerDuration;
+	
+	private String earlyDateTimePickupLoadedContainerAtWarehouse;
+	private String lateDateTimePickupLoadedContainerAtWarehouse;
+	private int attachLoadedMoocContainerDuration;
 	
 	private String portCode;
 	private String earlyDateTimeUnloadAtPort;
 	private String lateDateTimeUnloadAtPort;
 	private int unloadDuration;
+	
+	private String planSegment;// "1","2","12","13","123",...
 	
 	
 	public String getOrderItemID() {
@@ -33,7 +40,12 @@ public class ExportContainerRequest {
 	public void setShipCompanyCode(String shipCompanyCode) {
 		this.shipCompanyCode = shipCompanyCode;
 	}
-
+	public String getDepotContainerCode() {
+		return depotContainerCode;
+	}
+	public void setDepotContainerCode(String depotContainerCode) {
+		this.depotContainerCode = depotContainerCode;
+	}
 	public String getContainerCategory() {
 		return containerCategory;
 	}
@@ -82,6 +94,34 @@ public class ExportContainerRequest {
 	public void setLoadDuration(int loadDuration) {
 		this.loadDuration = loadDuration;
 	}
+	public int getDetachEmptyMoocContainerDuration() {
+		return detachEmptyMoocContainerDuration;
+	}
+	public void setDetachEmptyMoocContainerDuration(
+			int detachEmptyMoocContainerDuration) {
+		this.detachEmptyMoocContainerDuration = detachEmptyMoocContainerDuration;
+	}
+	public String getEarlyDateTimePickupLoadedContainerAtWarehouse() {
+		return earlyDateTimePickupLoadedContainerAtWarehouse;
+	}
+	public void setEarlyDateTimePickupLoadedContainerAtWarehouse(
+			String earlyDateTimePickupLoadedContainerAtWarehouse) {
+		this.earlyDateTimePickupLoadedContainerAtWarehouse = earlyDateTimePickupLoadedContainerAtWarehouse;
+	}
+	public String getLateDateTimePickupLoadedContainerAtWarehouse() {
+		return lateDateTimePickupLoadedContainerAtWarehouse;
+	}
+	public void setLateDateTimePickupLoadedContainerAtWarehouse(
+			String lateDateTimePickupLoadedContainerAtWarehouse) {
+		this.lateDateTimePickupLoadedContainerAtWarehouse = lateDateTimePickupLoadedContainerAtWarehouse;
+	}
+	public int getAttachLoadedMoocContainerDuration() {
+		return attachLoadedMoocContainerDuration;
+	}
+	public void setAttachLoadedMoocContainerDuration(
+			int attachLoadedMoocContainerDuration) {
+		this.attachLoadedMoocContainerDuration = attachLoadedMoocContainerDuration;
+	}
 	public String getPortCode() {
 		return portCode;
 	}
@@ -106,22 +146,18 @@ public class ExportContainerRequest {
 	public void setUnloadDuration(int unloadDuration) {
 		this.unloadDuration = unloadDuration;
 	}
-
-	public String getDepotContainerCode() {
-		return depotContainerCode;
-	}
-	public void setDepotContainerCode(String depotContainerCode) {
-		this.depotContainerCode = depotContainerCode;
-	}
-	
 	public ExportContainerRequest(String orderItemID, String shipCompanyCode,
 			String depotContainerCode, String containerCategory, double weight,
 			String earlyDateTimePickupAtDepot,
 			String lateDateTimePickupAtDepot, String wareHouseCode,
 			String earlyDateTimeLoadAtWarehouse,
 			String lateDateTimeLoadAtWarehouse, int loadDuration,
-			String portCode, String earlyDateTimeUnloadAtPort,
-			String lateDateTimeUnloadAtPort, int unloadDuration) {
+			int detachEmptyMoocContainerDuration,
+			String earlyDateTimePickupLoadedContainerAtWarehouse,
+			String lateDateTimePickupLoadedContainerAtWarehouse,
+			int attachLoadedMoocContainerDuration, String portCode,
+			String earlyDateTimeUnloadAtPort, String lateDateTimeUnloadAtPort,
+			int unloadDuration) {
 		super();
 		this.orderItemID = orderItemID;
 		this.shipCompanyCode = shipCompanyCode;
@@ -134,6 +170,10 @@ public class ExportContainerRequest {
 		this.earlyDateTimeLoadAtWarehouse = earlyDateTimeLoadAtWarehouse;
 		this.lateDateTimeLoadAtWarehouse = lateDateTimeLoadAtWarehouse;
 		this.loadDuration = loadDuration;
+		this.detachEmptyMoocContainerDuration = detachEmptyMoocContainerDuration;
+		this.earlyDateTimePickupLoadedContainerAtWarehouse = earlyDateTimePickupLoadedContainerAtWarehouse;
+		this.lateDateTimePickupLoadedContainerAtWarehouse = lateDateTimePickupLoadedContainerAtWarehouse;
+		this.attachLoadedMoocContainerDuration = attachLoadedMoocContainerDuration;
 		this.portCode = portCode;
 		this.earlyDateTimeUnloadAtPort = earlyDateTimeUnloadAtPort;
 		this.lateDateTimeUnloadAtPort = lateDateTimeUnloadAtPort;
@@ -143,7 +183,8 @@ public class ExportContainerRequest {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-
+	
+	
 	
 	
 }
