@@ -299,28 +299,31 @@ public class ContainerTruckMoocInput {
 		warehouses[3] = new Warehouse("Warehouse004","0004");
 		
 		Truck[] trucks = new Truck[6];
-		trucks[0] = new Truck("Truck0001","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00");
-		trucks[1] = new Truck("Truck0002","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00");
-		trucks[2] = new Truck("Truck0003","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00");
-		trucks[3] = new Truck("Truck0004","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00");
-		trucks[4] = new Truck("Truck0005","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00");
-		trucks[5] = new Truck("Truck0006","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00");
+		String[] returnDepotTruckCodes = {"DepotTruck001","DepotTruck002"};
+		trucks[0] = new Truck("Truck0001","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[1] = new Truck("Truck0002","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[2] = new Truck("Truck0003","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[3] = new Truck("Truck0004","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[4] = new Truck("Truck0005","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[5] = new Truck("Truck0006","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
 		
 		Mooc[] moocs = new Mooc[6];
-		moocs[0] = new Mooc("Mooc0001","20",20,"DepotMooc001");
-		moocs[1] = new Mooc("Mooc0002","40",40,"DepotMooc001");
-		moocs[2] = new Mooc("Mooc0003","45",45,"DepotMooc001");
-		moocs[3] = new Mooc("Mooc0004","20",20,"DepotMooc002");
-		moocs[4] = new Mooc("Mooc0005","40",40,"DepotMooc002");
-		moocs[5] = new Mooc("Mooc0006","45",45,"DepotMooc002");
+		String[] returnDepotMoocCodes = {"DepotMooc001","DepotMooc002"};
+		moocs[0] = new Mooc("Mooc0001","20",20,"DepotMooc001",returnDepotMoocCodes);
+		moocs[1] = new Mooc("Mooc0002","40",40,"DepotMooc001",returnDepotMoocCodes);
+		moocs[2] = new Mooc("Mooc0003","45",45,"DepotMooc001",returnDepotMoocCodes);
+		moocs[3] = new Mooc("Mooc0004","20",20,"DepotMooc002",returnDepotMoocCodes);
+		moocs[4] = new Mooc("Mooc0005","40",40,"DepotMooc002",returnDepotMoocCodes);
+		moocs[5] = new Mooc("Mooc0006","45",45,"DepotMooc002",returnDepotMoocCodes);
 		
 		Container[] containers = new Container[6];
-		containers[0] = new Container("Container001",20,"20","DepotContainer001");
-		containers[1] = new Container("Container002",40,"40","DepotContainer001");
-		containers[2] = new Container("Container003",20,"20","DepotContainer002");
-		containers[3] = new Container("Container004",40,"40","DepotContainer002");
-		containers[4] = new Container("Container005",20,"20","DepotContainer003");
-		containers[5] = new Container("Container006",45,"45","DepotContainer003");
+		String[] returnDepotCodes = {"DepotContainer001","DepotContainer002","DepotContainer003"};
+		containers[0] = new Container("Container001",20,"20","DepotContainer001",returnDepotCodes);
+		containers[1] = new Container("Container002",40,"40","DepotContainer001",returnDepotCodes);
+		containers[2] = new Container("Container003",20,"20","DepotContainer002",returnDepotCodes);
+		containers[3] = new Container("Container004",40,"40","DepotContainer002",returnDepotCodes);
+		containers[4] = new Container("Container005",20,"20","DepotContainer003",returnDepotCodes);
+		containers[5] = new Container("Container006",45,"45","DepotContainer003",returnDepotCodes);
 		
 		Port[] ports = new Port[2];
 		ports[0] = new Port("Port001","0012");
@@ -390,10 +393,11 @@ public class ContainerTruckMoocInput {
 				);
 		
 		ImportContainerRequest[] imContReq = new ImportContainerRequest[3];
+		String[] depotContainer0 = {"DepotContainer001"};
 		imContReq[0] = new ImportContainerRequest(
 				"ORD0004",
 				"Com01",
-				"DepotContainer001",
+				depotContainer0,
 				"20", "",20,
 				"Port001",
 				"2018-07-17 08:00:00",
@@ -408,12 +412,14 @@ public class ContainerTruckMoocInput {
 				"2018-07-20 18:00:00",
 				600,
 				"2018-07-17 08:00:00",
-				"2018-07-20 22:00:00"
+				"2018-07-20 22:00:00",
+				"12"
 				);
+		String[] depotContainer1 = {"DepotContainer001"};
 		imContReq[1] = new ImportContainerRequest(
 				"ORD0005",
 				"Com01",
-				"DepotContainer001",
+				depotContainer1,
 				"20", "", 20,
 				"Port001",
 				"2018-07-17 08:00:00",
@@ -428,12 +434,14 @@ public class ContainerTruckMoocInput {
 				"2018-07-20 18:00:00",
 				600,
 				"2018-07-17 08:00:00",
-				"2018-07-20 20:00:00"
+				"2018-07-20 20:00:00",
+				"12"
 				);
+		String[] depotContainer2 = {"DepotContainer001"};
 		imContReq[2] = new ImportContainerRequest(
 				"ORD0006",
 				"Com01",
-				"DepotContainer001",
+				depotContainer2,
 				"45", "",45,
 				"Port001",
 				"2018-07-17 08:00:00",
@@ -448,7 +456,8 @@ public class ContainerTruckMoocInput {
 				"2018-07-20 18:00:00",
 				600,
 				"2018-07-17 08:00:00",
-				"2018-07-20 22:00:00"
+				"2018-07-20 22:00:00",
+				"12"
 				);
 
 		WarehouseContainerTransportRequest[] wReq = new WarehouseContainerTransportRequest[2];
@@ -472,7 +481,8 @@ public class ContainerTruckMoocInput {
 				600,
 				"2018-07-17 08:00:00", 
 				"2018-07-20 20:00:00", 
-				600
+				600,
+				"123"
 				);
 		
 		wReq[1] = new WarehouseContainerTransportRequest(
@@ -495,7 +505,8 @@ public class ContainerTruckMoocInput {
 				600,
 				"2018-07-17 08:00:00", 
 				"2018-07-20 20:00:00", 
-				600
+				600,
+				"123"
 				);
 		
 		

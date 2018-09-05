@@ -47,14 +47,7 @@ public class Truck {
 	public void setEndWorkingTime(String endWorkingTime) {
 		this.endWorkingTime = endWorkingTime;
 	}
-	public Truck(String code, String depotTruckCode, String startWorkingTime,
-			String endWorkingTime) {
-		super();
-		this.code = code;
-		this.depotTruckCode = depotTruckCode;
-		this.startWorkingTime = startWorkingTime;
-		this.endWorkingTime = endWorkingTime;
-	}
+	
 	public Truck() {
 		super();
 		// TODO Auto-generated constructor stub

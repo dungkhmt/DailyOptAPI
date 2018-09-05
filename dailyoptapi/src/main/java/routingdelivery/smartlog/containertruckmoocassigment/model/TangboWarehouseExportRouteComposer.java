@@ -53,6 +53,9 @@ public class TangboWarehouseExportRouteComposer implements RouteComposer {
 		solver.markServed(whReq);
 		solver.markServed(exReq);
 		solver.addRoute(tri.route, tri.lastUsedIndex);
+		solver.logln(name() + "::acceptRoute " + tri.route.toString());
 	}
-
+	public String name(){
+		return "TangboWarehouseExportRouteComposer";
+	}
 }

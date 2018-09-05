@@ -46,6 +46,10 @@ public class KepLechRouteComposer implements RouteComposer {
 		solver.markServed(exReq);
 		solver.markServed(imReq);
 		solver.addRoute(tri.route, tri.lastUsedIndex);
+		solver.logln(name() + "::acceptRoute " + tri.route.toString());
+	}
+	public String name(){
+		return "KepLechRouteComposer";
 	}
 
 }

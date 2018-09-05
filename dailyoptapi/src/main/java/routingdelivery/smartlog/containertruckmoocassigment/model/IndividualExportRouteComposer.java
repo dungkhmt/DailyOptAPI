@@ -40,8 +40,26 @@ public class IndividualExportRouteComposer implements RouteComposer {
 	@Override
 	public void acceptRoute() {
 		// TODO Auto-generated method stub
+		Truck truck = tri.route.getTruck();
 		solver.markServed(exReq);
 		solver.addRoute(tri.route, tri.lastUsedIndex);
+		solver.logln(name() + "::acceptRoute " + tri.route.toString());
+		TruckItinerary I = solver.mTruck2Itinerary.get(truck);
+		solver.logln(name() + "::acceptRoute, Itinerary = " + I.toString());
+		for(Truck trk: tri.mTruck2LastDepot.keySet()){
+			solver.mTruck2LastDepot.put(trk, tri.getLastDepotTruck(trk));
+			solver.mTruck2LastTime.put(trk, tri.getLastTimeTruck(trk));
+		}
+		for(Mooc mooc: tri.mMooc2LastDepot.keySet()){
+			solver.mMooc2LastDepot.put(mooc, tri.getLastDepotMooc(mooc));
+			solver.mMooc2LastTime.put(mooc, tri.getLastTimeMooc(mooc));
+		}
+		for(Container container: tri.mContainer2LastDepot.keySet()){
+			solver.mContainer2LastDepot.put(container, tri.getLastDepotContainer(container));
+			solver.mContainer2LastTime.put(container, tri.getLastTimeContainer(container));
+		}		
 	}
-
+	public String name(){
+		return "IndividualExportRouteComposer";
+	}
 }

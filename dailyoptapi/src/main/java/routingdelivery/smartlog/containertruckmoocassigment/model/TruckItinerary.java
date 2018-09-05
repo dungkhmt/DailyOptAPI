@@ -24,6 +24,37 @@ public class TruckItinerary {
 												// successor routes.get(i+1)
 												// from lastUsedIndex.get(i)
 
+	public String toString(){
+		String s = "";
+		for(int i = 0; i < routes.size(); i++){
+			s = s + routes.get(i).toString() + ", INDEX = " + lastUsedIndex.get(i) + "\n";
+		}
+		return s;
+	}
+	public TruckRouteList establishRoute(){
+		if(routes == null | routes.size() == 0) return null;
+		Truck truck = routes.get(0).getTruck();
+		//ArrayList<RouteElement> L = new ArrayList<RouteElement>();
+		TruckRoute[] TR = new TruckRoute[routes.size()];
+		double distance = 0;
+		for(int i = 0; i < routes.size(); i++){
+			TruckRoute tr = routes.get(i);
+			int idx = lastUsedIndex.get(i);
+			RouteElement[] e = tr.getNodes();
+			ArrayList<RouteElement> L = new ArrayList<RouteElement>();
+			for(int j = 0; j <= idx; j++){
+				L.add(e[j]);
+			}
+			TR[i] = new TruckRoute(null,L);
+			TR[i].setType(tr.getType());
+			distance += TR[i].getDistance();
+		}
+		//RouteElement[] nodes = new RouteElement[L.size()];
+		//for(int i = 0; i < L.size(); i++) nodes[i] = L.get(i);
+		//TruckRoute tr = new TruckRoute(truck,nodes);
+		TruckRouteList tr = new TruckRouteList(truck,distance,TR.length,TR);
+		return tr;
+	}
 	public ArrayList<TruckRoute> getRoutes() {
 		return routes;
 	}

@@ -47,6 +47,9 @@ public class DoubleImportRouteComposer implements RouteComposer {
 		solver.markServed(importRequest1);
 		solver.markServed(importRequest2);
 		solver.addRoute(tri.route, tri.lastUsedIndex);
+		solver.logln(name() + "::acceptRoute " + tri.route.toString());
 	}
-
+	public String name(){
+		return "DoubleImportRouteComposer";
+	}
 }

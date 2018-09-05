@@ -3,17 +3,19 @@ package routingdelivery.smartlog.containertruckmoocassigment.model;
 import java.util.ArrayList;
 
 public class TruckRoute {
-	public static final String DIRECT = "DIRECT";
+	public static final String DIRECT_EXPORT = "DIRECT_EXPORT";
+	public static final String DIRECT_IMPORT = "DIRECT_IMPORT";
+	public static final String DIRECT_WAREHOUSE = "DIRECT_WAREHOUSE";
 	public static final String SWAP = "SWAP";
 	public static final String TANG_BO = "TANG_BO";
 	public static final String KEP_LECH = "KEP_LECH";
 	public static final String DOUBLE_IMPORT = "DOUBLE_IMPORT";
 	
 	private Truck truck;
-	private RouteElement[] nodes;
 	private String type;
 	private double distance;
 	private double reducedDistance;
+	private RouteElement[] nodes;
 	
 	public String getType() {
 		return type;
@@ -29,7 +31,7 @@ public class TruckRoute {
 	}
 	public String toString(){
 		String s= "";
-		s = s + "truck " + truck.getCode() + ": ";
+		s = s + "truck " + truck.getCode() + ", type = " + getType() + ": ";
 		if(nodes != null)
 			for(int i = 0; i < nodes.length; i++){
 				s = s + nodes[i].toString();

@@ -254,7 +254,7 @@ public class RouteSwapImportExportCreator {
 			e[i] = L.get(i);
 		r.setNodes(e);
 		r.setTruck(truck);
-
+		r.setType(TruckRoute.SWAP);
 		solver.propagate(r);
 
 		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();

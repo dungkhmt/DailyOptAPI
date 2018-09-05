@@ -33,6 +33,9 @@ import routingdelivery.smartlog.containertruckmoocassigment.service.ContainerTru
 import routingdelivery.smartlog.sem.model.SEMPickupDeliveryInput;
 import routingdelivery.smartlog.sem.model.SEMPickupDeliverySolution;
 import routingdelivery.smartlog.sem.service.SEMPickupDeliverySolver;
+import routingdelivery.smartlog.tracking.model.RouteTrackInput;
+import routingdelivery.smartlog.tracking.model.RouteTrackSolution;
+import routingdelivery.smartlog.tracking.service.RouteTrackSolver;
 import utils.DateTimeUtils;
 import weka.core.pmml.jaxbbindings.AssociationModel;
 
@@ -254,9 +257,17 @@ public class TestAPI {
 		// return solver.compute(input);
 		ContainerTruckMoocService service = new ContainerTruckMoocService();
 		return service.solve(input);
+		
 
 	}
-
+	@CrossOrigin
+	@RequestMapping(value = "/route-track", method = RequestMethod.POST)
+	public RouteTrackSolution routeTrack(HttpServletRequest request,
+			@RequestBody RouteTrackInput input) {
+		RouteTrackSolver solver = new RouteTrackSolver();
+		return solver.evaluate(input);
+	}
+	
 	@CrossOrigin
 	@RequestMapping(value = "/swm-store-data", method = RequestMethod.POST)
 	public StoreDataOuput storeTransactionData(HttpServletRequest request,

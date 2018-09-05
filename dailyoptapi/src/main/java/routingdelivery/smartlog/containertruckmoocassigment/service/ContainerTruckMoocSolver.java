@@ -241,9 +241,10 @@ public class ContainerTruckMoocSolver {
 	}
 
 	public void finalizeLog() {
-		if (log != null)
+		if (log != null){
 			log.close();
-		else {
+			log = null;
+		}else {
 
 		}
 	}
@@ -270,7 +271,7 @@ public class ContainerTruckMoocSolver {
 			Container c = input.getContainers()[i];
 			String code = c.getCode();
 			if (code.charAt(0) == 'I') {
-				code = code.substring(1);
+				code = code.substring(2);
 				c.setCode(code);
 			}
 		}
@@ -286,12 +287,13 @@ public class ContainerTruckMoocSolver {
 			ImportContainerTruckMoocRequest R = input.getImRequests()[i];
 			for (int j = 0; j < R.getContainerRequest().length; j++) {
 				ImportContainerRequest r = R.getContainerRequest()[j];
-				String depotContainerCode = r.getDepotContainerCode();
+				
+				//String depotContainerCode = r.getDepotContainerCode();
 				String containerCategory = r.getContainerCategory();
 				idxCode++;
 				String code = "A-" + idxCode;
 				Container c = new Container(code, (int) r.getWeight(),
-						r.getContainerCategory(), null);
+						r.getContainerCategory(), null,r.getDepotContainerCode());
 				additionalContainers.add(c);
 				r.setContainerCode(code);
 			}
@@ -423,6 +425,10 @@ public class ContainerTruckMoocSolver {
 	}
 
 	public double getDistance(String src, String dest) {
+		if(mLocationCode2Index.get(dest) == null){
+			System.out.println(name() + "::getDistance, location dest = " + dest + " has no index ");
+		}
+
 		int is = mLocationCode2Index.get(src);
 		int id = mLocationCode2Index.get(dest);
 		return distance[is][id];
@@ -455,11 +461,15 @@ public class ContainerTruckMoocSolver {
 			Mooc mooc, Container container) {
 		int startTimeTruck = mTruck2LastTime.get(truck);// (int)
 														// DateTimeUtils.dateTime2Int(truck.getStartWorkingTime());
-		String locationTruck = mCode2DepotTruck.get(truck.getDepotTruckCode())
-				.getLocationCode();
+		//String locationTruck = mCode2DepotTruck.get(truck.getDepotTruckCode())
+		//		.getLocationCode();
+		DepotTruck depotTruck = mTruck2LastDepot.get(truck);
+		String locationTruck = depotTruck.getLocationCode();
+		
 		String locationMooc = mMooc2LastDepot.get(mooc).getLocationCode();
 		String locationContainer = mContainer2LastDepot.get(container)
 				.getLocationCode();
+		//System.out.println(name() + "::createLastAvailableCombo, container = " + container.getCode() + ", location = " + locationContainer);
 		int timeMooc = mMooc2LastTime.get(mooc);
 		int timeContainer = mContainer2LastTime.get(container);
 		int arrivalTimeMooc = startTimeTruck
@@ -702,8 +712,11 @@ public class ContainerTruckMoocSolver {
 		int startTimeTruck = mTruck2LastTime.get(truck);// (int)
 														// DateTimeUtils.dateTime2Int(truck.getStartWorkingTime());
 		double distance = 0;
-		String locationTruck = mCode2DepotTruck.get(truck.getDepotTruckCode())
-				.getLocationCode();
+		//String locationTruck = mCode2DepotTruck.get(truck.getDepotTruckCode())
+		//		.getLocationCode();
+		DepotTruck depotTruck = mTruck2LastDepot.get(truck);
+		String locationTruck = depotTruck.getLocationCode(); 
+		
 		String locationMooc = mMooc2LastDepot.get(mooc).getLocationCode();
 		int timeMooc = mMooc2LastTime.get(mooc);
 		int arrivalTimeMooc = startTimeTruck
@@ -718,6 +731,31 @@ public class ContainerTruckMoocSolver {
 		return ret;
 
 	}
+	public ComboContainerMoocTruck createLastAvailableCombo(Truck truck, String locationTruck, int departureTime, 
+			double extraDistance, Mooc mooc) {
+		int startTimeTruck = departureTime;//mTruck2LastTime.get(truck);// (int)
+														// DateTimeUtils.dateTime2Int(truck.getStartWorkingTime());
+		double distance = 0;
+		//String locationTruck = mCode2DepotTruck.get(truck.getDepotTruckCode())
+		//		.getLocationCode();
+		//DepotTruck depotTruck = mTruck2LastDepot.get(truck);
+		//String locationTruck = depotTruck.getLocationCode(); 
+		
+		String locationMooc = mMooc2LastDepot.get(mooc).getLocationCode();
+		int timeMooc = mMooc2LastTime.get(mooc);
+		int arrivalTimeMooc = startTimeTruck
+				+ getTravelTime(locationTruck, locationMooc);
+		int departureTimeMooc = MAX(arrivalTimeMooc, timeMooc)
+				+ mMooc2LastDepot.get(mooc).getPickupMoocDuration();
+
+		distance = getDistance(locationTruck, locationMooc) + extraDistance;
+
+		ComboContainerMoocTruck ret = new ComboContainerMoocTruck(truck, mooc,
+				null, locationMooc, departureTimeMooc, null, null, distance);
+		return ret;
+
+	}
+
 
 	public ComboContainerMoocTruck findLastAvailable(Truck truck, Mooc mooc,
 			Container container) {
@@ -742,13 +780,14 @@ public class ContainerTruckMoocSolver {
 				RouteElement e = tr.getNodes()[i];
 				if (e.getAction().equals(
 						ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT)) {
-					if (e.getTruck() == truck && e.getMooc() == mooc) {
+					if (e.getMooc() == mooc) {
 						// truck and mooc available, go to last depot of
 						// container
 						int departureTimePort = mPoint2DepartureTime.get(e);
 						String locationCodePort = e.getLocationCode();
 						String locationContainer = mContainer2LastDepot.get(
 								container).getLocationCode();
+						
 						int arrivalTimeContainer = departureTimePort
 								+ getTravelTime(locationCodePort,
 										locationContainer);
@@ -773,7 +812,7 @@ public class ContainerTruckMoocSolver {
 					}
 				} else if (e.getAction().equals(
 						ActionEnum.LINK_EMPTY_CONTAINER_AT_WAREHOUSE)) {
-					if (e.getTruck() == truck && e.getMooc() == mooc
+					if (e.getMooc() == mooc
 							&& e.getContainer() == container) {
 						departureTime = mPoint2DepartureTime.get(e);
 						locationCode = e.getLocationCode();
@@ -785,7 +824,6 @@ public class ContainerTruckMoocSolver {
 								departureTime, e, tr, extraDistance);
 						return ret;
 					}
-
 				}
 			}
 			if (locationCode == null)
@@ -883,7 +921,7 @@ public class ContainerTruckMoocSolver {
 				RouteElement e = tr.getNodes()[i];
 				if (e.getAction().equals(
 						ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT)) {
-					if (e.getTruck() == truck && e.getMooc() == mooc) {
+					if (e.getMooc() == mooc) {
 						// truck and mooc available, go to last depot of
 						// container
 						int departureTimePort = mPoint2DepartureTime.get(e);
@@ -898,7 +936,7 @@ public class ContainerTruckMoocSolver {
 					}
 				} else if (e.getAction().equals(
 						ActionEnum.RELEASE_CONTAINER_AT_DEPOT)) {
-					if (e.getTruck() == truck && e.getMooc() == mooc) {
+					if (e.getMooc() == mooc) {
 						departureTime = mPoint2DepartureTime.get(e);
 						locationCode = e.getLocationCode();
 						double extraDistance = e.getDistance()
@@ -909,6 +947,12 @@ public class ContainerTruckMoocSolver {
 						return ret;
 					}
 
+				}else if(e.getAction().equals(ActionEnum.RELEASE_MOOC_AT_DEPOT)){
+					departureTime = mPoint2DepartureTime.get(e);
+					locationCode = e.getLocationCode();
+					double extraDistance = e.getDistance()
+							- tr.getLastNode().getDistance();
+					return createLastAvailableCombo(truck, locationCode, departureTime, extraDistance, mooc);
 				}
 			}
 			if (locationCode == null)
@@ -1330,7 +1374,8 @@ public class ContainerTruckMoocSolver {
 		e2.setPort(port);
 		e2.setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_PORT);
 		e2.setImportRequest(req);
-		e2.setContainer(mCode2Container.get(req.getContainerCode()));
+		Container container = mCode2Container.get(req.getContainerCode()); 
+		e2.setContainer(container);
 		distance = combo.extraDistance + getTravelTime(lastElement, e2);
 
 		travelTime = getTravelTime(lastElement, e2);
@@ -1341,6 +1386,8 @@ public class ContainerTruckMoocSolver {
 		mPoint2ArrivalTime.put(e2, arrivalTime);
 		mPoint2DepartureTime.put(e2, departureTime);
 
+		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		RouteElement e3 = new RouteElement();
 		L.add(e3);
 		e3.deriveFrom(e2);
@@ -1374,8 +1421,10 @@ public class ContainerTruckMoocSolver {
 		RouteElement e5 = new RouteElement();
 		L.add(e5);
 		e5.deriveFrom(e4);
-		e5.setDepotContainer(mCode2DepotContainer.get(req
-				.getDepotContainerCode()));
+		DepotContainer depotContainer = findDepotContainer4Deposit(req, e4, container);
+		//e5.setDepotContainer(mCode2DepotContainer.get(req.getDepotContainerCode()));
+		e5.setDepotContainer(depotContainer);
+				
 		e5.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 		e5.setContainer(null);
 		travelTime = getTravelTime(e4, e5);
@@ -1385,13 +1434,18 @@ public class ContainerTruckMoocSolver {
 		departureTime = startServiceTime + duration;
 		mPoint2ArrivalTime.put(e5, arrivalTime);
 		mPoint2DepartureTime.put(e5, departureTime);
-		mContainer2LastDepot.put(e5.getContainer(), e5.getDepotContainer());
-		mContainer2LastTime.put(e5.getContainer(), departureTime);
-
+		//mContainer2LastDepot.put(e5.getContainer(), e5.getDepotContainer());
+		//mContainer2LastTime.put(e5.getContainer(), departureTime);
+		tri.setLastDepotContainer(container, e5.getDepotContainer());
+		tri.setLastTimeContainer(container, departureTime);
+		
 		RouteElement e6 = new RouteElement();
 		L.add(e6);
 		e6.deriveFrom(e5);
-		e6.setDepotMooc(mCode2DepotMooc.get(mooc.getDepotMoocCode()));
+		DepotMooc depotMooc = findDepotMooc4Deposit(req, e5, mooc);
+		e6.setDepotMooc(depotMooc);
+		//e6.setDepotMooc(mCode2DepotMooc.get(mooc.getDepotMoocCode()));
+		
 		e6.setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
 		e6.setMooc(mooc);
 		travelTime = getTravelTime(e5, e6);
@@ -1401,13 +1455,18 @@ public class ContainerTruckMoocSolver {
 		departureTime = startServiceTime + duration;
 		mPoint2ArrivalTime.put(e6, arrivalTime);
 		mPoint2DepartureTime.put(e6, departureTime);
-		mMooc2LastDepot.put(mooc, e6.getDepotMooc());
-		mMooc2LastTime.put(mooc, departureTime);
-
+		//mMooc2LastDepot.put(mooc, e6.getDepotMooc());
+		//mMooc2LastTime.put(mooc, departureTime);
+		tri.setLastDepotMooc(mooc,  e6.getDepotMooc());
+		tri.setLastTimeMooc(mooc, departureTime);
+		
 		RouteElement e7 = new RouteElement();
 		L.add(e7);
 		e7.deriveFrom(e6);
-		e7.setDepotTruck(mCode2DepotTruck.get(truck.getDepotTruckCode()));
+		DepotTruck depotTruck = findDepotTruck4Deposit(req, e6, truck);
+		//e7.setDepotTruck(mCode2DepotTruck.get(truck.getDepotTruckCode()));
+		e7.setDepotTruck(depotTruck);
+		
 		e7.setAction(ActionEnum.REST_AT_DEPOT);
 		travelTime = getTravelTime(e6, e7);
 		arrivalTime = departureTime + travelTime;
@@ -1416,19 +1475,21 @@ public class ContainerTruckMoocSolver {
 		departureTime = startServiceTime + duration;
 		mPoint2ArrivalTime.put(e7, arrivalTime);
 		mPoint2DepartureTime.put(e7, departureTime);
-		mTruck2LastDepot.put(truck, e7.getDepotTruck());
-		mTruck2LastTime.put(truck, departureTime);
-
+		//mTruck2LastDepot.put(truck, e7.getDepotTruck());
+		//mTruck2LastTime.put(truck, departureTime);
+		tri.setLastDepotTruck(truck, e7.getDepotTruck());
+		tri.setLastTimeTruck(truck, departureTime);
+		
 		RouteElement[] e = new RouteElement[L.size()];
 		for (int i = 0; i < e.length; i++)
 			e[i] = L.get(i);
 		r = new TruckRoute();
 		r.setNodes(e);
 		r.setTruck(truck);
-
+		r.setType(TruckRoute.DIRECT_IMPORT);
 		propagate(r);
 
-		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		tri.route = r;
 		tri.additionalDistance = distance;
 		tri.lastUsedIndex = lastUsedIndex;
@@ -1570,12 +1631,143 @@ public class ContainerTruckMoocSolver {
 		return r;
 	}
 
+	public DepotMooc findDepotMooc4Deposit(ExportContainerRequest r, RouteElement fromElement, Mooc mooc){
+		//return mCode2DepotMooc.get(mooc.getDepotMoocCode());
+		double minDis = Integer.MAX_VALUE;
+		DepotMooc sel_depot = null;
+		for(String lc: mooc.getReturnDepotCodes()){
+			DepotMooc depotMooc = mCode2DepotMooc.get(lc);
+			double d= getTravelTime(fromElement.getLocationCode(),depotMooc.getLocationCode());
+			if(d < minDis){
+				minDis = d;
+				sel_depot = depotMooc;
+			}
+		}
+		return sel_depot;
+	}
+	public DepotMooc findDepotMooc4Deposit(WarehouseContainerTransportRequest r, RouteElement fromElement, Mooc mooc){
+		//return mCode2DepotMooc.get(mooc.getDepotMoocCode());
+		double minDis = Integer.MAX_VALUE;
+		DepotMooc sel_depot = null;
+		for(String lc: mooc.getReturnDepotCodes()){
+			DepotMooc depotMooc = mCode2DepotMooc.get(lc);
+			double d= getTravelTime(fromElement.getLocationCode(),depotMooc.getLocationCode());
+			if(d < minDis){
+				minDis = d;
+				sel_depot = depotMooc;
+			}
+		}
+		return sel_depot;
+	}
+	public DepotMooc findDepotMooc4Deposit(ImportContainerRequest r, RouteElement fromElement, Mooc mooc){
+		//return mCode2DepotMooc.get(mooc.getDepotMoocCode());
+		double minDis = Integer.MAX_VALUE;
+		DepotMooc sel_depot = null;
+		for(String lc: mooc.getReturnDepotCodes()){
+			DepotMooc depotMooc = mCode2DepotMooc.get(lc);
+			double d= getTravelTime(fromElement.getLocationCode(),depotMooc.getLocationCode());
+			if(d < minDis){
+				minDis = d;
+				sel_depot = depotMooc;
+			}
+		}
+		return sel_depot;
+	}
+	
+	public DepotContainer findDepotContainer4Deposit(ImportContainerRequest r, RouteElement fromElement, Container container){
+		double minDis = Integer.MAX_VALUE;
+		DepotContainer sel_depot = null;
+		for(String lc: r.getDepotContainerCode()){
+			DepotContainer dc = mCode2DepotContainer.get(lc);
+			double d = getTravelTime(fromElement.getLocationCode(), dc.getLocationCode());
+			if(minDis > d){
+				minDis = d;
+				sel_depot = dc;
+			}
+		}
+		return sel_depot;//mCode2DepotContainer.get(container.getDepotContainerCode());
+	}
+	public DepotContainer findDepotContainer4Deposit(WarehouseContainerTransportRequest r, RouteElement fromElement, Container container){
+		//return mCode2DepotContainer.get(container.getDepotContainerCode());
+		double minDis = Integer.MAX_VALUE;
+		DepotContainer sel_depot = null;
+		for(String lc:container.getReturnDepotCodes()){
+			DepotContainer depotContainer = mCode2DepotContainer.get(lc);
+			double d= getTravelTime(fromElement.getLocationCode(),depotContainer.getLocationCode());
+			if(d < minDis){
+				minDis = d;
+				sel_depot = depotContainer;
+			}
+		}
+		return sel_depot;
+	}
+	public DepotContainer findDepotContainer4Deposit(ExportContainerRequest r, RouteElement fromElement, Container container){
+		//return mCode2DepotContainer.get(container.getDepotContainerCode());
+		double minDis = Integer.MAX_VALUE;
+		DepotContainer sel_depot = null;
+		for(String lc:container.getReturnDepotCodes()){
+			DepotContainer depotContainer = mCode2DepotContainer.get(lc);
+			double d= getTravelTime(fromElement.getLocationCode(),depotContainer.getLocationCode());
+			if(d < minDis){
+				minDis = d;
+				sel_depot = depotContainer;
+			}
+		}
+		return sel_depot;
+	}
+	
+	public DepotTruck findDepotTruck4Deposit(ExportContainerRequest r, RouteElement fromElement, Truck truck){
+		//return mCode2DepotTruck.get(truck.getDepotTruckCode());
+		double minDis = Integer.MAX_VALUE;
+		DepotTruck sel_depot = null;
+		for(String c: truck.getReturnDepotCodes()){
+			DepotTruck depotTruck = mCode2DepotTruck.get(c);
+			double d = getTravelTime(fromElement.getLocationCode(),depotTruck.getLocationCode());
+			if(d < minDis){
+				minDis = d;
+				sel_depot = depotTruck;
+			}
+		}
+		return sel_depot;
+	}
+	public DepotTruck findDepotTruck4Deposit(WarehouseContainerTransportRequest r, RouteElement fromElement, Truck truck){
+		//return mCode2DepotTruck.get(truck.getDepotTruckCode());
+		double minDis = Integer.MAX_VALUE;
+		DepotTruck sel_depot = null;
+		for(String c: truck.getReturnDepotCodes()){
+			DepotTruck depotTruck = mCode2DepotTruck.get(c);
+			double d = getTravelTime(fromElement.getLocationCode(),depotTruck.getLocationCode());
+			if(d < minDis){
+				minDis = d;
+				sel_depot = depotTruck;
+			}
+		}
+		return sel_depot;
+	}
+	public DepotTruck findDepotTruck4Deposit(ImportContainerRequest r, RouteElement fromElement, Truck truck){
+		//return mCode2DepotTruck.get(truck.getDepotTruckCode());
+		double minDis = Integer.MAX_VALUE;
+		DepotTruck sel_depot = null;
+		for(String c: truck.getReturnDepotCodes()){
+			DepotTruck depotTruck = mCode2DepotTruck.get(c);
+			double d = getTravelTime(fromElement.getLocationCode(),depotTruck.getLocationCode());
+			if(d < minDis){
+				minDis = d;
+				sel_depot = depotTruck;
+			}
+		}
+		return sel_depot;
+	}
+	
+	
 	public TruckRouteInfo4Request createRouteForExportRequest(
 			ExportContainerRequest req, Truck truck, Mooc mooc,
 			Container container) {
-		String header = name() + "::createDirectRouteForExportRequest";
+		String header = name() + "::createRouteForExportRequest";
 		// truck, mooc, container are REST at their depots
-
+		if(mContainer2LastDepot.get(container) == null){
+			return null;
+		}
 		TruckRoute r = new TruckRoute();
 		RouteElement[] e = new RouteElement[8];
 		for (int i = 0; i < e.length; i++)
@@ -1606,6 +1798,7 @@ public class ContainerTruckMoocSolver {
 			mPoint2DepartureTime.put(e[0], departureTime);
 
 			// arrive at the depot mooc, take a mooc
+			L.add(e[1]);
 			e[1].deriveFrom(e[0]);
 			e[1].setDepotMooc(mCode2DepotMooc.get(mooc.getDepotMoocCode()));
 			e[1].setAction(ActionEnum.TAKE_MOOC_AT_DEPOT);
@@ -1620,11 +1813,14 @@ public class ContainerTruckMoocSolver {
 			mPoint2DepartureTime.put(e[1], departureTime);
 
 			// arrive at the depot container
+			L.add(e[2]);
 			e[2].deriveFrom(e[1]);
 			e[2].setDepotContainer(mContainer2LastDepot.get(container));
 			e[2].setAction(ActionEnum.TAKE_CONTAINER_AT_DEPOT);
 			e[2].setContainer(container);
-
+			if(mContainer2LastDepot.get(container) == null){
+				System.out.println(header + ", container = " + container.getCode() + " has no depot??????");
+			}
 			travelTime = getTravelTime(e[1], e[2]);
 			arrivalTime = departureTime + travelTime;
 			startServiceTime = arrivalTime;
@@ -1646,7 +1842,7 @@ public class ContainerTruckMoocSolver {
 		e[3].setAction(ActionEnum.WAIT_LOAD_CONTAINER_AT_WAREHOUSE);
 		e[3].setExportRequest(req);
 
-		travelTime = getTravelTime(e[2], e[3]);
+		travelTime = getTravelTime(lastElement, e[3]);
 		arrivalTime = departureTime + travelTime;
 		startServiceTime = MAX(arrivalTime,
 				(int) DateTimeUtils.dateTime2Int(req
@@ -1658,6 +1854,9 @@ public class ContainerTruckMoocSolver {
 		mPoint2ArrivalTime.put(e[3], arrivalTime);
 		mPoint2DepartureTime.put(e[3], departureTime);
 
+		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
+		L.add(e[4]);
 		e[4].deriveFrom(e[3]);
 		e[4].setWarehouse(mCode2Warehouse.get(req.getWareHouseCode()));
 		e[4].setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_WAREHOUSE);
@@ -1669,6 +1868,7 @@ public class ContainerTruckMoocSolver {
 		mPoint2ArrivalTime.put(e[4], arrivalTime);
 		mPoint2DepartureTime.put(e[4], departureTime);
 
+		L.add(e[5]);
 		e[5].deriveFrom(e[4]);
 		e[5].setPort(mCode2Port.get(req.getPortCode()));
 		e[5].setAction(ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT);
@@ -1684,9 +1884,14 @@ public class ContainerTruckMoocSolver {
 		// update last depot container, set to not-available
 		mContainer2LastDepot.put(container, null);
 		mContainer2LastTime.put(container, Integer.MAX_VALUE);
+		tri.setLastDepotContainer(container, null);
+		tri.setLastTimeContainer(container, null);
 
+		L.add(e[6]);
 		e[6].deriveFrom(e[5]);
-		e[6].setDepotMooc(mCode2DepotMooc.get(mooc.getDepotMoocCode()));
+		DepotMooc depotMooc = findDepotMooc4Deposit(req,e[5],mooc);
+		//e[6].setDepotMooc(mCode2DepotMooc.get(mooc.getDepotMoocCode()));
+		e[6].setDepotMooc(depotMooc);
 		e[6].setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
 		e[6].setMooc(null);
 		travelTime = getTravelTime(e[5], e[6]);
@@ -1697,11 +1902,19 @@ public class ContainerTruckMoocSolver {
 		mPoint2ArrivalTime.put(e[6], arrivalTime);
 		mPoint2DepartureTime.put(e[6], departureTime);
 		// update last depot and lastTime of mooc
-		mMooc2LastDepot.put(mooc, e[6].getDepotMooc());
-		mMooc2LastTime.put(mooc, departureTime);
+		//mMooc2LastDepot.put(mooc, e[6].getDepotMooc());
+		//mMooc2LastTime.put(mooc, departureTime);
+		tri.setLastDepotMooc(mooc, e[6].getDepotMooc());
+		tri.setLastTimeMooc(mooc, departureTime);
+		
+		tri.setLastDepotMooc(mooc, e[6].getDepotMooc());
+		tri.setLastTimeMooc(mooc, departureTime);
 
+		L.add(e[7]);
 		e[7].deriveFrom(e[6]);
-		e[7].setDepotTruck(mCode2DepotTruck.get(truck.getDepotTruckCode()));
+		//e[7].setDepotTruck(mCode2DepotTruck.get(truck.getDepotTruckCode()));
+		DepotTruck depotTruck = findDepotTruck4Deposit(req, e[6], truck);
+		e[7].setDepotTruck(depotTruck);
 		e[7].setAction(ActionEnum.REST_AT_DEPOT);
 
 		travelTime = getTravelTime(e[6], e[7]);
@@ -1712,9 +1925,11 @@ public class ContainerTruckMoocSolver {
 		mPoint2ArrivalTime.put(e[7], arrivalTime);
 		mPoint2DepartureTime.put(e[7], departureTime);
 		// update last depot and last time of truck
-		mTruck2LastDepot.put(truck, e[7].getDepotTruck());
-		mTruck2LastTime.put(truck, departureTime);
-
+		//mTruck2LastDepot.put(truck, e[7].getDepotTruck());
+		//mTruck2LastTime.put(truck, departureTime);
+		tri.setLastDepotTruck(truck, e[7].getDepotTruck());
+		tri.setLastTimeTruck(truck, departureTime);
+		
 		e = new RouteElement[L.size()];
 		for (int i = 0; i < L.size(); i++)
 			e[i] = L.get(i);
@@ -1722,10 +1937,10 @@ public class ContainerTruckMoocSolver {
 		r = new TruckRoute();
 		r.setNodes(e);
 		r.setTruck(truck);
-
+		r.setType(TruckRoute.DIRECT_EXPORT);
 		propagate(r);
 
-		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		tri.route = r;
 		tri.lastUsedIndex = lastUsedIndex;
 		tri.additionalDistance = distance;
@@ -1913,6 +2128,7 @@ public class ContainerTruckMoocSolver {
 			e[0].setTruck(truck);
 			mPoint2DepartureTime.put(e[0], departureTime);
 
+			L.add(e[1]);
 			e[1].deriveFrom(e[0]);
 			e[1].setDepotMooc(mCode2DepotMooc.get(mooc.getDepotMoocCode()));
 			e[1].setAction(ActionEnum.TAKE_MOOC_AT_DEPOT);
@@ -1961,6 +2177,8 @@ public class ContainerTruckMoocSolver {
 		mPoint2ArrivalTime.put(e[3], arrivalTime);
 		mPoint2DepartureTime.put(e[3], departureTime);
 
+		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		L.add(e[4]);
 		e[4].deriveFrom(e[3]);
 		e[4].setWarehouse(pickupWarehouse);
@@ -1974,6 +2192,7 @@ public class ContainerTruckMoocSolver {
 		mPoint2ArrivalTime.put(e[4], arrivalTime);
 		mPoint2DepartureTime.put(e[4], departureTime);
 
+		L.add(e[5]);
 		e[5].deriveFrom(e[4]);
 		e[5].setWarehouse(deliveryWarehouse);
 		e[5].setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
@@ -1986,6 +2205,7 @@ public class ContainerTruckMoocSolver {
 		mPoint2ArrivalTime.put(e[5], arrivalTime);
 		mPoint2DepartureTime.put(e[5], departureTime);
 
+		L.add(e[6]);
 		e[6].deriveFrom(e[5]);
 		e[6].setWarehouse(deliveryWarehouse);
 		e[6].setAction(ActionEnum.LINK_EMPTY_CONTAINER_AT_WAREHOUSE);
@@ -1998,9 +2218,12 @@ public class ContainerTruckMoocSolver {
 		mPoint2ArrivalTime.put(e[6], arrivalTime);
 		mPoint2DepartureTime.put(e[6], departureTime);
 
+		L.add(e[7]);
 		e[7].deriveFrom(e[6]);
-		e[7].setDepotContainer(mCode2DepotContainer.get(container
-				.getDepotContainerCode()));
+		//e[7].setDepotContainer(mCode2DepotContainer.get(container.getDepotContainerCode()));
+		DepotContainer depotContainer = findDepotContainer4Deposit(req, e[6], container);
+		e[7].setDepotContainer(depotContainer);
+		
 		e[7].setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 		e[7].setContainer(null);
 		travelTime = getTravelTime(e[6], e[7]);
@@ -2011,9 +2234,15 @@ public class ContainerTruckMoocSolver {
 		departureTime = startServiceTime + duration;
 		mPoint2ArrivalTime.put(e[7], arrivalTime);
 		mPoint2DepartureTime.put(e[7], departureTime);
-
+		tri.setLastDepotContainer(container, e[7].getDepotContainer());
+		tri.setLastTimeContainer(container, departureTime);
+		
+		L.add(e[8]);
 		e[8].deriveFrom(e[7]);
-		e[8].setDepotMooc(mCode2DepotMooc.get(mooc.getDepotMoocCode()));
+		//e[8].setDepotMooc(mCode2DepotMooc.get(mooc.getDepotMoocCode()));
+		DepotMooc depotMooc = findDepotMooc4Deposit(req, e[7], mooc);
+		e[8].setDepotMooc(depotMooc);
+		
 		e[8].setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
 		e[8].setMooc(mooc);
 		travelTime = getTravelTime(e[7], e[8]);
@@ -2024,9 +2253,15 @@ public class ContainerTruckMoocSolver {
 		departureTime = startServiceTime + duration;
 		mPoint2ArrivalTime.put(e[8], arrivalTime);
 		mPoint2DepartureTime.put(e[8], departureTime);
-
+		tri.setLastDepotMooc(mooc, e[8].getDepotMooc());
+		tri.setLastTimeMooc(mooc, departureTime);
+		
+		L.add(e[9]);
 		e[9].deriveFrom(e[8]);
-		e[9].setDepotTruck(mCode2DepotTruck.get(truck.getDepotTruckCode()));
+		//e[9].setDepotTruck(mCode2DepotTruck.get(truck.getDepotTruckCode()));
+		DepotTruck depotTruck = findDepotTruck4Deposit(req, e[8], truck);
+		e[9].setDepotTruck(depotTruck);
+		
 		e[9].setAction(ActionEnum.REST_AT_DEPOT);
 		travelTime = getTravelTime(e[8], e[9]);
 		arrivalTime = departureTime + travelTime;
@@ -2035,7 +2270,9 @@ public class ContainerTruckMoocSolver {
 		departureTime = startServiceTime + duration;
 		mPoint2ArrivalTime.put(e[9], arrivalTime);
 		mPoint2DepartureTime.put(e[9], departureTime);
-
+		tri.setLastDepotTruck(truck, e[9].getDepotTruck());
+		tri.setLastTimeTruck(truck, departureTime);
+		
 		e = new RouteElement[L.size()];
 		for (int i = 0; i < L.size(); i++)
 			e[i] = L.get(i);
@@ -2043,10 +2280,10 @@ public class ContainerTruckMoocSolver {
 		TruckRoute r = new TruckRoute();
 		r.setNodes(e);
 		r.setTruck(truck);
-
+		r.setType(TruckRoute.DIRECT_WAREHOUSE);
 		propagate(r);
 
-		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		tri.route = r;
 		tri.lastUsedIndex = lastUsedIndex;
 		tri.additionalDistance = distance;
@@ -2580,8 +2817,9 @@ public class ContainerTruckMoocSolver {
 	public int getTravelTime(RouteElement e1, RouteElement e2) {
 		String lc1 = e1.getLocationCode();
 		String lc2 = e2.getLocationCode();
-		// System.out.println(name() + "::getTravelTime, lc1 = " + lc1 +
-		// ", lc2 = " + lc2);
+		if(lc1 == null || lc2 == null)
+			System.out.println(name() + "::getTravelTime, lc1 = " + lc1 +
+				", lc2 = " + lc2);
 		return getTravelTime(lc1, lc2);
 	}
 

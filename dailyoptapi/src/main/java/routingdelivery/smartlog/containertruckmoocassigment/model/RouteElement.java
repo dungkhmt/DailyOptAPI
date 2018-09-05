@@ -23,7 +23,7 @@ public class RouteElement {
 	
 	public String toString(){
 		String s = "";
-		s = s + getLocationCode() + ", Action " + getAction();
+		s = s + "[" + getLocationCode() + ", Action " + getAction() + "]";
 		return s;
 	}
 	public void deriveFrom(RouteElement e){

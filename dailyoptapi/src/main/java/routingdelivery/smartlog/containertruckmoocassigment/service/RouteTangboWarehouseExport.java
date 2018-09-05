@@ -84,11 +84,9 @@ public class RouteTangboWarehouseExport {
 				container);
 		if (combo == null)
 			return null;
-
-		double distance = combo.extraDistance
-				+ solver.getDistance(combo.lastLocationCode,
-						wr.getFromWarehouseCode());
+		//System.out.println(name() + "::createTangboWarehouseExport, combo.locationCode= " + combo.lastLocationCode);
 		
+		double distance = -1;
 		ArrayList<RouteElement> L = new ArrayList<RouteElement>();
 		RouteElement lastElement = combo.routeElement;
 		int departureTime = combo.startTime;
@@ -155,6 +153,10 @@ public class RouteTangboWarehouseExport {
 					+ solver.getTravelTime(lastElement.getDepotContainer()
 							.getLocationCode(), e3.getWarehouse()
 							.getLocationCode());
+			distance = combo.extraDistance
+			+ solver.getDistance(lastElement, e3);
+	
+			
 			if (arrivalTime > DateTimeUtils.dateTime2Int(wr
 					.getLateDateTimeLoad())) {
 				solver.logln(name()
@@ -319,7 +321,7 @@ public class RouteTangboWarehouseExport {
 				e[i] = L.get(i);
 			r.setNodes(e);
 			r.setTruck(truck);
-
+			r.setType(TruckRoute.TANG_BO);
 			solver.propagate(r);
 
 			

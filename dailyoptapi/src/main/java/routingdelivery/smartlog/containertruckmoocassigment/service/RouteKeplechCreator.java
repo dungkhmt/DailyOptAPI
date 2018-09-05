@@ -297,7 +297,7 @@ public class RouteKeplechCreator {
 			e[i] = L.get(i);
 		r.setNodes(e);
 		r.setTruck(truck);
-
+		r.setType(TruckRoute.KEP_LECH);
 		solver.propagate(r);
 
 		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();

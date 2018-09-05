@@ -46,14 +46,7 @@ public class Mooc {
 	public void setDepotMoocCode(String depotMoocCode) {
 		this.depotMoocCode = depotMoocCode;
 	}
-	public Mooc(String code, String category, double weight,
-			String depotMoocCode) {
-		super();
-		this.code = code;
-		this.category = category;
-		this.weight = weight;
-		this.depotMoocCode = depotMoocCode;
-	}
+	
 	public Mooc() {
 		super();
 		// TODO Auto-generated constructor stub

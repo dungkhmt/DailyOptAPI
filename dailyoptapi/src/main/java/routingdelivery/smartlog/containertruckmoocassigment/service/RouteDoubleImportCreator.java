@@ -454,7 +454,7 @@ public class RouteDoubleImportCreator {
 			e[i] = L.get(i);
 		r.setNodes(e);
 		r.setTruck(truck);
-
+		r.setType(TruckRoute.DOUBLE_IMPORT);
 		solver.propagate(r);
 
 		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
