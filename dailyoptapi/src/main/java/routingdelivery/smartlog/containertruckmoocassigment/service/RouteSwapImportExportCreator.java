@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ActionEnum;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ComboContainerMoocTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerCategoryEnum;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DepotMooc;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DepotTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ExportContainerRequest;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ImportContainerRequest;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Mooc;
@@ -216,11 +218,14 @@ public class RouteSwapImportExportCreator {
 		solver.mPoint2ArrivalTime.put(e7, arrivalTime);
 		solver.mPoint2DepartureTime.put(e7, departureTime);
 
+		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		RouteElement e8 = new RouteElement();
 		L.add(e8);
+		DepotMooc depotMooc = solver.findDepotMooc4Deposit(ir, e7, mooc);
 		e8.deriveFrom(e7);
 		e8.setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
-		e8.setDepotMooc(solver.findDepotForReleaseMooc(mooc));
+		e8.setDepotMooc(depotMooc);
 		arrivalTime = departureTime
 				+ solver.getTravelTime(e7.getPort().getLocationCode(), e8
 						.getDepotMooc().getLocationCode());
@@ -229,14 +234,17 @@ public class RouteSwapImportExportCreator {
 		departureTime = serviceTime + duration;
 		solver.mPoint2ArrivalTime.put(e8, arrivalTime);
 		solver.mPoint2DepartureTime.put(e8, departureTime);
-		solver.mMooc2LastDepot.put(mooc, e8.getDepotMooc());
-		solver.mMooc2LastTime.put(mooc, departureTime);
-
+		//solver.mMooc2LastDepot.put(mooc, e8.getDepotMooc());
+		//solver.mMooc2LastTime.put(mooc, departureTime);
+		tri.setLastDepotMooc(mooc, depotMooc);
+		tri.setLastTimeMooc(mooc, departureTime);
+		
 		RouteElement e9 = new RouteElement();
 		L.add(e9);
+		DepotTruck depotTruck = solver.findDepotTruck4Deposit(ir, e8, truck);
 		e9.deriveFrom(e8);
 		e9.setAction(ActionEnum.REST_AT_DEPOT);
-		e9.setDepotTruck(solver.findDepotForReleaseTruck(truck));
+		e9.setDepotTruck(depotTruck);
 		arrivalTime = departureTime
 				+ solver.getTravelTime(e8.getDepotMooc().getLocationCode(), e9
 						.getDepotTruck().getLocationCode());
@@ -245,9 +253,11 @@ public class RouteSwapImportExportCreator {
 		departureTime = serviceTime + duration;
 		solver.mPoint2ArrivalTime.put(e9, arrivalTime);
 		solver.mPoint2DepartureTime.put(e9, departureTime);
-		solver.mTruck2LastDepot.put(truck, e9.getDepotTruck());
-		solver.mTruck2LastTime.put(truck, departureTime);
-
+		//solver.mTruck2LastDepot.put(truck, e9.getDepotTruck());
+		//solver.mTruck2LastTime.put(truck, departureTime);
+		tri.setLastDepotTruck(truck, depotTruck);
+		tri.setLastTimeTruck(truck, departureTime);
+		
 		TruckRoute r = new TruckRoute();
 		RouteElement[] e = new RouteElement[L.size()];
 		for (int i = 0; i < e.length; i++)
@@ -257,7 +267,7 @@ public class RouteSwapImportExportCreator {
 		r.setType(TruckRoute.SWAP);
 		solver.propagate(r);
 
-		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		tri.route = r;
 		tri.lastUsedIndex = lastUsedIndex;
 		tri.additionalDistance = distance;

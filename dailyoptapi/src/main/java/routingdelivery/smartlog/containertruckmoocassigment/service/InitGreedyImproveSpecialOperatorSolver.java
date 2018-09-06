@@ -11,6 +11,9 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.ComboContainer
 import routingdelivery.smartlog.containertruckmoocassigment.model.Container;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocInput;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocSolution;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DepotContainer;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DepotMooc;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DepotTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.DoubleImportRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ExportContainerRequest;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ImportContainerRequest;
@@ -323,9 +326,15 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 								backup();
 								TruckRouteInfo4Request tri_k = createRouteForImportRequest(
 										sel_imReq_k, trucks[i], moocs[j]);
+								if(tri_k == null){
+									restore(); continue;
+								}
 								TruckRouteInfo4Request tri_q = createRouteForExportRequest(
 										sel_exReq_q, trucks[i1], moocs[j1],
 										containers[k]);
+								if(tri_q == null){
+									restore(); continue;
+								}
 								TruckRoute tr_k = tri_k.route;
 								TruckRoute tr_q = tri_q.route;
 								// compute additional distance when creating
@@ -442,9 +451,15 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 								backup();
 								TruckRouteInfo4Request tri_k = createRouteForImportRequest(
 										sel_imReq_b, trucks[i], moocs[j]);
+								if(tri_k == null){
+									restore(); continue;
+								}
 								TruckRouteInfo4Request tri_q = createRouteForExportRequest(
 										sel_exReq_a, trucks[i1], moocs[j1],
 										containers[k]);
+								if(tri_q == null){
+									restore(); continue;
+								}
 								// compute additional distance when creating
 								// these routes
 								TruckRoute tr_k = tri_k.route;
@@ -565,10 +580,20 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 									TruckRouteInfo4Request tri_k = createRouteForWarehouseWarehouseRequest(
 											sel_whReq_a, trucks[i1], moocs[j1],
 											containers[k1]);
+									if(tri_k == null){
+										restore();
+										continue;
+									}
+									
 									TruckRouteInfo4Request tri_q = createRouteForExportRequest(
 											sel_exReq_b, trucks[i2], moocs[j2],
 											containers[k2]);
-
+									
+									if(tri_q == null){
+										restore();
+										continue;
+									}
+									
 									TruckRoute tr_k = tri_k.route;
 									TruckRoute tr_q = tri_q.route;
 
@@ -657,6 +682,9 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 					backup();
 					TruckRouteInfo4Request tri = createRouteForImportRequest(
 							imReq[i], trucks[j], moocs[k]);
+					if(tri == null){
+						restore(); continue;
+					}
 					TruckRoute tr = tri.route;
 
 					double dis = tr.getDistance() - tr.getReducedDistance();
@@ -763,7 +791,53 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		System.out.println("nbUnScheduledExReq = " + nbUnScheduledExReq + 
 				", nbUnScheduledImReq = " + nbUnScheduledImReq
 				+ ", nbUnScheduledWhReq = " + nbUnScheduledWhReq);
+		for(int i = 0; i < trucks.length; i++){
+			System.out.println(getLastInfos(trucks[i]));
+		}
+		for(int  i = 0; i < moocs.length; i++){
+			System.out.println(getLastInfos(moocs[i]));
+		}
+		for(int i = 0; i < containers.length; i++){
+			System.out.println(getLastInfos(containers[i]));
+		}
+	
 	}
+	
+	public String getLastInfos(Truck truck){
+		String s = "";
+		String locationCode = "NULL";
+		DepotTruck depot = mTruck2LastDepot.get(truck);
+		if(depot != null) locationCode = depot.getLocationCode();
+		int lastTime = mTruck2LastTime.get(truck);
+		s = "truck " + truck.getCode() + " at " + locationCode + " time = " + 
+		DateTimeUtils.unixTimeStamp2DateTime(lastTime);
+		return s;
+	}
+	public String getLastInfos(Mooc mooc){
+		String s = "";
+		String locationCode = "NULL";
+		DepotMooc depot = mMooc2LastDepot.get(mooc);
+		if(depot != null) locationCode = depot.getLocationCode();
+		int lastTime = mMooc2LastTime.get(mooc);
+		s = "mooc " + mooc.getCode() + " at " + locationCode + " time = " + 
+		DateTimeUtils.unixTimeStamp2DateTime(lastTime);
+		return s;
+	}
+	public String getLastInfos(Container container){
+		String s = "";
+		String locationCode = "NULL";
+		DepotContainer depot = mContainer2LastDepot.get(container);
+		if(depot != null) locationCode = depot.getLocationCode();
+		String s_time = "NULL";
+		if(mContainer2LastTime.get(container) != null){
+			int lastTime = mContainer2LastTime.get(container);
+			s_time = DateTimeUtils.unixTimeStamp2DateTime(lastTime); 
+		}
+		s = "container " + container.getCode() + " at " + locationCode + " time = " + 
+		s_time;
+		return s;
+	}
+	
 	public ContainerTruckMoocSolution solve(ContainerTruckMoocInput input) {
 		this.input = input;
 
@@ -821,10 +895,10 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		while (true) {
 			candidate_routes.clear();
 
-			//exploreDoubleImport(candidate_routes);
-			//exploreSwapImportExport(candidate_routes);
-			//exploreKepLech(candidate_routes);
-			//exploreTangBo(candidate_routes);
+			exploreDoubleImport(candidate_routes);
+			exploreSwapImportExport(candidate_routes);
+			exploreKepLech(candidate_routes);
+			exploreTangBo(candidate_routes);
 			System.out.println(name() + "::solve, special operators, candidates_routes.sz = " + candidate_routes.size());
 			if (candidate_routes.size() == 0) {
 				exploreDirectRouteExport(candidate_routes);
@@ -843,6 +917,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			}
 			
 			print();
+			System.out.println("------------------------------------");
+			
 		}
 
 		recoverContainerCode();

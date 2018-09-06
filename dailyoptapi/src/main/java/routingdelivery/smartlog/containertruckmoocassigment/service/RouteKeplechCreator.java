@@ -7,6 +7,8 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.ComboContainer
 import routingdelivery.smartlog.containertruckmoocassigment.model.Container;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerCategoryEnum;
 import routingdelivery.smartlog.containertruckmoocassigment.model.DepotContainer;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DepotMooc;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DepotTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ExportContainerRequest;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ImportContainerRequest;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Mooc;
@@ -177,15 +179,19 @@ public class RouteKeplechCreator {
 				.getLateDateTimeUnloadAtPort()))
 			return null;
 
+		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
 				.dateTime2Int(er.getEarlyDateTimeUnloadAtPort()));
 		duration = er.getUnloadDuration();
 		departureTime = serviceTime + duration;
 		solver.mPoint2ArrivalTime.put(e5, arrivalTime);
 		solver.mPoint2DepartureTime.put(e5, departureTime);
-		solver.mContainer2LastDepot.put(container, null);
-		solver.mContainer2LastTime.put(container, Integer.MAX_VALUE);
-
+		//solver.mContainer2LastDepot.put(container, null);
+		//solver.mContainer2LastTime.put(container, Integer.MAX_VALUE);
+		tri.setLastDepotContainer(container, null);
+		tri.setLastTimeContainer(container, Integer.MAX_VALUE);
+		
 		RouteElement e6 = new RouteElement();
 		L.add(e6);
 		e6.deriveFrom(e5);
@@ -241,13 +247,16 @@ public class RouteKeplechCreator {
 		solver.mPoint2ArrivalTime.put(e8, arrivalTime);
 		solver.mPoint2DepartureTime.put(e8, departureTime);
 
+		/*
 		DepotContainer depotContainer = solver
 				.findDepotForReleaseContainer(import_container);
 		if (depotContainer == null) {
 			depotContainer = solver.mCode2DepotContainer.get(ir
 					.getDepotContainerCode());
 		}
-
+		*/
+		DepotContainer depotContainer = solver.findDepotContainer4Deposit(ir, e8, import_container);
+		
 		RouteElement e9 = new RouteElement();
 		L.add(e9);
 		e9.deriveFrom(e8);
@@ -261,12 +270,15 @@ public class RouteKeplechCreator {
 		departureTime = serviceTime + duration;
 		solver.mPoint2ArrivalTime.put(e9, arrivalTime);
 		solver.mPoint2DepartureTime.put(e9, departureTime);
+		tri.setLastDepotContainer(import_container, depotContainer);
+		tri.setLastTimeContainer(import_container, departureTime);
 
 		RouteElement e10 = new RouteElement();
 		L.add(e10);
+		DepotMooc depotMooc = solver.findDepotMooc4Deposit(ir, e9, mooc);
 		e10.deriveFrom(e9);
 		e10.setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
-		e10.setDepotMooc(solver.findDepotForReleaseMooc(mooc));
+		e10.setDepotMooc(depotMooc);
 		arrivalTime = departureTime
 				+ solver.getTravelTime(
 						e9.getDepotContainer().getLocationCode(), e10
@@ -276,12 +288,15 @@ public class RouteKeplechCreator {
 		departureTime = serviceTime + duration;
 		solver.mPoint2ArrivalTime.put(e10, arrivalTime);
 		solver.mPoint2DepartureTime.put(e10, departureTime);
-
+		tri.setLastDepotMooc(mooc, depotMooc);
+		tri.setLastTimeMooc(mooc, departureTime);
+		
 		RouteElement e11 = new RouteElement();
 		L.add(e11);
+		DepotTruck depotTruck = solver.findDepotTruck4Deposit(ir, e10, truck);
 		e11.deriveFrom(e10);
 		e11.setAction(ActionEnum.REST_AT_DEPOT);
-		e11.setDepotTruck(solver.findDepotForReleaseTruck(truck));
+		e11.setDepotTruck(depotTruck);
 		arrivalTime = departureTime
 				+ solver.getTravelTime(e10.getDepotMooc().getLocationCode(),
 						e11.getDepotTruck().getLocationCode());
@@ -290,7 +305,9 @@ public class RouteKeplechCreator {
 		departureTime = serviceTime + duration;
 		solver.mPoint2ArrivalTime.put(e11, arrivalTime);
 		solver.mPoint2DepartureTime.put(e11, departureTime);
-
+		tri.setLastDepotTruck(truck, depotTruck);
+		tri.setLastTimeTruck(truck, departureTime);
+		
 		TruckRoute r = new TruckRoute();
 		RouteElement[] e = new RouteElement[L.size()];
 		for (int i = 0; i < e.length; i++)
@@ -300,7 +317,7 @@ public class RouteKeplechCreator {
 		r.setType(TruckRoute.KEP_LECH);
 		solver.propagate(r);
 
-		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		tri.route = r;
 		tri.lastUsedIndex = lastUsedIndex;
 		tri.additionalDistance = distance;

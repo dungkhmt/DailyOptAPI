@@ -29,6 +29,7 @@ public class WarehouseContainerTransportRequest {
 	private String earlyDateTimePickupEmptyContainerToWarehouse;
 	private String lateDateTimePickupEmptyContainerToWarehouse;
 	private int attachEmptyMoocContainerDurationToWarehouse;
+	private String[] returnDepotContainerCodes;
 	
 	private String levelRequest;// "1": only 1st, "2": only 2nd segment, "3": only 3th segment
 								// "12": only 1st and 2nd, "23": only 2nd and 3th segments
@@ -40,6 +41,8 @@ public class WarehouseContainerTransportRequest {
 		// TODO Auto-generated constructor stub
 	}
 
+
+	
 
 	public WarehouseContainerTransportRequest(
 										String orderItemID,
@@ -62,6 +65,7 @@ public class WarehouseContainerTransportRequest {
 										String earlyDateTimePickupEmptyContainerToWarehouse,
 										String lateDateTimePickupEmptyContainerToWarehouse,
 										int attachEmptyMoocContainerDurationToWarehouse,
+										String[] returnDepotContainerCodes,
 										String levelRequest) {
 									super();
 									this.orderItemID = orderItemID;
@@ -84,8 +88,25 @@ public class WarehouseContainerTransportRequest {
 									this.earlyDateTimePickupEmptyContainerToWarehouse = earlyDateTimePickupEmptyContainerToWarehouse;
 									this.lateDateTimePickupEmptyContainerToWarehouse = lateDateTimePickupEmptyContainerToWarehouse;
 									this.attachEmptyMoocContainerDurationToWarehouse = attachEmptyMoocContainerDurationToWarehouse;
+									this.returnDepotContainerCodes = returnDepotContainerCodes;
 									this.levelRequest = levelRequest;
 								}
+
+
+
+
+	public String[] getReturnDepotContainerCodes() {
+		return returnDepotContainerCodes;
+	}
+
+
+
+
+	public void setReturnDepotContainerCodes(String[] returnDepotContainerCodes) {
+		this.returnDepotContainerCodes = returnDepotContainerCodes;
+	}
+
+
 
 
 	public String getOrderItemID() {

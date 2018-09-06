@@ -461,6 +461,7 @@ public class ContainerTruckMoocInput {
 				);
 
 		WarehouseContainerTransportRequest[] wReq = new WarehouseContainerTransportRequest[2];
+		String[] returnDepotContainerCodes = {"DepotContainer001","DepotContainer002"};
 		wReq[0] = new WarehouseContainerTransportRequest(
 				"ORD0007", 
 				"20", 
@@ -482,6 +483,7 @@ public class ContainerTruckMoocInput {
 				"2018-07-17 08:00:00", 
 				"2018-07-20 20:00:00", 
 				600,
+				returnDepotContainerCodes,
 				"123"
 				);
 		
@@ -506,6 +508,7 @@ public class ContainerTruckMoocInput {
 				"2018-07-17 08:00:00", 
 				"2018-07-20 20:00:00", 
 				600,
+				returnDepotContainerCodes,
 				"123"
 				);
 		

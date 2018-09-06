@@ -50,6 +50,33 @@ public class IndividualImportExportRoutesComposer implements RouteComposer {
 		solver.markServed(imReq);
 		solver.addRoute(tri1.route, tri1.lastUsedIndex);
 		solver.addRoute(tri2.route, tri2.lastUsedIndex);
+		
+		for(Truck trk: tri1.mTruck2LastDepot.keySet()){
+			solver.mTruck2LastDepot.put(trk, tri1.getLastDepotTruck(trk));
+			solver.mTruck2LastTime.put(trk, tri1.getLastTimeTruck(trk));
+		}
+		for(Mooc mooc: tri1.mMooc2LastDepot.keySet()){
+			solver.mMooc2LastDepot.put(mooc, tri1.getLastDepotMooc(mooc));
+			solver.mMooc2LastTime.put(mooc, tri1.getLastTimeMooc(mooc));
+		}
+		for(Container container: tri1.mContainer2LastDepot.keySet()){
+			solver.mContainer2LastDepot.put(container, tri1.getLastDepotContainer(container));
+			solver.mContainer2LastTime.put(container, tri1.getLastTimeContainer(container));
+		}		
+		
+		for(Truck trk: tri2.mTruck2LastDepot.keySet()){
+			solver.mTruck2LastDepot.put(trk, tri2.getLastDepotTruck(trk));
+			solver.mTruck2LastTime.put(trk, tri2.getLastTimeTruck(trk));
+		}
+		for(Mooc mooc: tri2.mMooc2LastDepot.keySet()){
+			solver.mMooc2LastDepot.put(mooc, tri2.getLastDepotMooc(mooc));
+			solver.mMooc2LastTime.put(mooc, tri2.getLastTimeMooc(mooc));
+		}
+		for(Container container: tri2.mContainer2LastDepot.keySet()){
+			solver.mContainer2LastDepot.put(container, tri2.getLastDepotContainer(container));
+			solver.mContainer2LastTime.put(container, tri2.getLastTimeContainer(container));
+		}		
+		
 	}
 
 }

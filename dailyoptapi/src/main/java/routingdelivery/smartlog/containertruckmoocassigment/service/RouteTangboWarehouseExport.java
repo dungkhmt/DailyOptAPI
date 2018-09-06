@@ -6,6 +6,8 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.ActionEnum;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ComboContainerMoocTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Container;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerCategoryEnum;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DepotMooc;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DepotTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ExportContainerRequest;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Mooc;
 import routingdelivery.smartlog.containertruckmoocassigment.model.MoocCategoryEnum;
@@ -241,6 +243,9 @@ public class RouteTangboWarehouseExport {
 						+ er.getLateDateTimeLoadAtWarehouse());
 				return null;
 			}
+			
+			TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+			
 			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
 					.dateTime2Int(er.getEarlyDateTimeLoadAtWarehouse()));
 			duration = 0;
@@ -283,14 +288,17 @@ public class RouteTangboWarehouseExport {
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e9, arrivalTime);
 			solver.mPoint2DepartureTime.put(e9, departureTime);
-			solver.mContainer2LastDepot.put(container, null);
-			solver.mContainer2LastTime.put(container, Integer.MAX_VALUE);
-
+			//solver.mContainer2LastDepot.put(container, null);
+			//solver.mContainer2LastTime.put(container, Integer.MAX_VALUE);
+			tri.setLastDepotContainer(container, null);
+			tri.setLastTimeContainer(container, Integer.MAX_VALUE);
+			
 			RouteElement e10 = new RouteElement();
 			L.add(e10);
+			DepotMooc depotMooc = solver.findDepotMooc4Deposit(er, e9, mooc);
 			e10.deriveFrom(e9);
 			e10.setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
-			e10.setDepotMooc(solver.findDepotForReleaseMooc(mooc));
+			e10.setDepotMooc(depotMooc);
 			arrivalTime = departureTime
 					+ solver.getTravelTime(e9.getPort().getLocationCode(), e10
 							.getDepotMooc().getLocationCode());
@@ -299,12 +307,16 @@ public class RouteTangboWarehouseExport {
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e10, arrivalTime);
 			solver.mPoint2DepartureTime.put(e10, departureTime);
-
+			tri.setLastDepotMooc(mooc, depotMooc);
+			tri.setLastTimeMooc(mooc, departureTime);
+			
 			RouteElement e11 = new RouteElement();
 			L.add(e11);
+			DepotTruck depotTruck = solver.findDepotTruck4Deposit(er, e10, truck);
+			
 			e11.deriveFrom(e10);
 			e11.setAction(ActionEnum.REST_AT_DEPOT);
-			e11.setDepotTruck(solver.findDepotForReleaseTruck(truck));
+			e11.setDepotTruck(depotTruck);
 			arrivalTime = departureTime
 					+ solver.getTravelTime(
 							e10.getDepotMooc().getLocationCode(), e11
@@ -314,7 +326,9 @@ public class RouteTangboWarehouseExport {
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e11, arrivalTime);
 			solver.mPoint2DepartureTime.put(e11, departureTime);
-
+			tri.setLastDepotTruck(truck, depotTruck);
+			tri.setLastTimeTruck(truck, departureTime);
+			
 			TruckRoute r = new TruckRoute();
 			RouteElement[] e = new RouteElement[L.size()];
 			for (int i = 0; i < e.length; i++)
@@ -325,7 +339,7 @@ public class RouteTangboWarehouseExport {
 			solver.propagate(r);
 
 			
-			TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+			
 			tri.route = r;
 			tri.lastUsedIndex = lastUsedIndex;
 			tri.additionalDistance = distance;
