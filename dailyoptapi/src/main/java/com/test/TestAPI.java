@@ -86,6 +86,38 @@ public class TestAPI {
 			ex.printStackTrace();
 		}
 	}
+	public void writeGlobalRequest(RouteTrackInput input) {
+		try {
+			DateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
+			Date date = new Date();
+
+			// System.out.println(dateFormat.format(date)); //2014/08/06
+			// 15:59:48
+			String dt = dateFormat.format(date);
+			String[] s = dt.split(":");
+
+			String dir = ROOT_DIR + "/logs/routetrack/" + DateTimeUtils.currentDate();
+			File f = new File(dir);
+			if (!f.exists()) {
+				f.mkdir();
+			}
+
+			String fn = dir + "/request-" + s[0] + s[1] + s[2] + "-" + s[3]
+					+ s[4] + s[5] + ".txt";
+			PrintWriter out = new PrintWriter(fn);
+
+			ObjectMapper mapper = new ObjectMapper();
+			String jsoninput = mapper.writeValueAsString(input);
+
+			// out.println("input: JSON");
+			out.println(jsoninput);
+
+			out.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
 	public void writeGlobalRequest(ContainerTruckMoocInput input) {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
@@ -118,7 +150,7 @@ public class TestAPI {
 		}
 	}
 
-	public void writeGlobalRequest(BrennTagPickupDeliveryInput input) {
+	public void writeGlobalRequest(BrennTagPickupDeliveryInput input, String dir_group) {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
 			Date date = new Date();
@@ -128,7 +160,7 @@ public class TestAPI {
 			String dt = dateFormat.format(date);
 			String[] s = dt.split(":");
 
-			String dir = ROOT_DIR + "/logs/brenntagpickupdelivery/" + DateTimeUtils.currentDate();
+			String dir = ROOT_DIR + "/logs/" + dir_group + "/" + DateTimeUtils.currentDate();
 			File f = new File(dir);
 			if (!f.exists()) {
 				f.mkdir();
@@ -159,7 +191,7 @@ public class TestAPI {
 		// Gson gson = new Gson();
 		// String json = gson.toJson(input);
 		try {
-			writeGlobalRequest(input);
+			writeGlobalRequest(input,"brenntagpickupdelivery");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -182,7 +214,7 @@ public class TestAPI {
 		// Gson gson = new Gson();
 		// String json = gson.toJson(input);
 		try {
-			// writeGlobalRequest(input);
+			 writeGlobalRequest(input,"reorderroute");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -205,7 +237,7 @@ public class TestAPI {
 		// Gson gson = new Gson();
 		// String json = gson.toJson(input);
 		try {
-			writeGlobalRequest(input);
+			writeGlobalRequest(input,"multibrenntagpickupdelivery");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -264,6 +296,11 @@ public class TestAPI {
 	@RequestMapping(value = "/route-track", method = RequestMethod.POST)
 	public RouteTrackSolution routeTrack(HttpServletRequest request,
 			@RequestBody RouteTrackInput input) {
+		try {
+			writeGlobalRequest(input);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		RouteTrackSolver solver = new RouteTrackSolver();
 		return solver.evaluate(input);
 	}

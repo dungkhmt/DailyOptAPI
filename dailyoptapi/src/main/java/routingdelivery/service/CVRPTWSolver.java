@@ -194,7 +194,7 @@ public class CVRPTWSolver {
 					lq = requests[ir].getDeliveryLocationCode();
 					double d = mDistance.get(code(lp,lq));
 					awm.setWeight(p, q, d);
-					travelTime.setWeight(p, q, (d*1000)/input.getParams().getAverageSpeed());// meter per second
+					travelTime.setWeight(p, q, (d*1000)/3600*30);// meter per second
 				}
 			}
 			if(ip == 0) nwm.setWeight(p, 0);
@@ -263,7 +263,7 @@ public class CVRPTWSolver {
 		se.setObjectiveFunction(F);
 		se.setMaxStable(50);
 
-		se.search(100000, input.getParams().getTimeLimit());
+		se.search(100000, 10000);
 
 		System.out.println("solution XR = " + XR.toString() + ", cost = " + cost.getValue());
 		for(int k = 1; k <= XR.getNbRoutes(); k++){

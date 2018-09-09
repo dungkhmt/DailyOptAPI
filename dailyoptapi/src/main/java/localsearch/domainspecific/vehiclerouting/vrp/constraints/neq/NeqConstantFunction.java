@@ -416,4 +416,10 @@ public class NeqConstantFunction implements IConstraintVR {
 		int nv = CBLSVR.equal(c, v) ? 1 : 0;
 		return nv - violations;
 	}
+	@Override
+	public void propagateTwoOptMoveOneRoute(Point x, Point y) {
+		// TODO Auto-generated method stub
+		System.out.println(name() + "::propagateTwoOptMoveOneRoute, NOT IMPLEMENTED YET -> System.exit(-1)");
+	}
+
 }

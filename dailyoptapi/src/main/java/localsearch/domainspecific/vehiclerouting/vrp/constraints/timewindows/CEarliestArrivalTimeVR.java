@@ -1346,5 +1346,10 @@ public class CEarliestArrivalTimeVR implements IConstraintVR {
 		//System.out.println(delta);
 		return delta;
 	}
+	@Override
+	public void propagateTwoOptMoveOneRoute(Point x, Point y) {
+		// TODO Auto-generated method stub
+		System.out.println(name() + "::propagateTwoOptMoveOneRoute, NOT IMPLEMENTED YET -> System.exit(-1)");
+	}
 
 }

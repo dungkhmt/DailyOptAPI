@@ -12,6 +12,11 @@ public class ContainerTruckMoocInput {
 	private ImportContainerTruckMoocRequest[] imRequests;
 	private WarehouseTransportRequest[] warehouseRequests;
 	
+	private EmptyContainerFromDepotRequest[] emptyContainerFromDepotRequests;
+	private EmptyContainerToDepotRequest[] emptyContainerToDepotRequests;
+	private TransportContainerRequest[] transportContainerRequests;
+	
+	
 	private ShipCompany[] companies;
 	private DepotContainer[] depotContainers;
 	private DepotMooc[] depotMoocs;
@@ -29,6 +34,39 @@ public class ContainerTruckMoocInput {
 	private ConfigParam params;
 	
 
+	public EmptyContainerFromDepotRequest[] getEmptyContainerFromDepotRequests() {
+		return emptyContainerFromDepotRequests;
+	}
+
+
+	public void setEmptyContainerFromDepotRequests(
+			EmptyContainerFromDepotRequest[] emptyContainerFromDepotRequests) {
+		this.emptyContainerFromDepotRequests = emptyContainerFromDepotRequests;
+	}
+
+
+	public EmptyContainerToDepotRequest[] getEmptyContainerToDepotRequests() {
+		return emptyContainerToDepotRequests;
+	}
+
+
+	public void setEmptyContainerToDepotRequests(
+			EmptyContainerToDepotRequest[] emptyContainerToDepotRequests) {
+		this.emptyContainerToDepotRequests = emptyContainerToDepotRequests;
+	}
+
+
+	public TransportContainerRequest[] getTransportContainerRequests() {
+		return transportContainerRequests;
+	}
+
+
+	public void setTransportContainerRequests(
+			TransportContainerRequest[] transportContainerRequests) {
+		this.transportContainerRequests = transportContainerRequests;
+	}
+
+
 	public Port[] getPorts() {
 		return ports;
 	}
@@ -39,10 +77,19 @@ public class ContainerTruckMoocInput {
 	}
 
 
+
+
+
+
+
+
 	public ContainerTruckMoocInput(
 			ExportContainerTruckMoocRequest[] exRequests,
 			ImportContainerTruckMoocRequest[] imRequests,
 			WarehouseTransportRequest[] warehouseRequests,
+			EmptyContainerFromDepotRequest[] emptyContainerFromDepotRequests,
+			EmptyContainerToDepotRequest[] emptyContainerToDepotRequests,
+			TransportContainerRequest[] transportContainerRequests,
 			ShipCompany[] companies, DepotContainer[] depotContainers,
 			DepotMooc[] depotMoocs, DepotTruck[] depotTrucks,
 			Warehouse[] warehouses, Truck[] trucks, Mooc[] moocs, Port[] ports,
@@ -52,6 +99,9 @@ public class ContainerTruckMoocInput {
 		this.exRequests = exRequests;
 		this.imRequests = imRequests;
 		this.warehouseRequests = warehouseRequests;
+		this.emptyContainerFromDepotRequests = emptyContainerFromDepotRequests;
+		this.emptyContainerToDepotRequests = emptyContainerToDepotRequests;
+		this.transportContainerRequests = transportContainerRequests;
 		this.companies = companies;
 		this.depotContainers = depotContainers;
 		this.depotMoocs = depotMoocs;
@@ -60,33 +110,6 @@ public class ContainerTruckMoocInput {
 		this.trucks = trucks;
 		this.moocs = moocs;
 		this.ports = ports;
-		this.containers = containers;
-		this.distance = distance;
-		this.travelTime = travelTime;
-		this.params = params;
-	}
-
-
-	public ContainerTruckMoocInput(
-			ExportContainerTruckMoocRequest[] exRequests,
-			ImportContainerTruckMoocRequest[] imRequests,
-			WarehouseTransportRequest[] warehouseRequests,
-			ShipCompany[] companies, DepotContainer[] depotContainers,
-			DepotMooc[] depotMoocs, DepotTruck[] depotTrucks,
-			Warehouse[] warehouses, Truck[] trucks, Mooc[] moocs,
-			Container[] containers, DistanceElement[] distance,
-			DistanceElement[] travelTime, ConfigParam params) {
-		super();
-		this.exRequests = exRequests;
-		this.imRequests = imRequests;
-		this.warehouseRequests = warehouseRequests;
-		this.companies = companies;
-		this.depotContainers = depotContainers;
-		this.depotMoocs = depotMoocs;
-		this.depotTrucks = depotTrucks;
-		this.warehouses = warehouses;
-		this.trucks = trucks;
-		this.moocs = moocs;
 		this.containers = containers;
 		this.distance = distance;
 		this.travelTime = travelTime;
@@ -239,30 +262,6 @@ public class ContainerTruckMoocInput {
 		// TODO Auto-generated constructor stub
 	}
 
-
-	public ContainerTruckMoocInput(
-			ExportContainerTruckMoocRequest[] exRequests,
-			ImportContainerTruckMoocRequest[] imRequests,
-			WarehouseTransportRequest[] warehouseRequests,
-			ShipCompany[] companies, DepotContainer[] depotContainers,
-			DepotMooc[] depotMoocs, DepotTruck[] depotTrucks, Truck[] trucks,
-			Mooc[] moocs, Container[] containers, DistanceElement[] distance,
-			DistanceElement[] travelTime, ConfigParam params) {
-		super();
-		this.exRequests = exRequests;
-		this.imRequests = imRequests;
-		this.warehouseRequests = warehouseRequests;
-		this.companies = companies;
-		this.depotContainers = depotContainers;
-		this.depotMoocs = depotMoocs;
-		this.depotTrucks = depotTrucks;
-		this.trucks = trucks;
-		this.moocs = moocs;
-		this.containers = containers;
-		this.distance = distance;
-		this.travelTime = travelTime;
-		this.params = params;
-	}
 
 
 	public static void main(String[] args){
@@ -512,6 +511,44 @@ public class ContainerTruckMoocInput {
 				"123"
 				);
 		
+		EmptyContainerFromDepotRequest[] emptyContainerFromDepotRequests = new EmptyContainerFromDepotRequest[1];
+		String[] returnDepotContainerCodesE = {"DepotContainer001","DepotContainer002"};
+		emptyContainerFromDepotRequests[0] = new EmptyContainerFromDepotRequest(
+				"ECFDR001", 
+				"Com01", 
+				returnDepotContainerCodesE, 
+				"40", 
+				"0004", 
+				"2018-07-17 08:00:00", 
+				"2018-07-17 22:00:00", 
+				600);
+		
+		EmptyContainerToDepotRequest[] emptyContainerToDepotRequests = new EmptyContainerToDepotRequest[1];
+		emptyContainerToDepotRequests[0] = new EmptyContainerToDepotRequest(
+				"ECTDR0001", 
+				"", 
+				"Container006", 
+				"0003", 
+				returnDepotContainerCodesE, 
+				"2018-07-17 08:00:00", 
+				"2018-07-17 20:00:00", 
+				600);
+		
+		TransportContainerRequest[] transportContainerRequests = new TransportContainerRequest[1];
+		transportContainerRequests[0] = new TransportContainerRequest(
+				"TCR0001", 
+				"Container005", 
+				"20",
+				1000000, 
+				"0002", 
+				"2018-07-17 08:00:00", 
+				"2018-07-17 20:00:00", 
+				600, 
+				"0004", 
+				"2018-07-17 08:00:00", 
+				"2018-07-17 20:00:00", 
+				600);
+		
 		
 		ExportContainerTruckMoocRequest[] exReq = new ExportContainerTruckMoocRequest[1];
 		exReq[0] = new ExportContainerTruckMoocRequest("OR0001","OR0001",exContReq);
@@ -540,10 +577,27 @@ public class ContainerTruckMoocInput {
 		}
 		
 		ConfigParam params = new ConfigParam(600, 600);
-		ContainerTruckMoocInput input = new ContainerTruckMoocInput(exReq,imReq,wtr,companies,depotContainers,depotMoocs,depotTrucks,
-				trucks,moocs,containers,dis,t, params);
-		input.setWarehouses(warehouses);
-		input.setPorts(ports);
+		ContainerTruckMoocInput input = new ContainerTruckMoocInput(
+				exReq, 
+				imReq, 
+				wtr, 
+				emptyContainerFromDepotRequests, 
+				emptyContainerToDepotRequests,
+				transportContainerRequests, 
+				companies,
+				depotContainers, 
+				depotMoocs, 
+				depotTrucks, 
+				warehouses, 
+				trucks, 
+				moocs, 
+				ports, 
+				containers, 
+				dis, 
+				t,
+				params);
+		
+		
 		
 		
 		Gson gson = new Gson();

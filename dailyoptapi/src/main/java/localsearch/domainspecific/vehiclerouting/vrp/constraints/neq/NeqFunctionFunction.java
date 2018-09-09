@@ -452,5 +452,10 @@ public class NeqFunctionFunction implements IConstraintVR {
 		int nv = CBLSVR.equal(nf1, nf2) ? 1 : 0;
 		return nv - violations;
 	}
+	@Override
+	public void propagateTwoOptMoveOneRoute(Point x, Point y) {
+		// TODO Auto-generated method stub
+		System.out.println(name() + "::propagateTwoOptMoveOneRoute, NOT IMPLEMENTED YET -> System.exit(-1)");
+	}
 
 }

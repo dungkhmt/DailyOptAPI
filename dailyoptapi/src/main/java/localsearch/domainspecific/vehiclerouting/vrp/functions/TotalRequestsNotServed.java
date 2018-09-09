@@ -610,9 +610,21 @@ public class TotalRequestsNotServed implements IFunctionVR {
 		}
 		return k;
 	}
-	
+	@Override
+	public void propagateTwoOptMoveOneRoute(Point x, Point y) {
+		// TODO Auto-generated method stub
+		System.out.println(name() + "::propagateTwoOptMoveOneRoute, NOT IMPLEMENTED YET -> System.exit(-1)");
+	}
+	@Override
+	public double evaluateTwoOptMoveOneRoute(Point x, Point y) {
+		// TODO Auto-generated method stub
+		
+		return 0;
+	}
+
 	public static void main(String[] avgr) {
 		
 	}
+
 
 }

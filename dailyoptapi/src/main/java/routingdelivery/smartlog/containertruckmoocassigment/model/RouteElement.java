@@ -10,13 +10,42 @@ public class RouteElement {
 	private Container container;
 	private Truck truck;
 	
+	private String locationCode;
 	private String action;// LAY_MOOC, TRA_MOOC, LAY_CONTAINER, TRA_CONTAINER, 
 						//   LOAD_HANG, UNLOAD_HANG, CAT_MOOC, 
 						// 
 	private ExportContainerRequest exportRequest;
 	private ImportContainerRequest importRequest;
 	private WarehouseContainerTransportRequest warehouseRequest;
+	private EmptyContainerFromDepotRequest emptyContainerFromDepotRequest;
+	private EmptyContainerToDepotRequest emptyContainerToDepotRequest;
+	private TransportContainerRequest transportContainerRequest;
 	
+	public EmptyContainerFromDepotRequest getEmptyContainerFromDepotRequest() {
+		return emptyContainerFromDepotRequest;
+	}
+	public void setEmptyContainerFromDepotRequest(
+			EmptyContainerFromDepotRequest emptyContainerFromDepotRequest) {
+		this.emptyContainerFromDepotRequest = emptyContainerFromDepotRequest;
+	}
+	
+	public EmptyContainerToDepotRequest getEmptyContainerToDepotRequest() {
+		return emptyContainerToDepotRequest;
+	}
+	public void setEmptyContainerToDepotRequest(
+			EmptyContainerToDepotRequest emptyContainerToDepotRequest) {
+		this.emptyContainerToDepotRequest = emptyContainerToDepotRequest;
+	}
+	public TransportContainerRequest getTransportContainerRequest() {
+		return transportContainerRequest;
+	}
+	public void setTransportContainerRequest(
+			TransportContainerRequest transportContainerRequest) {
+		this.transportContainerRequest = transportContainerRequest;
+	}
+	public void setLocationCode(String locationCode) {
+		this.locationCode = locationCode;
+	}
 	private String arrivalTime;
 	private String departureTime;
 	private double distance;
@@ -38,6 +67,9 @@ public class RouteElement {
 		this.exportRequest = e.exportRequest;
 		this.importRequest = e.importRequest;
 		this.warehouseRequest = e.warehouseRequest;
+		this.emptyContainerFromDepotRequest = e.emptyContainerFromDepotRequest;
+		this.emptyContainerToDepotRequest = e.emptyContainerToDepotRequest;
+		this.transportContainerRequest = e.transportContainerRequest;
 		
 	}
 	public Truck getTruck() {
@@ -127,42 +159,50 @@ public class RouteElement {
 		this.distance = distance;
 	}
 	public String getLocationCode(){
+		/*
 		if(depotTruck != null) return depotTruck.getLocationCode();
 		else if(depotMooc != null) return depotMooc.getLocationCode();
 		else if(depotContainer != null) return depotContainer.getLocationCode();
 		else if(warehouse != null) return warehouse.getLocationCode();
 		else if(port != null) return port.getLocationCode();
 		return null;
+		*/
+		return locationCode;
 	}
 	public DepotTruck getDepotTruck() {
 		return depotTruck;
 	}
 	public void setDepotTruck(DepotTruck depotTruck) {
 		this.depotTruck = depotTruck;
+		locationCode = depotTruck.getLocationCode();
 	}
 	public DepotMooc getDepotMooc() {
 		return depotMooc;
 	}
 	public void setDepotMooc(DepotMooc depotMooc) {
 		this.depotMooc = depotMooc;
+		locationCode = depotMooc.getLocationCode();
 	}
 	public DepotContainer getDepotContainer() {
 		return depotContainer;
 	}
 	public void setDepotContainer(DepotContainer depotContainer) {
 		this.depotContainer = depotContainer;
+		locationCode = depotContainer.getLocationCode();
 	}
 	public Warehouse getWarehouse() {
 		return warehouse;
 	}
 	public void setWarehouse(Warehouse warehouse) {
 		this.warehouse = warehouse;
+		locationCode = warehouse.getLocationCode();
 	}
 	public Port getPort() {
 		return port;
 	}
 	public void setPort(Port port) {
 		this.port = port;
+		locationCode = port.getLocationCode();
 	}
 	public String getAction() {
 		return action;

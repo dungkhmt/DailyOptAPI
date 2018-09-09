@@ -1201,13 +1201,8 @@ public class IndexOnRoute implements IFunctionVR {
 			}
 		}
 		return eval;
-<<<<<<< HEAD
-	}
-
-=======
 	}	
 	
->>>>>>> b97c149ce61245b5939125dd91b667aebcb11466
 	public double evaluateAddOnePoint(Point x, Point y) {
 		// TODO Auto-generated method stub
 		if (!XR.checkPerformAddOnePoint(x, y)) {
@@ -1223,11 +1218,7 @@ public class IndexOnRoute implements IFunctionVR {
 		}
 		return 0;
 	}
-<<<<<<< HEAD
 
-=======
-	
->>>>>>> b97c149ce61245b5939125dd91b667aebcb11466
 	public double evaluateRemoveOnePoint(Point x) {
 		// TODO Auto-generated method stub
 		if (!XR.checkPerformRemoveOnePoint(x)) {
@@ -1244,8 +1235,7 @@ public class IndexOnRoute implements IFunctionVR {
 		return 0;
 	}
 
-<<<<<<< HEAD
-=======
+
 	public double evaluateAddTwoPoints(Point x1, Point y1, Point x2, Point y2) {
 		// TODO Auto-generated method stub
 		if (!XR.checkPerformAddTwoPoints(x1, y1, x2, y2)) {
@@ -1290,7 +1280,7 @@ public class IndexOnRoute implements IFunctionVR {
 		return 0;
 	}
 	
->>>>>>> b97c149ce61245b5939125dd91b667aebcb11466
+
 	public void propagateAddRemovePoints(Point x, Point y, Point z) {
 		// TODO Auto-generated method stub
 
@@ -1394,122 +1384,5 @@ public class IndexOnRoute implements IFunctionVR {
 		return eval;
 	}
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		int N = 60;
-		int n = 50;
-		int K = 5;
-		Point[] p = new Point[N];
-		SecureRandom rand = new SecureRandom();
-		for (int i = 0; i < N; i++) {
-			p[i] = new Point(i, rand.nextInt(50), rand.nextInt(50));
-		}
-		VRManager mgr = new VRManager();
-		VarRoutesVR XR = new VarRoutesVR(mgr);
-		for (int i = 0; i < n; i++) {
-			XR.addClientPoint(p[i]);
-		}
-		for (int i = n; i < N - K; i++) {
-			XR.addRoute(p[i], p[i + K]);
-		}
-		XR.initSequential();
-		NodeWeightsManager nwm = new NodeWeightsManager(XR.getAllPoints());
-		for (int i = 0; i < p.length; i++) {
-			nwm.setWeight(p[i], rand.nextInt(50));
-		}
-		AccumulatedWeightNodesVR accWN = new AccumulatedWeightNodesVR(XR, nwm);
-		IFunctionVR[] f = new IFunctionVR[N];
-		for (int i = 0; i < f.length; i++) {
-			f[i] = new IndexOnRoute(XR, p[i]);
-		}
-
-		mgr.close();
-		// mgr.performRemoveOnePoint(p[0]);
-
-		int iter = 0;
-		double[] oldV = new double[N];
-		double[] newV = new double[N];
-		double[] delta = new double[N];
-		while (iter < 10000) {
-			System.out.println(iter++ + "\n" + XR + "\n" + accWN);
-			for (int i = 0; i < N; i++) {
-				oldV[i] = f[i].getValue();
-			}
-			// int x1 = rand.nextInt(N);
-			// int x2 = rand.nextInt(N);
-			// int y1 = rand.nextInt(N);
-			// int y2 = rand.nextInt(N);
-			// int x3 = rand.nextInt(N);
-			// int y3 = rand.nextInt(N);
-			// int x4 = rand.nextInt(N);
-			// int y4 = rand.nextInt(N);
-			// while (!XR.checkPerformThreePointsMove(p[x1], p[x2], p[x3],
-			// p[y1], p[y2], p[y3])) {
-			// x1 = rand.nextInt(N);
-			// y1 = rand.nextInt(N);
-			// x2 = rand.nextInt(N);
-			// y2 = rand.nextInt(N);
-			// x3 = rand.nextInt(N);
-			// y3 = rand.nextInt(N);
-			// x4 = rand.nextInt(N);
-			// y4 = rand.nextInt(N);
-			// }
-			//
-			// System.out.println(x1 + " " + y1);
-			// for (int i = 0; i < N; i++) {
-			// delta[i] = f[i].evaluateThreePointsMove(p[x1], p[x2], p[x3],
-			// p[y1], p[y2], p[y3]);
-			// }
-			// mgr.performThreePointsMove(p[x1], p[x2], p[x3], p[y1], p[y2],
-			// p[y3]);
-			// for (int i = 0; i < N; i++) {
-			// newV[i] = f[i].getValue();
-			// }
-			ArrayList<Point> x = new ArrayList<Point>();
-			ArrayList<Point> y = new ArrayList<Point>();
-			int count = rand.nextInt(5) + 5;
-			for (int i = 0; i < count; i++) {
-				x.add(p[rand.nextInt(N)]);
-				if (rand.nextInt(5) == 0) {
-					y.add(CBLSVR.NULL_POINT);
-				} else {
-					y.add(p[rand.nextInt(N)]);
-				}
-			}
-			while (!XR.checkPerformKPointsMove(x, y)) {
-				x.clear();
-				y.clear();
-				count = rand.nextInt(5) + 5;
-				for (int i = 0; i < count; i++) {
-					x.add(p[rand.nextInt(N)]);
-					if (rand.nextInt(5) == 0) {
-						y.add(CBLSVR.NULL_POINT);
-					} else {
-						y.add(p[rand.nextInt(N)]);
-					}
-				}
-			}
-			System.out.println(count);
-			for (int i = 0; i < count; i++) {
-				System.out.println(x.get(i) + " " + y.get(i));
-			}
-			for (int i = 0; i < N; i++) {
-				delta[i] = f[i].evaluateKPointsMove(x, y);
-			}
-			mgr.performKPointsMove(x, y);
-			for (int i = 0; i < N; i++) {
-				newV[i] = f[i].getValue();
-			}
-			System.out.println(XR + "\n" + accWN);
-			for (int i = 0; i < N; i++) {
-				if (Math.abs(oldV[i] + delta[i] - newV[i]) > 1e-6) {
-					System.out.println("WTFFFFFFFFFFFFFFFFFFF " + i + " "
-							+ oldV[i] + " " + delta[i] + " " + newV[i]);
-					System.exit(-1);
-				}
-			}
-		}
-		System.out.println("Okkkkkkkkkkkkkk");
-	}
 
 }
