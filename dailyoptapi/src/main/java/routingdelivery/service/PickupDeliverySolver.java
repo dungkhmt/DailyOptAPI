@@ -10,7 +10,6 @@ import java.util.HashSet;
 
 import com.test.TestAPI;
 
-
 import localsearch.domainspecific.vehiclerouting.vrp.ConstraintSystemVR;
 import localsearch.domainspecific.vehiclerouting.vrp.IConstraintVR;
 import localsearch.domainspecific.vehiclerouting.vrp.IFunctionVR;
@@ -133,7 +132,7 @@ public class PickupDeliverySolver {
 
 	public HashMap<Point, Integer> mPickupPoint2PickupIndex;
 	public HashMap<Point, Integer> mDeliveryPoint2DeliveryIndex;
-	
+
 	public HashMap<Integer, HashSet<Integer>> mRequest2PointIndices;
 
 	public HashMap<Point, Integer> earliestAllowedArrivalTime;
@@ -373,7 +372,7 @@ public class PickupDeliverySolver {
 	}
 
 	public String printRouteAndItems(VarRoutesVR XR, int k) {
-		String s = "Vehicle " + getVehicle(k-1).getCode();
+		String s = "Vehicle " + getVehicle(k - 1).getCode();
 		HashSet<String> loadedItems = new HashSet<String>();
 		for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)) {
 			String s1 = "";
@@ -384,18 +383,18 @@ public class PickupDeliverySolver {
 					loadedItems.add(I.getCode());
 					s1 = s1 + I.getCode() + ",";
 				}
-				//for(String ic: loadedItems) s1 = s1 + ic + ",";
+				// for(String ic: loadedItems) s1 = s1 + ic + ",";
 			}
-			for(int i: mPoint2IndexLoadedItems.get(p)){
+			for (int i : mPoint2IndexLoadedItems.get(p)) {
 				Item I = items.get(i);
 				s2 = s2 + I.getCode() + ",";
 			}
-			s = s + p.ID + ", location " + mPoint2LocationCode.get(p) + ": items = " + s1 + ", loaded items = " + s2 + "\n";
+			s = s + p.ID + ", location " + mPoint2LocationCode.get(p)
+					+ ": items = " + s1 + ", loaded items = " + s2 + "\n";
 		}
 		return s;
 	}
 
-	
 	public boolean checkConflictItemsAtPoint(Point p) {
 		if (mPoint2IndexLoadedItems.get(p) == null)
 			return true;
@@ -403,21 +402,23 @@ public class PickupDeliverySolver {
 		for (int i : mPoint2IndexLoadedItems.get(p)) {
 			for (int j : mPoint2IndexLoadedItems.get(p))
 				if (i < j) {
-					
+
 					if (itemConflict[i][j]) {
 						Item I = items.get(i);
 						Item J = items.get(j);
 						/*
-						if(I.getOrderId().equals(J.getOrderId())){
-							log(name() + "::checkConflictItemsAtPoint, CONFLICT-ITEMS " + I.getCode() + "," + J.getCode()
-									+ " have the SAME Order " + I.getOrderId());
-							continue;
-						}
-						*/
-						//log(name()
-						//		+ "::checkConflictItemsAtPoint, FAILED??? CONFLICT-ITEMS at point " + p.ID + ": "
-						//		+ items.get(i).getCode() + "-"
-						//		+ items.get(j).getCode());
+						 * if(I.getOrderId().equals(J.getOrderId())){ log(name()
+						 * + "::checkConflictItemsAtPoint, CONFLICT-ITEMS " +
+						 * I.getCode() + "," + J.getCode() +
+						 * " have the SAME Order " + I.getOrderId()); continue;
+						 * }
+						 */
+						// log(name()
+						// +
+						// "::checkConflictItemsAtPoint, FAILED??? CONFLICT-ITEMS at point "
+						// + p.ID + ": "
+						// + items.get(i).getCode() + "-"
+						// + items.get(j).getCode());
 						return false;
 					}
 				}
@@ -451,21 +452,25 @@ public class PickupDeliverySolver {
 	}
 
 	public String printRouteAndTime(VarRoutesVR XR, int k) {
-		if(XR.next(XR.startPoint(k)) == XR.endPoint(k))
+		if (XR.next(XR.startPoint(k)) == XR.endPoint(k))
 			return "";
-		
+
 		String s = "";
 		s += "route[" + k + ", vehicle " + getVehicle(k - 1).getCode() + "]\n";
 		for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)) {
-			if(mPoint2ArrivalTime.get(p) == null){
-				log(name() + "::printRouteAndTime, point " + p.ID + " KHONG CO ARRIVAL TIME, BUG???, XR = " + XR.toStringRoute(k));
+			if (mPoint2ArrivalTime.get(p) == null) {
+				log(name() + "::printRouteAndTime, point " + p.ID
+						+ " KHONG CO ARRIVAL TIME, BUG???, XR = "
+						+ XR.toStringRoute(k));
 				continue;
 			}
-			if(mPoint2DepartureTime.get(p) == null){
-				log(name() + "::printRouteAndTime, point " + p.ID + " KHONG CO DEPARTURE TIME, BUG???, XR = " + XR.toStringRoute(k));
+			if (mPoint2DepartureTime.get(p) == null) {
+				log(name() + "::printRouteAndTime, point " + p.ID
+						+ " KHONG CO DEPARTURE TIME, BUG???, XR = "
+						+ XR.toStringRoute(k));
 				continue;
 			}
-			
+
 			long at = mPoint2ArrivalTime.get(p);
 			long dt = mPoint2DepartureTime.get(p);
 			String sat = DateTimeUtils.unixTimeStamp2DateTime(at);
@@ -484,26 +489,28 @@ public class PickupDeliverySolver {
 									.get(p)) + "\n";
 		}
 		Point p = XR.endPoint(k);
-		if(mPoint2ArrivalTime.get(p) == null){
-			log(name() + "::printRouteAndTime, point " + p.ID + " KHONG CO ARRIVAL TIME, BUG???, XR = " + XR.toStringRoute(k));
-			
-		}else{
-		long at = mPoint2ArrivalTime.get(p);
-		// long dt = mPoint2DepartureTime.get(p);
-		String sat = DateTimeUtils.unixTimeStamp2DateTime(at);
-		String sdt = "-";// DateTimeUtils.unixTimeStamp2DateTime(dt);
-		s += "ID = "
-				+ p.ID
-				+ ": "
-				+ mPoint2LocationCode.get(p)
-				+ " [arr = "
-				+ sat
-				+ ", dep = "
-				+ sdt
-				+ "] late = "
-				+ DateTimeUtils
-						.unixTimeStamp2DateTime(lastestAllowedArrivalTime
-								.get(p)) + "\n";
+		if (mPoint2ArrivalTime.get(p) == null) {
+			log(name() + "::printRouteAndTime, point " + p.ID
+					+ " KHONG CO ARRIVAL TIME, BUG???, XR = "
+					+ XR.toStringRoute(k));
+
+		} else {
+			long at = mPoint2ArrivalTime.get(p);
+			// long dt = mPoint2DepartureTime.get(p);
+			String sat = DateTimeUtils.unixTimeStamp2DateTime(at);
+			String sdt = "-";// DateTimeUtils.unixTimeStamp2DateTime(dt);
+			s += "ID = "
+					+ p.ID
+					+ ": "
+					+ mPoint2LocationCode.get(p)
+					+ " [arr = "
+					+ sat
+					+ ", dep = "
+					+ sdt
+					+ "] late = "
+					+ DateTimeUtils
+							.unixTimeStamp2DateTime(lastestAllowedArrivalTime
+									.get(p)) + "\n";
 		}
 		return s;
 	}
@@ -516,19 +523,20 @@ public class PickupDeliverySolver {
 		System.out.println(name() + "::analyzeTrips, XR = "
 				+ XR.toStringShort());
 		if (log != null) {
-			//log.println(name()
-			//		+ "::analyzeTrips-----------------------------------------------------------------------------");
+			// log.println(name()
+			// +
+			// "::analyzeTrips-----------------------------------------------------------------------------");
 			for (int k = 1; k <= XR.getNbRoutes(); k++) {
 				if (XR.next(XR.startPoint(k)) == XR.endPoint(k))
 					continue;
 				Point s = XR.startPoint(k);
 				Vehicle vh = mPoint2Vehicle.get(s);
-				//log.println("Vehicle[" + k + "] code = " + vh.getCode());
-				//for (Point p = s; p != XR.endPoint(k); p = XR.next(p)) {
-				//	log.println("POINT " + mPoint2LocationCode.get(p)
-				//			+ ", type = " + mPoint2Type.get(p) + ", load = "
-				//			+ mPoint2Demand.get(p));
-				//}
+				// log.println("Vehicle[" + k + "] code = " + vh.getCode());
+				// for (Point p = s; p != XR.endPoint(k); p = XR.next(p)) {
+				// log.println("POINT " + mPoint2LocationCode.get(p)
+				// + ", type = " + mPoint2Type.get(p) + ", load = "
+				// + mPoint2Demand.get(p));
+				// }
 			}
 		}
 		/*
@@ -555,8 +563,8 @@ public class PickupDeliverySolver {
 
 			// if (log != null) {
 			Vehicle vh = mPoint2Vehicle.get(p);
-			//if (log != null)
-			//	log.println(name() + "::analyzeTrips, VEHICLE " + vh.getCode());
+			// if (log != null)
+			// log.println(name() + "::analyzeTrips, VEHICLE " + vh.getCode());
 			p = XR.next(p);
 			Point np = XR.next(p);
 			while (p != XR.endPoint(k)) {
@@ -616,82 +624,97 @@ public class PickupDeliverySolver {
 				mTrip2VarRoute.put(tr, XR);
 				trips.add(tr);
 
-				//if (log != null)
-				//	log.println("TRIP " + (nbTrips - 1) + ", vehicle.cap = "
-				//			+ vh.getWeight() + ", loadTrip = " + loadPerTrip
-				//			+ ", nbLocations = " + nbLocations + ", length = "
-				//			+ length + ", departure-time = " + s_dt);
+				// if (log != null)
+				// log.println("TRIP " + (nbTrips - 1) + ", vehicle.cap = "
+				// + vh.getWeight() + ", loadTrip = " + loadPerTrip
+				// + ", nbLocations = " + nbLocations + ", length = "
+				// + length + ", departure-time = " + s_dt);
 
 				p = np;
 				np = XR.next(np);
 			}
 			long at = mPoint2ArrivalTime.get(XR.endPoint(k));
-			//if (log != null)
-			//	log.println("Arrival-time to END = "
-			//			+ DateTimeUtils.unixTimeStamp2DateTime(at));
-			//if (log != null)
-			//	log.println("-------------------------");
+			// if (log != null)
+			// log.println("Arrival-time to END = "
+			// + DateTimeUtils.unixTimeStamp2DateTime(at));
+			// if (log != null)
+			// log.println("-------------------------");
 			// }
 		}
 		return new VehicleTripCollection(mTrip2Route, trips);
 	}
-	public void performMoveTrip(VarRoutesVR XR, VehicleTrip vt1, VehicleTrip vt2){
+
+	public void performMoveTrip(VarRoutesVR XR, VehicleTrip vt1, VehicleTrip vt2) {
 		ArrayList<Point> lst_pickup_1 = vt1.getPickupSeqPoints();
 		ArrayList<Point> lst_delivery_1 = vt1.getDeliverySeqPoints();
 		ArrayList<Point> lst_pickup_2 = vt2.getPickupSeqPoints();
 		ArrayList<Point> lst_delivery_2 = vt2.getDeliverySeqPoints();
-		
-		if(lst_pickup_1.size() == 0) return;
-		
+
+		if (lst_pickup_1.size() == 0)
+			return;
+
 		Point p = XR.prev(lst_pickup_1.get(0));// store the point for recover
 		int n = lst_pickup_1.size();
 		// remove trip vt1
-		for(int i = 0; i < n; i++){
+		for (int i = 0; i < n; i++) {
 			performRemoveOnePoint(XR, lst_pickup_1.get(i));
-			performRemoveOnePoint(XR, lst_delivery_1.get(n-1-i));
+			performRemoveOnePoint(XR, lst_delivery_1.get(n - 1 - i));
 		}
-		//System.out.println(name() + "::performMoveTrip, init cost = " + cost.getValue());
-		Point np = lst_pickup_2.get(lst_pickup_2.size()-1);
+		// System.out.println(name() + "::performMoveTrip, init cost = " +
+		// cost.getValue());
+		Point np = lst_pickup_2.get(lst_pickup_2.size() - 1);
 		// re-insert into vt2
-		for(int i = 0; i < lst_pickup_1.size(); i++){
+		for (int i = 0; i < lst_pickup_1.size(); i++) {
 			Point pickup = lst_pickup_1.get(i);
-			Point delivery = lst_delivery_1.get(n-1-i);
+			Point delivery = lst_delivery_1.get(n - 1 - i);
 			performAddOnePoint(XR, pickup, np);
-			//System.out.println(name() + "::performMoveTrip, first addOnePoint(" + pickup.ID + "," + np.ID + ") -> cost = " + cost.getValue());
+			// System.out.println(name() +
+			// "::performMoveTrip, first addOnePoint(" + pickup.ID + "," + np.ID
+			// + ") -> cost = " + cost.getValue());
 			performAddOnePoint(XR, delivery, pickup);
-			//System.out.println(name() + "::performMoveTrip, second addOnePoint(" + delivery.ID + "," + delivery.ID + ") -> cost = " + cost.getValue());
+			// System.out.println(name() +
+			// "::performMoveTrip, second addOnePoint(" + delivery.ID + "," +
+			// delivery.ID + ") -> cost = " + cost.getValue());
 			np = pickup;
 		}
 	}
-	public Point[] getBestSequenceGreedy(Point start, ArrayList<Point> L, boolean DIXAVEGAN){
+
+	public Point[] getBestSequenceGreedy(Point start, ArrayList<Point> L,
+			boolean DIXAVEGAN) {
 		// return the shortest sequence of points from start
-		// if DIXAVEGAN, then the first point of the sequence will be the farthest point
+		// if DIXAVEGAN, then the first point of the sequence will be the
+		// farthest point
 		Point[] ret = new Point[L.size()];
 		double maxD = 0;
 		Point sel_p = null;
-		for(Point p: L){
+		for (Point p : L) {
 			double d = getDistance(start, p);
-			if(d > maxD){
-				maxD = d;sel_p = p;
+			if (d > maxD) {
+				maxD = d;
+				sel_p = p;
 			}
 		}
 		HashSet<Point> S = new HashSet<Point>();
 		int idx = -1;
-		if(DIXAVEGAN){
-			for(Point p: L)if(p != sel_p) S.add(p);
+		if (DIXAVEGAN) {
+			for (Point p : L)
+				if (p != sel_p)
+					S.add(p);
 			idx++;
 			ret[idx] = sel_p;
 			start = sel_p;
-		}else{
-			for(Point p: L) S.add(p);
+		} else {
+			for (Point p : L)
+				S.add(p);
 		}
-		while(S.size() > 0){
+		while (S.size() > 0) {
 			double minD = Integer.MAX_VALUE;
 			Point next = null;
-			for(Point p: S){
+			for (Point p : S) {
 				double d = getDistance(start, p);
-				if(d < minD){
-					minD = d; next = p;
+				if (d < minD) {
+					minD = d;
+					next = p;
 				}
 			}
 			idx++;
@@ -701,197 +724,275 @@ public class PickupDeliverySolver {
 		}
 		return ret;
 	}
-	public Point getDeliveryOfPickup(Point pickup){
+
+	public Point getDeliveryOfPickup(Point pickup) {
 		int idx = mPickupPoint2PickupIndex.get(pickup);
 		return deliveryPoints.get(idx);
 	}
-	public Point getPickupOfDelivery(Point delivery){
+
+	public Point getPickupOfDelivery(Point delivery) {
 		int idx = mDeliveryPoint2DeliveryIndex.get(delivery);
 		return pickupPoints.get(idx);
 	}
-	public double evaluateMoveTrip(VarRoutesVR XR, VehicleTrip vt1, VehicleTrip vt2, boolean DIXAVEGAN){
+
+	public boolean checkPossibleVehicleLocation(Vehicle vh, Point p) {
+		String lc = mPoint2LocationCode.get(p);
+		return !mVehicle2NotReachedLocations.get(vh.getCode()).contains(lc);
+	}
+
+	public boolean checkPossibleVehicleLocation(Vehicle vh,
+			ArrayList<Point> listPoints) {
+		for (Point p : listPoints) {
+			String lc = mPoint2LocationCode.get(p);
+			//System.out.println(name() + "::checkPossibleVehicleLocation, location lc = " + lc + 
+			//		" vehicle " + vh.getCode() + " NOT REACH " + mVehicle2NotReachedLocations.get(vh.getCode()));
+			//if (mVehicle2NotReachedLocations.get(vh.getCode()) != null)
+			if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(lc))
+					return false;
+		}
+		return true;
+	}
+
+	public boolean checkPossibleVehicleCategoryLocation(Vehicle vh, Point p) {
+		String lc = mPoint2LocationCode.get(p);
+		return !mVehicleCategory2NotReachedLocations.get(vh.getVehicleCategory()).contains(lc);
+	}
+
+	public boolean checkPossibleVehicleCategoryLocation(Vehicle vh,
+			ArrayList<Point> listPoints) {
+		for (Point p : listPoints) {
+			String lc = mPoint2LocationCode.get(p);
+			//System.out.println(name() + "::checkPossibleVehicleCategoryLocation, location lc = " + lc + 
+			//		" vehicle " + vh.getCode() + ", category " + vh.getVehicleCategory() + " NOT REACH " + mVehicle2NotReachedLocations.get(vh.getCode()));
+			//if (mVehicle2NotReachedLocations.get(vh.getCode()) != null)
+				if (mVehicleCategory2NotReachedLocations.get(vh.getVehicleCategory()).contains(lc))
+					return false;
+		}
+		return true;
+	}
+
+	public double evaluateMoveTrip(VarRoutesVR XR, VehicleTrip vt1,
+			VehicleTrip vt2, boolean DIXAVEGAN) {
+		// check if t[i] and be moved to t[j] w.r.t exclusiveVehicleLocations
+		for (Point p : vt1.seqPoints) {
+			String lc = mPoint2LocationCode.get(p);
+			if (mVehicle2NotReachedLocations.get(vt2.vehicle.getCode())
+					.contains(lc))
+				return Integer.MAX_VALUE;
+		}
+
 		ArrayList<Point> lst_pickup_1 = vt1.getPickupSeqPoints();
 		ArrayList<Point> lst_delivery_1 = vt1.getDeliverySeqPoints();
 		ArrayList<Point> lst_pickup_2 = vt2.getPickupSeqPoints();
 		ArrayList<Point> lst_delivery_2 = vt2.getDeliverySeqPoints();
-		
+
 		double value = cost.getValue();
-		//System.out.println(name() + "::evaluateMoveTrip, vt1 = " + vt1.seqPointString() + ", vt2 = " + vt2.seqPointString());
-		//System.out.println(name() + "::evaluateMoveTrip, value = " + value);
-		// return the differentiation of total distance if trip vt1 is remove and re-insert into trip vt2
+		// System.out.println(name() + "::evaluateMoveTrip, vt1 = " +
+		// vt1.seqPointString() + ", vt2 = " + vt2.seqPointString());
+		// System.out.println(name() + "::evaluateMoveTrip, value = " + value);
+		// return the differentiation of total distance if trip vt1 is remove
+		// and re-insert into trip vt2
 		// satisfying constraint
 		double delta = Integer.MAX_VALUE;
-		if(lst_pickup_1.size() == 0) return delta;
-		if(lst_pickup_2.size() == 0) return delta;
+		if (lst_pickup_1.size() == 0)
+			return delta;
+		if (lst_pickup_2.size() == 0)
+			return delta;
 		int n = lst_pickup_1.size();
-		Point start1 = XR.prev(lst_pickup_1.get(0));// store the point for recover
+		Point start1 = XR.prev(lst_pickup_1.get(0));// store the point for
+													// recover
 		Point start2 = XR.prev(lst_pickup_2.get(0));
-		Point np = lst_pickup_2.get(lst_pickup_2.size()-1);
+		Point np = lst_pickup_2.get(lst_pickup_2.size() - 1);
 		int k = XR.route(np);// index of route containing points of vt2
-		
-		if(vt1.load + vt2.load > cap[k-1]) return delta;
-		
+
+		if (vt1.load + vt2.load > cap[k - 1])
+			return delta;
+
 		// remove trip vt1 and vt2
-		for(Point x: vt1.seqPoints){
+		for (Point x : vt1.seqPoints) {
 			mgr.performRemoveOnePoint(x);
 		}
-		for(Point x: vt2.seqPoints){
+		for (Point x : vt2.seqPoints) {
 			mgr.performRemoveOnePoint(x);
 		}
-		//for(int i = 0; i < n; i++){
-		//	performRemoveOnePoint(XR, lst_pickup_1.get(i));
-		//	performRemoveOnePoint(XR, lst_delivery_1.get(n-1-i));
-		//}
-		//System.out.println(name() + "::evaluateMoveTrip, after remove trip, value = " + cost.getValue());
-		
-		
-		
+		// for(int i = 0; i < n; i++){
+		// performRemoveOnePoint(XR, lst_pickup_1.get(i));
+		// performRemoveOnePoint(XR, lst_delivery_1.get(n-1-i));
+		// }
+		// System.out.println(name() +
+		// "::evaluateMoveTrip, after remove trip, value = " + cost.getValue());
+
 		// re-insert into vt2 in an optimal way
-		
+
 		Point start = np;
 		ArrayList<Point> L = new ArrayList<Point>();
-		for(Point x: lst_delivery_1) L.add(x);
-		for(Point x: lst_delivery_2) L.add(x);
-		Point[] seq = getBestSequenceGreedy(start,L,DIXAVEGAN);
-		//re-insert seq into route
-		
-		//start = XR.prev(vt2.seqPoints.get(0));
+		for (Point x : lst_delivery_1)
+			L.add(x);
+		for (Point x : lst_delivery_2)
+			L.add(x);
+		Point[] seq = getBestSequenceGreedy(start, L, DIXAVEGAN);
+		// re-insert seq into route
+
+		// start = XR.prev(vt2.seqPoints.get(0));
 		Point start_p = start2;
-		if(vt1.contains(start_p)) start_p = start1;// vt1 is before vt2 on the same route[k]
-		
-		//System.out.println(name() + "::evaluateMoveTrip, k = " + k + ", start_p = " + start_p.ID);
-		for(int i = seq.length-1; i >= 0; i--){
+		if (vt1.contains(start_p))
+			start_p = start1;// vt1 is before vt2 on the same route[k]
+
+		// System.out.println(name() + "::evaluateMoveTrip, k = " + k +
+		// ", start_p = " + start_p.ID);
+		for (int i = seq.length - 1; i >= 0; i--) {
 			Point delivery = seq[i];
 			Point pickup = getPickupOfDelivery(delivery);
-			//System.out.println(name() + "::evaluateMoveTrip, delivery = " + delivery.ID + ", pickup = " + pickup.ID);
+			// System.out.println(name() + "::evaluateMoveTrip, delivery = " +
+			// delivery.ID + ", pickup = " + pickup.ID);
 			mgr.performAddOnePoint(pickup, start_p);
 			mgr.performAddOnePoint(delivery, pickup);
 			start_p = pickup;
 		}
-		//System.out.println(name() + "::evaluateMoveTrip, after re-insert, XR(k) = " + XR.toStringRoute(k));
+		// System.out.println(name() +
+		// "::evaluateMoveTrip, after re-insert, XR(k) = " +
+		// XR.toStringRoute(k));
 		propagate(XR, k);
 		int violations = 0;
-		for(Point q = XR.startPoint(k); q != XR.endPoint(k); q = XR.next(q)){
-				if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q)){
-					violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
-							.get(q));
-					//log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
-					//		+ ", AT point " + q.ID + ", arrT = " + mPoint2ArrivalTime.get(q) + " > latest = " + lastestAllowedArrivalTime.get(q) + ", violations = " + violations );
-				}
-				//if(pickup.ID == 46 && delivery.ID == 47 && p.ID == 60){
-				//	log.print(name() + "::evaluateViolationsAddTwoPoints, loaded-items at " + q.ID + "");
-				//}
-				if(!checkConflictItemsAtPoint(q)){
-					//log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
-					//		+ ", conflict item at " + p.ID + ", violations = " + violations);
-					violations++;
-				}
-				if(awn.getSumWeights(q) > cap[k-1]){
-					//log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
-					//		+ ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) + " > cap = " + cap[k-1] + ", violations = " + violations);
-					violations++;
-				}
-				
-				// System.out.println("evaluateTimeViolationsAddTwoPoints, arrT(" +
-				// q.ID + ") = " + mPoint2ArrivalTime.get(q) +
-				// "(" +
-				// DateTimeUtils.unixTimeStamp2DateTime(mPoint2ArrivalTime.get(q)) +
-				// ")" +
-				// ", latestAllowArrivalTime(" + q.ID + ") = " +
-				// lastestAllowedArrivalTime.get(q) +
-				// "(" +
-				// DateTimeUtils.unixTimeStamp2DateTime(lastestAllowedArrivalTime.get(q)));
-			}
-			
-			// check end_working_time of vehicle
-			Point q = XR.endPoint(k);
-			if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
+		for (Point q = XR.startPoint(k); q != XR.endPoint(k); q = XR.next(q)) {
+			if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q)) {
 				violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
 						.get(q));
+				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
+				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
+				// + ", AT point " + q.ID + ", arrT = " +
+				// mPoint2ArrivalTime.get(q) + " > latest = " +
+				// lastestAllowedArrivalTime.get(q) + ", violations = " +
+				// violations );
+			}
+			// if(pickup.ID == 46 && delivery.ID == 47 && p.ID == 60){
+			// log.print(name() +
+			// "::evaluateViolationsAddTwoPoints, loaded-items at " + q.ID +
+			// "");
+			// }
+			if (!checkConflictItemsAtPoint(q)) {
+				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
+				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
+				// + ", conflict item at " + p.ID + ", violations = " +
+				// violations);
+				violations++;
+			}
+			if (awn.getSumWeights(q) > cap[k - 1]) {
+				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
+				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
+				// + ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) +
+				// " > cap = " + cap[k-1] + ", violations = " + violations);
+				violations++;
+			}
 
-		if(violations == 0)
+			// System.out.println("evaluateTimeViolationsAddTwoPoints, arrT(" +
+			// q.ID + ") = " + mPoint2ArrivalTime.get(q) +
+			// "(" +
+			// DateTimeUtils.unixTimeStamp2DateTime(mPoint2ArrivalTime.get(q)) +
+			// ")" +
+			// ", latestAllowArrivalTime(" + q.ID + ") = " +
+			// lastestAllowedArrivalTime.get(q) +
+			// "(" +
+			// DateTimeUtils.unixTimeStamp2DateTime(lastestAllowedArrivalTime.get(q)));
+		}
+
+		// check end_working_time of vehicle
+		Point q = XR.endPoint(k);
+		if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
+			violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
+					.get(q));
+
+		if (violations == 0)
 			delta = cost.getValue() - value;
-		
-		//System.out.println(name() + "::evaluateMoveTrip, new cost = " + cost.getValue() + ", delta = " + delta);
+
+		// System.out.println(name() + "::evaluateMoveTrip, new cost = " +
+		// cost.getValue() + ", delta = " + delta);
 
 		// recover
-		for(int j = 0; j < lst_pickup_2.size(); j++){
+		for (int j = 0; j < lst_pickup_2.size(); j++) {
 			Point p2 = lst_pickup_2.get(j);
-			//Point d1 = lst_delivery_1.get(j);
+			// Point d1 = lst_delivery_1.get(j);
 			performRemoveOnePoint(XR, p2);
-			performAddOnePoint(XR, p2,start2);
-			//performAddOnePoint(XR, d1,p1);
+			performAddOnePoint(XR, p2, start2);
+			// performAddOnePoint(XR, d1,p1);
 			start2 = p2;
 		}
-		for(int j = 0; j < lst_pickup_2.size(); j++){
-			//Point p1 = lst_pickup_1.get(j);
+		for (int j = 0; j < lst_pickup_2.size(); j++) {
+			// Point p1 = lst_pickup_1.get(j);
 			Point d2 = lst_delivery_2.get(j);
-			//performAddOnePoint(XR, p1,p);
+			// performAddOnePoint(XR, p1,p);
 			performRemoveOnePoint(XR, d2);
-			performAddOnePoint(XR, d2,start2);
+			performAddOnePoint(XR, d2, start2);
 			start2 = d2;
 		}
-		
-		
-		for(int j = 0; j < lst_pickup_1.size(); j++){
+
+		for (int j = 0; j < lst_pickup_1.size(); j++) {
 			Point p1 = lst_pickup_1.get(j);
-			//Point d1 = lst_delivery_1.get(j);
+			// Point d1 = lst_delivery_1.get(j);
 			performRemoveOnePoint(XR, p1);
-			performAddOnePoint(XR, p1,start1);
-			//performAddOnePoint(XR, d1,p1);
+			performAddOnePoint(XR, p1, start1);
+			// performAddOnePoint(XR, d1,p1);
 			start1 = p1;
 		}
-		for(int j = 0; j < lst_pickup_1.size(); j++){
-			//Point p1 = lst_pickup_1.get(j);
+		for (int j = 0; j < lst_pickup_1.size(); j++) {
+			// Point p1 = lst_pickup_1.get(j);
 			Point d1 = lst_delivery_1.get(j);
-			//performAddOnePoint(XR, p1,p);
+			// performAddOnePoint(XR, p1,p);
 			performRemoveOnePoint(XR, d1);
-			performAddOnePoint(XR, d1,start1);
+			performAddOnePoint(XR, d1, start1);
 			start1 = d1;
 		}
 
 		return delta;
-		
-		//return Integer.MAX_VALUE;
+
+		// return Integer.MAX_VALUE;
 	}
-	public void performMoveTrip(VarRoutesVR XR, VehicleTrip vt1, VehicleTrip vt2, boolean DIXAVEGAN){
+
+	public void performMoveTrip(VarRoutesVR XR, VehicleTrip vt1,
+			VehicleTrip vt2, boolean DIXAVEGAN) {
 		ArrayList<Point> lst_pickup_1 = vt1.getPickupSeqPoints();
 		ArrayList<Point> lst_delivery_1 = vt1.getDeliverySeqPoints();
 		ArrayList<Point> lst_pickup_2 = vt2.getPickupSeqPoints();
 		ArrayList<Point> lst_delivery_2 = vt2.getDeliverySeqPoints();
-		
-		if(lst_pickup_1.size() == 0) return;
-		if(lst_pickup_2.size() == 0) return;
+
+		if (lst_pickup_1.size() == 0)
+			return;
+		if (lst_pickup_2.size() == 0)
+			return;
 		int n = lst_pickup_1.size();
-		Point start1 = XR.prev(lst_pickup_1.get(0));// store the point for recover
+		Point start1 = XR.prev(lst_pickup_1.get(0));// store the point for
+													// recover
 		Point start2 = XR.prev(lst_pickup_2.get(0));
-		
-		Point np = lst_pickup_2.get(lst_pickup_2.size()-1);
+
+		Point np = lst_pickup_2.get(lst_pickup_2.size() - 1);
 		int k = XR.route(np);// index of route containing points of vt2
-		System.out.println(name() + "::performMoveTrip, vt1 = " + vt1.seqPointString() + ", vt2 = " + vt2.seqPointString());
+		System.out.println(name() + "::performMoveTrip, vt1 = "
+				+ vt1.seqPointString() + ", vt2 = " + vt2.seqPointString());
 		// remove trip vt1 and vt2
-		for(Point x: vt1.seqPoints){
+		for (Point x : vt1.seqPoints) {
 			mgr.performRemoveOnePoint(x);
 		}
-		for(Point x: vt2.seqPoints){
+		for (Point x : vt2.seqPoints) {
 			mgr.performRemoveOnePoint(x);
 		}
-		
-		
+
 		// re-insert into vt2 in an optimal way
-		
+
 		Point start = np;
 		ArrayList<Point> L = new ArrayList<Point>();
-		for(Point x: lst_delivery_1) L.add(x);
-		for(Point x: lst_delivery_2) L.add(x);
-		Point[] seq = getBestSequenceGreedy(start,L,DIXAVEGAN);
-		//re-insert seq into route
-		
-		//start = XR.prev(vt2.seqPoints.get(0));
+		for (Point x : lst_delivery_1)
+			L.add(x);
+		for (Point x : lst_delivery_2)
+			L.add(x);
+		Point[] seq = getBestSequenceGreedy(start, L, DIXAVEGAN);
+		// re-insert seq into route
+
+		// start = XR.prev(vt2.seqPoints.get(0));
 		Point start_p = start2;
-		if(vt1.contains(start_p)) start_p = start1;// vt1 is before vt2 on the same route[k]
-		
-		for(int i = seq.length-1; i >= 0; i--){
+		if (vt1.contains(start_p))
+			start_p = start1;// vt1 is before vt2 on the same route[k]
+
+		for (int i = seq.length - 1; i >= 0; i--) {
 			Point delivery = seq[i];
 			Point pickup = getPickupOfDelivery(delivery);
 			mgr.performAddOnePoint(pickup, start_p);
@@ -902,104 +1003,120 @@ public class PickupDeliverySolver {
 
 	}
 
-	
-	public double evaluateMoveTrip(VarRoutesVR XR, VehicleTrip vt1, VehicleTrip vt2){
+	public double evaluateMoveTrip(VarRoutesVR XR, VehicleTrip vt1,
+			VehicleTrip vt2) {
 		ArrayList<Point> lst_pickup_1 = vt1.getPickupSeqPoints();
 		ArrayList<Point> lst_delivery_1 = vt1.getDeliverySeqPoints();
 		ArrayList<Point> lst_pickup_2 = vt2.getPickupSeqPoints();
 		ArrayList<Point> lst_delivery_2 = vt2.getDeliverySeqPoints();
-		
+
 		double value = cost.getValue();
-		//System.out.println(name() + "::evaluateMoveTrip, vt1 = " + vt1.seqPointString() + ", vt2 = " + vt2.seqPointString());
-		//System.out.println(name() + "::evaluateMoveTrip, value = " + value);
-		// return the differentiation of total distance if trip vt1 is remove and re-insert into trip vt2
+		// System.out.println(name() + "::evaluateMoveTrip, vt1 = " +
+		// vt1.seqPointString() + ", vt2 = " + vt2.seqPointString());
+		// System.out.println(name() + "::evaluateMoveTrip, value = " + value);
+		// return the differentiation of total distance if trip vt1 is remove
+		// and re-insert into trip vt2
 		// satisfying constraint
 		double delta = Integer.MAX_VALUE;
-		if(lst_pickup_1.size() == 0) return delta;
+		if (lst_pickup_1.size() == 0)
+			return delta;
 		int n = lst_pickup_1.size();
 		Point p = XR.prev(lst_pickup_1.get(0));// store the point for recover
-		
+
 		// remove trip vt1
-		for(int i = 0; i < n; i++){
+		for (int i = 0; i < n; i++) {
 			performRemoveOnePoint(XR, lst_pickup_1.get(i));
-			performRemoveOnePoint(XR, lst_delivery_1.get(n-1-i));
+			performRemoveOnePoint(XR, lst_delivery_1.get(n - 1 - i));
 		}
-		//System.out.println(name() + "::evaluateMoveTrip, after remove trip, value = " + cost.getValue());
-		
-		Point np = lst_pickup_2.get(lst_pickup_2.size()-1);
+		// System.out.println(name() +
+		// "::evaluateMoveTrip, after remove trip, value = " + cost.getValue());
+
+		Point np = lst_pickup_2.get(lst_pickup_2.size() - 1);
 		// re-insert into vt2
-		
-		for(int i = 0; i < n; i++){
+
+		for (int i = 0; i < n; i++) {
 			Point pickup = lst_pickup_1.get(i);
-			Point delivery = lst_delivery_1.get(n-1-i);
-			int violations = evaluateViolationsAddTwoPoints(XR, pickup, np, delivery, np);
-			//System.out.println(name() + "::evaluateMoveTrip, violations(" + pickup.ID + "," + np.ID + "," + 
-			//delivery.ID + "," + np.ID + ") = " + violations);
-			
-			if(violations > 0){// recover and return
-				
+			Point delivery = lst_delivery_1.get(n - 1 - i);
+			int violations = evaluateViolationsAddTwoPoints(XR, pickup, np,
+					delivery, np);
+			// System.out.println(name() + "::evaluateMoveTrip, violations(" +
+			// pickup.ID + "," + np.ID + "," +
+			// delivery.ID + "," + np.ID + ") = " + violations);
+
+			if (violations > 0) {// recover and return
+
 				// recover
-				for(int j = 0; j < lst_pickup_1.size(); j++){
+				for (int j = 0; j < lst_pickup_1.size(); j++) {
 					Point p1 = lst_pickup_1.get(j);
-					//Point d1 = lst_delivery_1.get(j);
-					if(XR.contains(p1))performRemoveOnePoint(XR, p1);
-					performAddOnePoint(XR, p1,p);
-					//performAddOnePoint(XR, d1,p1);
+					// Point d1 = lst_delivery_1.get(j);
+					if (XR.contains(p1))
+						performRemoveOnePoint(XR, p1);
+					performAddOnePoint(XR, p1, p);
+					// performAddOnePoint(XR, d1,p1);
 					p = p1;
 				}
-				for(int j = 0; j < lst_pickup_1.size(); j++){
-					//Point p1 = lst_pickup_1.get(j);
+				for (int j = 0; j < lst_pickup_1.size(); j++) {
+					// Point p1 = lst_pickup_1.get(j);
 					Point d1 = lst_delivery_1.get(j);
-					//performAddOnePoint(XR, p1,p);
-					if(XR.contains(d1))performRemoveOnePoint(XR, d1);
-					performAddOnePoint(XR, d1,p);
+					// performAddOnePoint(XR, p1,p);
+					if (XR.contains(d1))
+						performRemoveOnePoint(XR, d1);
+					performAddOnePoint(XR, d1, p);
 					p = d1;
 				}
-				return delta;	
+				return delta;
 			}
-			
+
 			performAddOnePoint(XR, pickup, np);
-			//System.out.println(name() + "::evaluateMoveTrip, violations = 0, performAddOnePoint(" + pickup.ID + "," + np.ID + ")");
+			// System.out.println(name() +
+			// "::evaluateMoveTrip, violations = 0, performAddOnePoint(" +
+			// pickup.ID + "," + np.ID + ")");
 			performAddOnePoint(XR, delivery, pickup);
-			//System.out.println(name() + "::evaluateMoveTrip, violations = 0, performAddOnePoint(" + delivery.ID + "," + pickup.ID + ")");
+			// System.out.println(name() +
+			// "::evaluateMoveTrip, violations = 0, performAddOnePoint(" +
+			// delivery.ID + "," + pickup.ID + ")");
 			np = pickup;
 		}
 		delta = cost.getValue() - value;
-		//System.out.println(name() + "::evaluateMoveTrip, new cost = " + cost.getValue() + ", delta = " + delta);
+		// System.out.println(name() + "::evaluateMoveTrip, new cost = " +
+		// cost.getValue() + ", delta = " + delta);
 
 		// recover
-		for(int j = 0; j < lst_pickup_1.size(); j++){
+		for (int j = 0; j < lst_pickup_1.size(); j++) {
 			Point p1 = lst_pickup_1.get(j);
-			//Point d1 = lst_delivery_1.get(j);
+			// Point d1 = lst_delivery_1.get(j);
 			performRemoveOnePoint(XR, p1);
-			performAddOnePoint(XR, p1,p);
-			//performAddOnePoint(XR, d1,p1);
+			performAddOnePoint(XR, p1, p);
+			// performAddOnePoint(XR, d1,p1);
 			p = p1;
 		}
-		for(int j = 0; j < lst_pickup_1.size(); j++){
-			//Point p1 = lst_pickup_1.get(j);
+		for (int j = 0; j < lst_pickup_1.size(); j++) {
+			// Point p1 = lst_pickup_1.get(j);
 			Point d1 = lst_delivery_1.get(j);
-			//performAddOnePoint(XR, p1,p);
+			// performAddOnePoint(XR, p1,p);
 			performRemoveOnePoint(XR, d1);
-			performAddOnePoint(XR, d1,p);
+			performAddOnePoint(XR, d1, p);
 			p = d1;
 		}
 
 		return delta;
 	}
-	public String toStringShort(VarRoutesVR XR){
+
+	public String toStringShort(VarRoutesVR XR) {
 		String s = "";
-		for(int k = 1; k <= XR.getNbRoutes(); k++)if(XR.next(XR.startPoint(k)) != XR.endPoint(k)){
-			s += "route[" + k + "] = ";
-			Point x = XR.getStartingPointOfRoute(k);
-			while(x != XR.getTerminatingPointOfRoute(k)){
-				s = s + x.getID() + "[" + mPoint2Type.get(x) + "]" + " -> ";
-				x = XR.next(x);
+		for (int k = 1; k <= XR.getNbRoutes(); k++)
+			if (XR.next(XR.startPoint(k)) != XR.endPoint(k)) {
+				s += "route[" + k + "] = ";
+				Point x = XR.getStartingPointOfRoute(k);
+				while (x != XR.getTerminatingPointOfRoute(k)) {
+					s = s + x.getID() + "[" + mPoint2Type.get(x) + "]" + " -> ";
+					x = XR.next(x);
+				}
+				s = s + x.getID() + "\n";
 			}
-			s = s + x.getID() + "\n";
-		}
 		return s;
 	}
+
 	public VehicleTripCollection analyzeTripsWithoutMappingTrip2VarRoute(
 			VarRoutesVR XR) {
 		ArrayList<VehicleTrip> trips = new ArrayList<VehicleTrip>();
@@ -1009,22 +1126,23 @@ public class PickupDeliverySolver {
 		System.out.println(name()
 				+ "::analyzeTripsWithoutMappingTrip2VarRoute, XR = "
 				+ XR.toStringShort());
-		//if (log != null) {
-		//	log.println(name()
-		//			+ "::analyzeTripsWithoutMappingTrip2VarRoute-----------------------------------------------------------------------------");
-		//	for (int k = 1; k <= XR.getNbRoutes(); k++) {
-		//		if (XR.next(XR.startPoint(k)) == XR.endPoint(k))
-		//			continue;
-		//		Point s = XR.startPoint(k);
-		//		Vehicle vh = mPoint2Vehicle.get(s);
-		//		//log.println("Vehicle[" + k + "] code = " + vh.getCode());
-		//		for (Point p = s; p != XR.endPoint(k); p = XR.next(p)) {
-		//			log.println("POINT " + mPoint2LocationCode.get(p)
-		//					+ ", type = " + mPoint2Type.get(p) + ", load = "
-		//					+ mPoint2Demand.get(p));
-		//		}
-		//	}
-		//}
+		// if (log != null) {
+		// log.println(name()
+		// +
+		// "::analyzeTripsWithoutMappingTrip2VarRoute-----------------------------------------------------------------------------");
+		// for (int k = 1; k <= XR.getNbRoutes(); k++) {
+		// if (XR.next(XR.startPoint(k)) == XR.endPoint(k))
+		// continue;
+		// Point s = XR.startPoint(k);
+		// Vehicle vh = mPoint2Vehicle.get(s);
+		// //log.println("Vehicle[" + k + "] code = " + vh.getCode());
+		// for (Point p = s; p != XR.endPoint(k); p = XR.next(p)) {
+		// log.println("POINT " + mPoint2LocationCode.get(p)
+		// + ", type = " + mPoint2Type.get(p) + ", load = "
+		// + mPoint2Demand.get(p));
+		// }
+		// }
+		// }
 		/*
 		 * int r_index = getRouteIndex("60C-242.61"); int pi =
 		 * getPickupPointIndex("60007742"); Point pickup = pickupPoints.get(pi);
@@ -1049,10 +1167,10 @@ public class PickupDeliverySolver {
 
 			// if (log != null) {
 			Vehicle vh = mPoint2Vehicle.get(p);
-			//if (log != null)
-			//	log.println(name()
-			//			+ "::analyzeTripsWithoutMappingTrip2VarRoute, VEHICLE "
-			//			+ vh.getCode());
+			// if (log != null)
+			// log.println(name()
+			// + "::analyzeTripsWithoutMappingTrip2VarRoute, VEHICLE "
+			// + vh.getCode());
 			p = XR.next(p);
 			Point np = XR.next(p);
 			while (p != XR.endPoint(k)) {
@@ -1106,27 +1224,27 @@ public class PickupDeliverySolver {
 
 				VehicleTrip tr = new VehicleTrip(vh, points, nbLocations,
 						loadPerTrip, length, this);
-				//tr.setSolver(this);
+				// tr.setSolver(this);
 
 				mTrip2Route.put(tr, k);
 				// mTrip2VarRoute.put(tr, XR);
 				trips.add(tr);
 
-				//if (log != null)
-				//	log.println("TRIP " + (nbTrips - 1) + ", vehicle.cap = "
-				//			+ vh.getWeight() + ", loadTrip = " + loadPerTrip
-				//			+ ", nbLocations = " + nbLocations + ", length = "
-				//			+ length + ", departure-time = " + s_dt);
+				// if (log != null)
+				// log.println("TRIP " + (nbTrips - 1) + ", vehicle.cap = "
+				// + vh.getWeight() + ", loadTrip = " + loadPerTrip
+				// + ", nbLocations = " + nbLocations + ", length = "
+				// + length + ", departure-time = " + s_dt);
 
 				p = np;
 				np = XR.next(np);
 			}
 			long at = mPoint2ArrivalTime.get(XR.endPoint(k));
-			//if (log != null)
-			//	log.println("Arrival-time to END = "
-			//			+ DateTimeUtils.unixTimeStamp2DateTime(at));
-			//if (log != null)
-			//	log.println("-------------------------");
+			// if (log != null)
+			// log.println("Arrival-time to END = "
+			// + DateTimeUtils.unixTimeStamp2DateTime(at));
+			// if (log != null)
+			// log.println("-------------------------");
 			// }
 		}
 		return new VehicleTripCollection(mTrip2Route, trips);
@@ -1193,6 +1311,24 @@ public class PickupDeliverySolver {
 
 			for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
 					.next(p)) {
+
+				// check exclusive vehicle-location
+				Vehicle vh = getVehicle(k - 1);
+				String locationCode = mPoint2LocationCode.get(p);
+				if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(
+						locationCode)) {
+					log(name() + "::checkAllSolution, vehicle " + vh.getCode()
+							+ ", goes to forbidden point " + p.ID
+							+ " at location " + locationCode
+							+ " FAILED -> BUG????");
+					System.out.println(name() + "::checkAllSolution, vehicle "
+							+ vh.getCode() + ", goes to forbidden point "
+							+ p.ID + " at location " + locationCode
+							+ " FAILED -> BUG????");
+
+					return false;
+				}
+
 				if (mPoint2ArrivalTime.get(p) == null) {
 					log(name() + "::checkAllSolution, time at "
 							+ mPoint2LocationCode.get(p) + " arrivaltime = "
@@ -1203,44 +1339,58 @@ public class PickupDeliverySolver {
 					continue;
 				}
 				/*
-				log(name()
-						+ "::checkAllSolution, time at "
-						+ mPoint2LocationCode.get(p)
-						+ " arrivaltime = "
-						+ mPoint2ArrivalTime.get(p)
-						+ " ["
-						+ DateTimeUtils
-								.unixTimeStamp2DateTime(mPoint2ArrivalTime
-										.get(p))
-						+ "], latest = "
-						+ lastestAllowedArrivalTime.get(p)
-						+ "["
-						+ DateTimeUtils
-								.unixTimeStamp2DateTime(lastestAllowedArrivalTime
-										.get(p)) + "]");
-				*/
+				 * log(name() + "::checkAllSolution, time at " +
+				 * mPoint2LocationCode.get(p) + " arrivaltime = " +
+				 * mPoint2ArrivalTime.get(p) + " [" + DateTimeUtils
+				 * .unixTimeStamp2DateTime(mPoint2ArrivalTime .get(p)) +
+				 * "], latest = " + lastestAllowedArrivalTime.get(p) + "[" +
+				 * DateTimeUtils
+				 * .unixTimeStamp2DateTime(lastestAllowedArrivalTime .get(p)) +
+				 * "]");
+				 */
 				if (mPoint2ArrivalTime.get(p) > lastestAllowedArrivalTime
 						.get(p)) {
-					System.out.println(name() + "::checkAllSolution, vehicle["
-							+ k + ", code = " + getVehicle(k - 1).getCode()
+					System.out
+							.println(name()
+									+ "::checkAllSolution, vehicle["
+									+ k
+									+ ", code = "
+									+ getVehicle(k - 1).getCode()
+									+ "], FAILED, arrivalTime("
+									+ mPoint2LocationCode.get(p)
+									+ ") = "
+									+ mPoint2ArrivalTime.get(p)
+									+ " ("
+									+ DateTimeUtils
+											.unixTimeStamp2DateTime(mPoint2ArrivalTime
+													.get(p))
+									+ ") "
+									+ " >= "
+									+ lastestAllowedArrivalTime.get(p)
+									+ "( "
+									+ DateTimeUtils
+											.unixTimeStamp2DateTime(lastestAllowedArrivalTime
+													.get(p)) + ") ");
+					log(name()
+							+ "::checkAllSolution, vehicle["
+							+ k
+							+ ", code = "
+							+ getVehicle(k - 1).getCode()
 							+ "], FAILED, arrivalTime("
-							+ mPoint2LocationCode.get(p) + ") = "
-							+ mPoint2ArrivalTime.get(p) 
-							+ " (" + DateTimeUtils.unixTimeStamp2DateTime(mPoint2ArrivalTime.get(p) ) + ") "
+							+ mPoint2LocationCode.get(p)
+							+ ") = "
+							+ mPoint2ArrivalTime.get(p)
+							+ " ("
+							+ DateTimeUtils
+									.unixTimeStamp2DateTime(mPoint2ArrivalTime
+											.get(p))
+							+ ") "
 							+ " >= "
 							+ lastestAllowedArrivalTime.get(p)
-							+ "( " + DateTimeUtils.unixTimeStamp2DateTime(lastestAllowedArrivalTime.get(p)) + ") "
-							);
-					log(name() + "::checkAllSolution, vehicle["
-							+ k + ", code = " + getVehicle(k - 1).getCode()
-							+ "], FAILED, arrivalTime("
-							+ mPoint2LocationCode.get(p) + ") = "
-							+ mPoint2ArrivalTime.get(p) 
-							+ " (" + DateTimeUtils.unixTimeStamp2DateTime(mPoint2ArrivalTime.get(p) ) + ") "
-							+ " >= "
-							+ lastestAllowedArrivalTime.get(p)
-							+ "( " + DateTimeUtils.unixTimeStamp2DateTime(lastestAllowedArrivalTime.get(p)) + ") "
-							);
+							+ "( "
+							+ DateTimeUtils
+									.unixTimeStamp2DateTime(lastestAllowedArrivalTime
+											.get(p)) + ") ");
 					// return false;
 					ok = false;
 
@@ -1251,7 +1401,6 @@ public class PickupDeliverySolver {
 							+ "::checkALlSolution, checkConflictItemsAtPoint("
 							+ p.ID + ") FAILED, BUG???, XR = "
 							+ printRouteAndItems(XR, k));
-					
 
 				}
 				/*
@@ -1266,7 +1415,7 @@ public class PickupDeliverySolver {
 				 */
 			}
 		}
-		
+
 		VehicleTripCollection VTC = analyzeTripsWithoutMappingTrip2VarRoute(XR);
 		for (VehicleTrip t : VTC.trips) {
 			ArrayList<Point> P = t.seqPoints;
@@ -1301,19 +1450,21 @@ public class PickupDeliverySolver {
 	}
 
 	public boolean checkExclusiveItemsAtPoints(Point p, Point q) {
-		if(mPoint2IndexItems.get(p) != null){
-		for (int i : mPoint2IndexItems.get(p)) {
-			if(mPoint2IndexItems.get(q) != null){
-			for (int j : mPoint2IndexItems.get(q)) {
-				if (itemConflict[i][j])
-					return false;
+		if (mPoint2IndexItems.get(p) != null) {
+			for (int i : mPoint2IndexItems.get(p)) {
+				if (mPoint2IndexItems.get(q) != null) {
+					for (int j : mPoint2IndexItems.get(q)) {
+						if (itemConflict[i][j])
+							return false;
+					}
+				} else {
+					log(name() + "::checkExclusiveItemsAtPoints, point q = "
+							+ q.ID + " has not items");
+				}
 			}
-			}else{
-				log(name() + "::checkExclusiveItemsAtPoints, point q = " + q.ID + " has not items");
-			}
-		}
-		}else{
-			log(name() + "::checkExclusiveItemsAtPoints, point p = " + p.ID + " has not items");
+		} else {
+			log(name() + "::checkExclusiveItemsAtPoints, point p = " + p.ID
+					+ " has not items");
 		}
 		return true;
 	}
@@ -1555,13 +1706,13 @@ public class PickupDeliverySolver {
 		// }
 	}
 
-	
 	public int getTravelTime(Point p, Point q) {
 		int ip = mLocationCode2Index.get(mPoint2LocationCode.get(p));
 		int iq = mLocationCode2Index.get(mPoint2LocationCode.get(q));
 		int tt = (int) a_travelTime[ip][iq];
 		return tt;
 	}
+
 	public int getTravelTime(String src, String dest) {
 		int ip = mLocationCode2Index.get(src);
 		int iq = mLocationCode2Index.get(dest);
@@ -1619,33 +1770,37 @@ public class PickupDeliverySolver {
 		}
 		if (sel_p != null) {
 			/*
-			MR.mgr.performAddOnePoint(delivery, sel_d);
-			MR.mgr.performAddOnePoint(pickup, sel_p);
-			propagateArrivalDepartureTime(MR.XR, k, false);
-			*/
-			performAddOnePoint(MR.XR,delivery, sel_d);
-			performAddOnePoint(MR.XR,pickup, sel_p);
-			
+			 * MR.mgr.performAddOnePoint(delivery, sel_d);
+			 * MR.mgr.performAddOnePoint(pickup, sel_p);
+			 * propagateArrivalDepartureTime(MR.XR, k, false);
+			 */
+			performAddOnePoint(MR.XR, delivery, sel_d);
+			performAddOnePoint(MR.XR, pickup, sel_p);
+
 			return true;
 		} else
 			return false;
 	}
-	public void propagate(VarRoutesVR XR, int k){
+
+	public void propagate(VarRoutesVR XR, int k) {
 		propagateArrivalDepartureTime(XR, k, false);
 		propagateLoadedItems(XR, k);
 	}
-	public void performAddOnePoint(VarRoutesVR XR, Point x, Point y){
+
+	public void performAddOnePoint(VarRoutesVR XR, Point x, Point y) {
 		int k = XR.route(y);
 		XR.getVRManager().performAddOnePoint(x, y);
 		propagateArrivalDepartureTime(XR, k, false);
 		propagateLoadedItems(XR, k);
 	}
-	public void performRemoveOnePoint(VarRoutesVR XR, Point x){
+
+	public void performRemoveOnePoint(VarRoutesVR XR, Point x) {
 		int k = XR.route(x);
 		XR.getVRManager().performRemoveOnePoint(x);
 		propagateArrivalDepartureTime(XR, k, false);
 		propagateLoadedItems(XR, k);
 	}
+
 	public void propagateArrivalDepartureTime(VarRoutesVR XR, int k,
 			boolean DEBUG) {
 
@@ -1775,18 +1930,22 @@ public class PickupDeliverySolver {
 		return 0;
 	}
 
-	public HashSet<Integer> collectLoadedItemIndexAtPoint(VarRoutesVR XR, int k, Point p){
+	public HashSet<Integer> collectLoadedItemIndexAtPoint(VarRoutesVR XR,
+			int k, Point p) {
 		HashSet<Integer> S = new HashSet<Integer>();
-		for(Point x = XR.startPoint(k); x != XR.endPoint(k); x = XR.next(x)){
-			if(mPoint2Type.get(x).equals("P") && mPoint2IndexItems.get(x) != null){
-				for(int i: mPoint2IndexItems.get(x)){
+		for (Point x = XR.startPoint(k); x != XR.endPoint(k); x = XR.next(x)) {
+			if (mPoint2Type.get(x).equals("P")
+					&& mPoint2IndexItems.get(x) != null) {
+				for (int i : mPoint2IndexItems.get(x)) {
 					S.add(i);
 				}
-				if(x == p) return S;
+				if (x == p)
+					return S;
 			}
 		}
 		return new HashSet<Integer>();
 	}
+
 	public int evaluateNewOrderLoad(VarRoutesVR XR, int k, Point pickup,
 			Point p, Point delivery, Point d) {
 		// return 1 is there is new order loaded when inserting
@@ -1795,10 +1954,11 @@ public class PickupDeliverySolver {
 		boolean ok = false;
 		if (mPoint2IndexLoadedItems.get(p) != null) {
 			HashSet<Integer> S = collectLoadedItemIndexAtPoint(XR, k, p);
-			//for (int i : mPoint2IndexLoadedItems.get(p)) {
-			for(int i: S){	
-				if(mItemIndex2RequestIndex.get(i) == null){
-					log(name() + "::evaluateNewOrderLoad, item index " + i + " does not match to any requets --> BUG???");
+			// for (int i : mPoint2IndexLoadedItems.get(p)) {
+			for (int i : S) {
+				if (mItemIndex2RequestIndex.get(i) == null) {
+					log(name() + "::evaluateNewOrderLoad, item index " + i
+							+ " does not match to any requets --> BUG???");
 					return 0;
 				}
 				int r = mItemIndex2RequestIndex.get(i);
@@ -1871,8 +2031,8 @@ public class PickupDeliverySolver {
 		// CONSIDER END POINT
 		Point q = XR.endPoint(k);
 		if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
-		violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
-		.get(q));
+			violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
+					.get(q));
 
 		// recovery
 		XR.performRemoveOnePoint(delivery);
@@ -1882,100 +2042,104 @@ public class PickupDeliverySolver {
 		return violations;
 
 	}
+
 	public int evaluateTimeViolationsAddTwoPoints(Point pickup, Point p,
 			Point delivery, Point d) {
 		int k = XR.route(p);
 		return evaluateTimeViolationsAddTwoPoints(k, pickup, p, delivery, d);
-		
+
 		/*
-		XR.performAddOnePoint(delivery, d);
-		XR.performAddOnePoint(pickup, p);
-		propagateArrivalDepartureTime(k, true);
-		// if (pickup.ID == 8 && delivery.ID == 9)
-		// log(printRouteAndTime(XR, k));
-
-		int violations = 0;
-		// for (Point q = XR.next(XR.startPoint(k)); q != XR.endPoint(k); q = XR
-		for (Point q = XR.startPoint(k); q != XR.endPoint(k); q = XR.next(q)) {
-			if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
-				violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
-						.get(q));
-			// System.out.println("evaluateTimeViolationsAddTwoPoints, arrT(" +
-			// q.ID + ") = " + mPoint2ArrivalTime.get(q) +
-			// "(" +
-			// DateTimeUtils.unixTimeStamp2DateTime(mPoint2ArrivalTime.get(q)) +
-			// ")" +
-			// ", latestAllowArrivalTime(" + q.ID + ") = " +
-			// lastestAllowedArrivalTime.get(q) +
-			// "(" +
-			// DateTimeUtils.unixTimeStamp2DateTime(lastestAllowedArrivalTime.get(q)));
-		}
-
-		// DO NOT CONSIDER END POINT
-		// Point q = XR.endPoint(k);
-		// if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
-		// violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
-		// .get(q));
-
-		// recovery
-		XR.performRemoveOnePoint(delivery);
-		XR.performRemoveOnePoint(pickup);
-		propagateArrivalDepartureTime(k, false);
-
-		return violations;
-		*/
+		 * XR.performAddOnePoint(delivery, d); XR.performAddOnePoint(pickup, p);
+		 * propagateArrivalDepartureTime(k, true); // if (pickup.ID == 8 &&
+		 * delivery.ID == 9) // log(printRouteAndTime(XR, k));
+		 * 
+		 * int violations = 0; // for (Point q = XR.next(XR.startPoint(k)); q !=
+		 * XR.endPoint(k); q = XR for (Point q = XR.startPoint(k); q !=
+		 * XR.endPoint(k); q = XR.next(q)) { if (mPoint2ArrivalTime.get(q) >
+		 * lastestAllowedArrivalTime.get(q)) violations +=
+		 * (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime .get(q)); //
+		 * System.out.println("evaluateTimeViolationsAddTwoPoints, arrT(" + //
+		 * q.ID + ") = " + mPoint2ArrivalTime.get(q) + // "(" + //
+		 * DateTimeUtils.unixTimeStamp2DateTime(mPoint2ArrivalTime.get(q)) + //
+		 * ")" + // ", latestAllowArrivalTime(" + q.ID + ") = " + //
+		 * lastestAllowedArrivalTime.get(q) + // "(" + //
+		 * DateTimeUtils.unixTimeStamp2DateTime
+		 * (lastestAllowedArrivalTime.get(q))); }
+		 * 
+		 * // DO NOT CONSIDER END POINT // Point q = XR.endPoint(k); // if
+		 * (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q)) //
+		 * violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
+		 * // .get(q));
+		 * 
+		 * // recovery XR.performRemoveOnePoint(delivery);
+		 * XR.performRemoveOnePoint(pickup); propagateArrivalDepartureTime(k,
+		 * false);
+		 * 
+		 * return violations;
+		 */
 	}
+
 	/*
-	public boolean checkConflictItemAtPoint(Point p){
-		Integer[] IDX = mPoint2IndexItems.get(p);
-		if(IDX == null || IDX.length == 0) return true;
-		for(int i = 0; i < IDX.length; i++ ){
-			for(int j = i+1; j < IDX.length; j++){
-				if(itemConflict[IDX[i]][IDX[j]]) return false;
-			}
-		}
-		return true;
-	}
-	*/
-	public int evaluateViolationsAddTwoPoints(VarRoutesVR XR,
-			Point pickup, Point p, Point delivery, Point d){
+	 * public boolean checkConflictItemAtPoint(Point p){ Integer[] IDX =
+	 * mPoint2IndexItems.get(p); if(IDX == null || IDX.length == 0) return true;
+	 * for(int i = 0; i < IDX.length; i++ ){ for(int j = i+1; j < IDX.length;
+	 * j++){ if(itemConflict[IDX[i]][IDX[j]]) return false; } } return true; }
+	 */
+	public int evaluateViolationsAddTwoPoints(VarRoutesVR XR, Point pickup,
+			Point p, Point delivery, Point d) {
 		int k = XR.route(p);
-		//log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k);
-		//System.out.println(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k);
-		//XR.performAddOnePoint(delivery, d);
-		//XR.performAddOnePoint(pickup, p);
-		//propagateArrivalDepartureTime(XR, k, true);
-		performAddOnePoint(XR,delivery, d);
-		//System.out.println(name() + "::evaluateViolationsAddTwoPoints, after AddPoint(" + delivery.ID + "," + d.ID + 
-		//		"), XR[" + k + "] = " + XR.toStringRoute(k));
-		performAddOnePoint(XR,pickup, p);
-		//System.out.println(name() + "::evaluateViolationsAddTwoPoints, after AddPoint(" + pickup.ID + "," + p.ID + 
-		//		"), XR[" + k + "] = " + XR.toStringRoute(k));
-				
-		
+		// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID + "," +
+		// p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k);
+		// System.out.println(name() + "::evaluateViolationsAddTwoPoints(" +
+		// pickup.ID + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " +
+		// k);
+		// XR.performAddOnePoint(delivery, d);
+		// XR.performAddOnePoint(pickup, p);
+		// propagateArrivalDepartureTime(XR, k, true);
+		performAddOnePoint(XR, delivery, d);
+		// System.out.println(name() +
+		// "::evaluateViolationsAddTwoPoints, after AddPoint(" + delivery.ID +
+		// "," + d.ID +
+		// "), XR[" + k + "] = " + XR.toStringRoute(k));
+		performAddOnePoint(XR, pickup, p);
+		// System.out.println(name() +
+		// "::evaluateViolationsAddTwoPoints, after AddPoint(" + pickup.ID + ","
+		// + p.ID +
+		// "), XR[" + k + "] = " + XR.toStringRoute(k));
+
 		int violations = 0;
 		for (Point q = XR.next(XR.startPoint(k)); q != XR.endPoint(k); q = XR
 				.next(q)) {
-			if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q)){
+			if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q)) {
 				violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
 						.get(q));
-				//log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
-				//		+ ", AT point " + q.ID + ", arrT = " + mPoint2ArrivalTime.get(q) + " > latest = " + lastestAllowedArrivalTime.get(q) + ", violations = " + violations );
+				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
+				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
+				// + ", AT point " + q.ID + ", arrT = " +
+				// mPoint2ArrivalTime.get(q) + " > latest = " +
+				// lastestAllowedArrivalTime.get(q) + ", violations = " +
+				// violations );
 			}
-			//if(pickup.ID == 46 && delivery.ID == 47 && p.ID == 60){
-			//	log.print(name() + "::evaluateViolationsAddTwoPoints, loaded-items at " + q.ID + "");
-			//}
-			if(!checkConflictItemsAtPoint(q)){
-				//log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
-				//		+ ", conflict item at " + p.ID + ", violations = " + violations);
+			// if(pickup.ID == 46 && delivery.ID == 47 && p.ID == 60){
+			// log.print(name() +
+			// "::evaluateViolationsAddTwoPoints, loaded-items at " + q.ID +
+			// "");
+			// }
+			if (!checkConflictItemsAtPoint(q)) {
+				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
+				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
+				// + ", conflict item at " + p.ID + ", violations = " +
+				// violations);
 				violations++;
 			}
-			if(awn.getSumWeights(q) > cap[k-1]){
-				//log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
-				//		+ ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) + " > cap = " + cap[k-1] + ", violations = " + violations);
+			if (awn.getSumWeights(q) > cap[k - 1]) {
+				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
+				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
+				// + ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) +
+				// " > cap = " + cap[k-1] + ", violations = " + violations);
 				violations++;
 			}
-			
+
 			// System.out.println("evaluateTimeViolationsAddTwoPoints, arrT(" +
 			// q.ID + ") = " + mPoint2ArrivalTime.get(q) +
 			// "(" +
@@ -1986,7 +2150,7 @@ public class PickupDeliverySolver {
 			// "(" +
 			// DateTimeUtils.unixTimeStamp2DateTime(lastestAllowedArrivalTime.get(q)));
 		}
-		
+
 		// check end_working_time of vehicle
 		Point q = XR.endPoint(k);
 		if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
@@ -1994,15 +2158,16 @@ public class PickupDeliverySolver {
 					.get(q));
 
 		// recovery
-		//XR.performRemoveOnePoint(delivery);
-		//XR.performRemoveOnePoint(pickup);
-		//propagateArrivalDepartureTime(XR, k, false);
-		performRemoveOnePoint(XR,delivery);
-		performRemoveOnePoint(XR,pickup);
-		
+		// XR.performRemoveOnePoint(delivery);
+		// XR.performRemoveOnePoint(pickup);
+		// propagateArrivalDepartureTime(XR, k, false);
+		performRemoveOnePoint(XR, delivery);
+		performRemoveOnePoint(XR, pickup);
+
 		return violations;
-		
+
 	}
+
 	public int evaluateTimeViolationsAddTwoPoints(VarRoutesVR XR, int k,
 			Point pickup, Point p, Point delivery, Point d) {
 		XR.performAddOnePoint(delivery, d);
@@ -2267,13 +2432,12 @@ public class PickupDeliverySolver {
 			}
 			if (sel_i != -1) {
 				/*
-				mgr.performAddOnePoint(sel_delivery, sel_d);
-				mgr.performAddOnePoint(sel_pickup, sel_p);
-				propagateArrivalDepartureTime(sel_k, true);
-				*/
-				performAddOnePoint(XR,sel_delivery, sel_d);
-				performAddOnePoint(XR,sel_pickup, sel_p);
-				
+				 * mgr.performAddOnePoint(sel_delivery, sel_d);
+				 * mgr.performAddOnePoint(sel_pickup, sel_p);
+				 * propagateArrivalDepartureTime(sel_k, true);
+				 */
+				performAddOnePoint(XR, sel_delivery, sel_d);
+				performAddOnePoint(XR, sel_pickup, sel_p);
 
 				// log.println("add delivery " + sel_delivery.ID + " after "+
 				// sel_d.ID +
@@ -2286,21 +2450,17 @@ public class PickupDeliverySolver {
 				cand.remove(sel_i);
 
 				/*
-				// update loaded items
-				for (int I : mPoint2IndexLoadedItems.get(sel_p)) {
-					mPoint2IndexLoadedItems.get(sel_pickup).add(I);
-				}
-				for (int I : mPoint2IndexLoadedItems.get(sel_d)) {
-					mPoint2IndexLoadedItems.get(sel_delivery).add(I);
-				}
-				for (Point p = sel_pickup; p != sel_delivery; p = XR.next(p)) {
-					// mPoint2LoadedItems.get(p).add(
-					// mPoint2ItemCode.get(sel_pickup));
-					for (int ite : mPoint2IndexItems.get(sel_pickup)) {
-						mPoint2IndexLoadedItems.get(p).add(ite);
-					}
-				}
-				*/
+				 * // update loaded items for (int I :
+				 * mPoint2IndexLoadedItems.get(sel_p)) {
+				 * mPoint2IndexLoadedItems.get(sel_pickup).add(I); } for (int I
+				 * : mPoint2IndexLoadedItems.get(sel_d)) {
+				 * mPoint2IndexLoadedItems.get(sel_delivery).add(I); } for
+				 * (Point p = sel_pickup; p != sel_delivery; p = XR.next(p)) {
+				 * // mPoint2LoadedItems.get(p).add( //
+				 * mPoint2ItemCode.get(sel_pickup)); for (int ite :
+				 * mPoint2IndexItems.get(sel_pickup)) {
+				 * mPoint2IndexLoadedItems.get(p).add(ite); } }
+				 */
 			} else {
 				System.out.println("Cannot schedule any more, BREAK");
 				break;
@@ -2331,44 +2491,46 @@ public class PickupDeliverySolver {
 			return true;
 		return false;
 	}
-	
-	public void propagateLoadedItems(VarRoutesVR XR, int k){
-		for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
-			if(mPoint2IndexLoadedItems.get(p)==null)
-				mPoint2IndexLoadedItems.put(p,new HashSet<Integer>());
+
+	public void propagateLoadedItems(VarRoutesVR XR, int k) {
+		for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)) {
+			if (mPoint2IndexLoadedItems.get(p) == null)
+				mPoint2IndexLoadedItems.put(p, new HashSet<Integer>());
 			else
 				mPoint2IndexLoadedItems.get(p).clear();
 		}
 		HashSet<Integer> S = new HashSet<Integer>();
-		for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
-			if(mPoint2Type.get(p).equals("P")){
-				for(int i: mPoint2IndexItems.get(p)){
-					if(S.contains(i)){
-						log(name() + "::propagateLoadedItems, BUG???? duplicate loaded items");
+		for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)) {
+			if (mPoint2Type.get(p).equals("P")) {
+				for (int i : mPoint2IndexItems.get(p)) {
+					if (S.contains(i)) {
+						log(name()
+								+ "::propagateLoadedItems, BUG???? duplicate loaded items");
 					}
 					S.add(i);
 				}
-				for(int i: S){
+				for (int i : S) {
 					mPoint2IndexLoadedItems.get(p).add(i);
 				}
-			}else if(mPoint2Type.get(p).equals("D")){
+			} else if (mPoint2Type.get(p).equals("D")) {
 				int idx = mDeliveryPoint2DeliveryIndex.get(p);
 				Point pickup = pickupPoints.get(idx);
-				for(int i: mPoint2IndexItems.get(pickup)){
+				for (int i : mPoint2IndexItems.get(pickup)) {
 					S.remove(i);
 				}
-				for(int i: S){
+				for (int i : S) {
 					mPoint2IndexLoadedItems.get(p).add(i);
 				}
 			}
 		}
-		
+
 	}
-	public void propagateLoadedItems(VarRoutesVR XR){
-		for(int k = 1; k <= XR.getNbRoutes(); k++)
+
+	public void propagateLoadedItems(VarRoutesVR XR) {
+		for (int k = 1; k <= XR.getNbRoutes(); k++)
 			propagateLoadedItems(XR, k);
 	}
-	
+
 	public String analyzeRequest(int idx) {
 		String des = "";
 		Point pickup = pickupPoints.get(idx);
@@ -2980,9 +3142,9 @@ public class PickupDeliverySolver {
 			serviceDuration.put(s, 0);// load-unload is 30 minutes
 			// lastestAllowedArrivalTime.put(s,
 			// (int)DateTimeUtils.dateTime2Int(vehicles[k].getEndWorkingTime()));
-			if(vh.getEndWorkingTime() != null)
-			lastestAllowedArrivalTime.put(s,
-					(int) DateTimeUtils.dateTime2Int(vh.getEndWorkingTime()));
+			if (vh.getEndWorkingTime() != null)
+				lastestAllowedArrivalTime.put(s, (int) DateTimeUtils
+						.dateTime2Int(vh.getEndWorkingTime()));
 			// earliestAllowedArrivalTime.put(t,
 			// (int)DateTimeUtils.dateTime2Int(vehicles[k].getStartWorkingTime()));
 			earliestAllowedArrivalTime.put(t,
@@ -2990,9 +3152,9 @@ public class PickupDeliverySolver {
 			serviceDuration.put(t, 0);// load-unload is 30 minutes
 			// lastestAllowedArrivalTime.put(t,
 			// (int)DateTimeUtils.dateTime2Int(vehicles[k].getEndWorkingTime()));
-			if(vh.getEndWorkingTime() != null)
-			lastestAllowedArrivalTime.put(t,
-					(int) DateTimeUtils.dateTime2Int(vh.getEndWorkingTime()));
+			if (vh.getEndWorkingTime() != null)
+				lastestAllowedArrivalTime.put(t, (int) DateTimeUtils
+						.dateTime2Int(vh.getEndWorkingTime()));
 
 			// System.out.println("mapData, startWorkingTime = " +
 			// vh.getStartWorkingTime() + ", end working time = " +
@@ -3326,11 +3488,16 @@ public class PickupDeliverySolver {
 		return false;
 	}
 
-	public Vehicle findBestFitVehicle(double load) {
+	// public Vehicle findBestFitVehicle(double load) {
+	public Vehicle findBestFitVehicle(VehicleTrip t) {
 		double minCap = Integer.MAX_VALUE;
 		Vehicle sel_vh = null;
 		for (int i = 0; i < input.getVehicleCategories().length; i++) {
-			if (input.getVehicleCategories()[i].getWeight() >= load) {
+			Vehicle vh = input.getVehicleCategories()[i];
+			if (!checkPossibleVehicleCategoryLocation(vh, t.seqPoints))
+				continue;
+
+			if (vh.getWeight() >= t.load) {
 				if (input.getVehicleCategories()[i].getWeight() < minCap) {
 					minCap = input.getVehicleCategories()[i].getWeight();
 					sel_vh = input.getVehicleCategories()[i];
@@ -3340,8 +3507,11 @@ public class PickupDeliverySolver {
 
 		for (int i = 0; i < vehicles.length; i++) {
 			Vehicle vh = vehicles[i];
+			if (!checkPossibleVehicleLocation(vh, t.seqPoints))
+				continue;
+
 			if (!usedInternalVehicles.contains(vh)) {
-				if (vh.getWeight() >= load) {
+				if (vh.getWeight() >= t.load) {
 					if (vh.getWeight() < minCap) {
 						minCap = vh.getWeight();
 						sel_vh = vh;
@@ -3393,7 +3563,8 @@ public class PickupDeliverySolver {
 	}
 
 	public boolean vehicleCanGoToPoint(Vehicle vh, Point p) {
-		if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(mPoint2LocationCode.get(p)))
+		if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(
+				mPoint2LocationCode.get(p)))
 			return false;
 		return true;
 	}
@@ -3406,9 +3577,12 @@ public class PickupDeliverySolver {
 	}
 
 	public boolean vehicleCategoryCanGoToPoint(Vehicle vh, Point p) {
-		if(mVehicleCategory2NotReachedLocations.get(vh.getVehicleCategory())==null) return true;
-		if(mPoint2LocationCode.get(p) == null) return true;		
-		if (mVehicleCategory2NotReachedLocations.get(vh.getVehicleCategory()).contains(mPoint2LocationCode.get(p)))
+		if (mVehicleCategory2NotReachedLocations.get(vh.getVehicleCategory()) == null)
+			return true;
+		if (mPoint2LocationCode.get(p) == null)
+			return true;
+		if (mVehicleCategory2NotReachedLocations.get(vh.getVehicleCategory())
+				.contains(mPoint2LocationCode.get(p)))
 			return false;
 		return true;
 	}
@@ -3741,30 +3915,30 @@ public class PickupDeliverySolver {
 						e.setDistance(e_distance);
 
 						Item[] pitems = null;
-						if (mPoint2Type.get(p).equals("P")){
-							
+						if (mPoint2Type.get(p).equals("P")) {
+
 							Integer[] L = mPoint2IndexItems.get(p);
-						
+
 							if (L != null) {
 								pitems = new Item[L.length];
 								for (int ii = 0; ii < L.length; ii++)
 									pitems[ii] = items.get(L[ii]);
-							}else{
-							
+							} else {
+
 							}
-						}else if (mPoint2Type.get(p).equals("D")){
+						} else if (mPoint2Type.get(p).equals("D")) {
 							int idx = mDeliveryPoint2DeliveryIndex.get(p);
 							Point pickup = pickupPoints.get(idx);
 							Integer[] L = mPoint2IndexItems.get(pickup);
-							
+
 							if (L != null) {
 								pitems = new Item[L.length];
 								for (int ii = 0; ii < L.length; ii++)
 									pitems[ii] = items.get(L[ii]);
-							}else{
-							
+							} else {
+
 							}
-							
+
 						}
 						e.setItems(pitems);
 					}
@@ -3883,9 +4057,9 @@ public class PickupDeliverySolver {
 								d_lat + "," + d_lng, d_lat, d_lng, "-", "-",
 								s_at, s_dt);
 						e.setDescription("weight: " + v.getWeight());
-						double e_load = (int)0;
-						if(awn.getSumWeights(p)>Utility.EPS)
-							e_load = awn.getSumWeights(p); 
+						double e_load = (int) 0;
+						if (awn.getSumWeights(p) > Utility.EPS)
+							e_load = awn.getSumWeights(p);
 						double e_distance = awe.getCostRight(p);
 						e.setLoad(e_load);
 						e.setDistance(e_distance);
@@ -3897,9 +4071,9 @@ public class PickupDeliverySolver {
 						double d_lng = v.getEndLng();
 						e = new RoutingElement(v.getEndLocationCode(), "-",
 								d_lat + "," + d_lng, d_lat, d_lng, "-", "-");
-						double e_load = (int)0;
-						if(awn.getSumWeights(p)>Utility.EPS)
-							e_load = awn.getSumWeights(p); 
+						double e_load = (int) 0;
+						if (awn.getSumWeights(p) > Utility.EPS)
+							e_load = awn.getSumWeights(p);
 						double e_distance = awe.getCostRight(p);
 						e.setLoad(e_load);
 						e.setDistance(e_distance);
@@ -3953,7 +4127,7 @@ public class PickupDeliverySolver {
 							orderCodes += rr.getOrderCode() + ", ";
 						}
 						String s_accumulate_load = "0";
-						if(awn.getSumWeights(p) > Utility.EPS){
+						if (awn.getSumWeights(p) > Utility.EPS) {
 							s_accumulate_load = awn.getSumWeights(p) + "";
 						}
 						e.setDescription("orderID: " + r.getOrderID()
@@ -3964,38 +4138,38 @@ public class PickupDeliverySolver {
 						if (maxLoad < awn.getSumWeights(p))
 							maxLoad = awn.getSumWeights(p);
 						e.setOrderId(r.getOrderID());
-						double e_load = (int)0;
-						if(awn.getSumWeights(p)>Utility.EPS)
-							e_load = awn.getSumWeights(p); 
+						double e_load = (int) 0;
+						if (awn.getSumWeights(p) > Utility.EPS)
+							e_load = awn.getSumWeights(p);
 						double e_distance = awe.getCostRight(p);
 						e.setLoad(e_load);
 						e.setDistance(e_distance);
 
 						Item[] pitems = null;
-						if (mPoint2Type.get(p).equals("P")){
-							
+						if (mPoint2Type.get(p).equals("P")) {
+
 							Integer[] L = mPoint2IndexItems.get(p);
-						
+
 							if (L != null) {
 								pitems = new Item[L.length];
 								for (int ii = 0; ii < L.length; ii++)
 									pitems[ii] = items.get(L[ii]);
-							}else{
-							
+							} else {
+
 							}
-						}else if (mPoint2Type.get(p).equals("D")){
+						} else if (mPoint2Type.get(p).equals("D")) {
 							int idx = mDeliveryPoint2DeliveryIndex.get(p);
 							Point pickup = pickupPoints.get(idx);
 							Integer[] L = mPoint2IndexItems.get(pickup);
-							
+
 							if (L != null) {
 								pitems = new Item[L.length];
 								for (int ii = 0; ii < L.length; ii++)
 									pitems[ii] = items.get(L[ii]);
-							}else{
-							
+							} else {
+
 							}
-							
+
 						}
 						e.setItems(pitems);
 					}
@@ -4016,11 +4190,11 @@ public class PickupDeliverySolver {
 				double d_lng = v.getEndLng();
 				RoutingElement e = new RoutingElement(v.getEndLocationCode(),
 						"-", d_lat + "," + d_lng, d_lat, d_lng, s_at, "-");
-				
-				double e_load = (int)0;
-				if(awn.getSumWeights(p)>Utility.EPS)
-					e_load = awn.getSumWeights(p); 
-				
+
+				double e_load = (int) 0;
+				if (awn.getSumWeights(p) > Utility.EPS)
+					e_load = awn.getSumWeights(p);
+
 				double e_distance = awe.getCostRight(p);
 				e.setLoad(e_load);
 				e.setDistance(e_distance);

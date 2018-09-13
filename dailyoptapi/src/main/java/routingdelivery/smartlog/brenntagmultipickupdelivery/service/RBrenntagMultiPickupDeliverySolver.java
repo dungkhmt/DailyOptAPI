@@ -614,6 +614,14 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 
 		VehicleTripCollection VTC = analyzeTrips(XR);
 
+		for(int i = 0; i < vehicles.length + externalVehicles.length; i++){
+			Vehicle vh = getVehicle(i);
+			if(mVehicle2NotReachedLocations.get(vh.getCode()) == null){
+				System.out.println(name() + "::computeVehicleSuggestion, vehicle " + vh.getCode() + " NOT REACHES "
+						+ mVehicle2NotReachedLocations.get(vh.getCode()));
+			}
+		}
+		
 		ArrayList<ModelRoute> modelRoutes = extractAndAssignNewVehicle(VTC);
 
 		if (input.getParams().getIntCity().equals("TRUE")) {

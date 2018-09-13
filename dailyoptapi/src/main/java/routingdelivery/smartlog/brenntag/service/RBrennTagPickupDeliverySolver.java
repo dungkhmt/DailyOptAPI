@@ -684,6 +684,7 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 			}
 
 			processSplitOrders();
+			
 			processDistinctPickupDeliveryLocationCodes();
 
 			logStateAfterSplittingOrder();
@@ -876,7 +877,13 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 		// improveMergeLongTrip();
 
 		VehicleTripCollection VTC = analyzeTrips(XR);
-
+		for(int i = 0; i < vehicles.length + externalVehicles.length; i++){
+			Vehicle vh = getVehicle(i);
+			if(mVehicle2NotReachedLocations.get(vh.getCode()) == null){
+				System.out.println(name() + "::computeVehicleSuggestion, vehicle " + vh.getCode() + " NOT REACHES "
+						+ mVehicle2NotReachedLocations.get(vh.getCode()));
+			}
+		}
 		ArrayList<ModelRoute> modelRoutes = extractAndAssignNewVehicle(VTC);
 
 		if (input.getParams().getIntCity().equals("TRUE")) {
@@ -1602,6 +1609,9 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 
 			for (int i = 0; i < t.length; i++) {
 				for (int j = i + 1; j < t.length; j++) {
+					// check if t[i] and be moved to t[j] w.r.t exclusiveVehicleLocations
+					
+					
 					// double delta = evaluateMoveTrip(XR, t[i], t[j]);
 					double delta = evaluateMoveTrip(XR, t[i], t[j], DIXAVEGAN);
 
