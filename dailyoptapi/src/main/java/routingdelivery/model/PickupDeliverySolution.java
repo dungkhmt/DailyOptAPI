@@ -2,13 +2,45 @@ package routingdelivery.model;
 
 import java.util.ArrayList;
 
+
+
 public class PickupDeliverySolution {
 	private RoutingSolution[] routes;
 	private Item[] unScheduledItems;
 	private PickupDeliveryRequest[] unScheduledRequests;
 	private String description;
 	private String errorMSG;
+	private StatisticInformation statistic;
 	
+	public PickupDeliverySolution(RoutingSolution[] routes,
+			Item[] unScheduledItems,
+			PickupDeliveryRequest[] unScheduledRequests, String description,
+			String errorMSG, StatisticInformation statistic) {
+		super();
+		this.routes = routes;
+		this.unScheduledItems = unScheduledItems;
+		this.unScheduledRequests = unScheduledRequests;
+		this.description = description;
+		this.errorMSG = errorMSG;
+		this.statistic = statistic;
+	}
+	public boolean checkLoadConstraint(){
+		for(int i = 0; i < routes.length; i++){
+			RoutingSolution r = routes[i];
+			for(int j = 0; j < r.getElements().length; j++){
+				RoutingElement e = r.getElements()[j];
+				if(r.getVehicle().getWeight() < e.getLoad())
+					return false;
+			}
+		}
+		return true;
+	}
+	public StatisticInformation getStatistic() {
+		return statistic;
+	}
+	public void setStatistic(StatisticInformation statistic) {
+		this.statistic = statistic;
+	}
 	public String getErrorMSG() {
 		return errorMSG;
 	}

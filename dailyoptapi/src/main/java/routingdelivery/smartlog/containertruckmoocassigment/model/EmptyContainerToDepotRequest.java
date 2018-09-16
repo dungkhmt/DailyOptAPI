@@ -10,6 +10,8 @@ public class EmptyContainerToDepotRequest {
 	private String earlyArrivalDateTime;
 	private String lateArrivalDateTime;// early and late time to fromLocationCode
 	private int attachContainerDuration;// duration for attaching container to the truck
+	
+	
 	public String getOrderID() {
 		return orderID;
 	}

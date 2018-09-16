@@ -18,7 +18,15 @@ public class Vehicle {
 	private String vehicleCategory;
 	private String description;
 	
-	
+	/*
+	public Vehicle clone(){
+		return new Vehicle(width, length, height, code, lat,
+			lng, endLat, endLng, weight,
+			startLocationCode, endLocationCode,
+			startWorkingTime, endWorkingTime, cost,
+			vehicleCategory, description);
+	}
+	*/
 	public Vehicle(int width, int length, int height, String code, double lat,
 			double lng, double endLat, double endLng, double weight,
 			String startLocationCode, String endLocationCode,

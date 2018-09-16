@@ -329,6 +329,16 @@ public class ContainerTruckMoocInput {
 		ports[1] = new Port("Port002","0013");
 		
 		ExportContainerRequest[] exContReq = new ExportContainerRequest[3];
+		PickupWarehouseInfo[] pwi = new PickupWarehouseInfo[1];
+		pwi[0] = new PickupWarehouseInfo("Warehouse004",
+				"2018-07-17 08:00:00",
+				"2018-07-20 14:00:00",
+				36000,
+				600,
+				"2018-07-17 08:00:00",
+				"2018-07-20 18:00:00",
+				600
+				);
 		exContReq[0] = new ExportContainerRequest(
 				"ORD0001",
 				"Com01",
@@ -336,20 +346,22 @@ public class ContainerTruckMoocInput {
 				"20", 20,
 				"2018-07-17 08:00:00",
 				"2018-07-20 12:00:00",
-				"Warehouse004",
+				pwi,
+				"Port001",
+				"2018-07-17 08:00:00",
+				"2018-07-20 20:00:00",
+				36000
+				);
+		pwi = new PickupWarehouseInfo[1];
+		pwi[0] = new PickupWarehouseInfo("Warehouse001",
 				"2018-07-17 08:00:00",
 				"2018-07-20 14:00:00",
 				36000,
 				600,
 				"2018-07-17 08:00:00",
 				"2018-07-20 18:00:00",
-				600,
-				"Port001",
-				"2018-07-17 08:00:00",
-				"2018-07-20 20:00:00",
-				36000
+				600
 				);
-		
 		exContReq[1] = new ExportContainerRequest(
 				"ORD0002",
 				"Com01",
@@ -357,18 +369,21 @@ public class ContainerTruckMoocInput {
 				"20", 20,
 				"2018-07-17 08:00:00",
 				"2018-07-20 12:00:00",
-				"Warehouse001",
+				pwi,
+				"Port002",
+				"2018-07-17 08:00:00",
+				"2018-07-20 20:00:00",
+				36000
+				);
+		pwi = new PickupWarehouseInfo[1];
+		pwi[0] = new PickupWarehouseInfo("Warehouse002",
 				"2018-07-17 08:00:00",
 				"2018-07-20 14:00:00",
 				36000,
 				600,
 				"2018-07-17 08:00:00",
 				"2018-07-20 18:00:00",
-				600,
-				"Port002",
-				"2018-07-17 08:00:00",
-				"2018-07-20 20:00:00",
-				36000
+				600
 				);
 		exContReq[2] = new ExportContainerRequest(
 				"ORD0003",
@@ -377,14 +392,7 @@ public class ContainerTruckMoocInput {
 				"40", 40,
 				"2018-07-17 08:00:00",
 				"2018-07-20 12:00:00",
-				"Warehouse002",
-				"2018-07-17 08:00:00",
-				"2018-07-20 14:00:00",
-				36000,
-				600,
-				"2018-07-17 08:00:00",
-				"2018-07-20 18:00:00",
-				600,
+				pwi,
 				"Port001",
 				"2018-07-17 08:00:00",
 				"2018-07-20 20:00:00",
@@ -393,6 +401,17 @@ public class ContainerTruckMoocInput {
 		
 		ImportContainerRequest[] imContReq = new ImportContainerRequest[3];
 		String[] depotContainer0 = {"DepotContainer001"};
+		
+		DeliveryWarehouseInfo[] dwi = new DeliveryWarehouseInfo[1];
+		dwi[0] = new DeliveryWarehouseInfo(
+				"Warehouse004",
+				"2018-07-17 08:00:00",
+				"2018-07-20 14:00:00",
+				36000,
+				600,
+				"2018-07-17 08:00:00",
+				"2018-07-20 18:00:00",
+				600);
 		imContReq[0] = new ImportContainerRequest(
 				"ORD0004",
 				"Com01",
@@ -402,18 +421,21 @@ public class ContainerTruckMoocInput {
 				"2018-07-17 08:00:00",
 				"2018-07-20 12:00:00",
 				36000,
-				"Warehouse004",
+				dwi,
+				"2018-07-17 08:00:00",
+				"2018-07-20 22:00:00"
+				);
+		
+		dwi = new DeliveryWarehouseInfo[1];
+		dwi[0] = new DeliveryWarehouseInfo(
+				"Warehouse002",
 				"2018-07-17 08:00:00",
 				"2018-07-20 14:00:00",
 				36000,
 				600,
 				"2018-07-17 08:00:00",
 				"2018-07-20 18:00:00",
-				600,
-				"2018-07-17 08:00:00",
-				"2018-07-20 22:00:00",
-				"12"
-				);
+				600);
 		String[] depotContainer1 = {"DepotContainer001"};
 		imContReq[1] = new ImportContainerRequest(
 				"ORD0005",
@@ -424,18 +446,21 @@ public class ContainerTruckMoocInput {
 				"2018-07-17 08:00:00",
 				"2018-07-20 12:00:00",
 				36000,
-				"Warehouse002",
+				dwi,
+				"2018-07-17 08:00:00",
+				"2018-07-20 20:00:00"
+				);
+		
+		dwi = new DeliveryWarehouseInfo[1];
+		dwi[0] = new DeliveryWarehouseInfo(
+				"Warehouse001",
 				"2018-07-17 08:00:00",
 				"2018-07-20 14:00:00",
 				36000,
 				600,
 				"2018-07-17 08:00:00",
 				"2018-07-20 18:00:00",
-				600,
-				"2018-07-17 08:00:00",
-				"2018-07-20 20:00:00",
-				"12"
-				);
+				600);
 		String[] depotContainer2 = {"DepotContainer001"};
 		imContReq[2] = new ImportContainerRequest(
 				"ORD0006",
@@ -446,17 +471,9 @@ public class ContainerTruckMoocInput {
 				"2018-07-17 08:00:00",
 				"2018-07-20 12:00:00",
 				36000,
-				"Warehouse001",
+				dwi,
 				"2018-07-17 08:00:00",
-				"2018-07-20 14:00:00",
-				36000,
-				600,
-				"2018-07-17 08:00:00",
-				"2018-07-20 18:00:00",
-				600,
-				"2018-07-17 08:00:00",
-				"2018-07-20 22:00:00",
-				"12"
+				"2018-07-20 22:00:00"
 				);
 
 		WarehouseContainerTransportRequest[] wReq = new WarehouseContainerTransportRequest[2];
@@ -535,19 +552,24 @@ public class ContainerTruckMoocInput {
 				600);
 		
 		TransportContainerRequest[] transportContainerRequests = new TransportContainerRequest[1];
+		TransportContainerLocationInfo[] tcli = new TransportContainerLocationInfo[2];
+		tcli[0] = new TransportContainerLocationInfo("0002", 
+				"2018-07-17 08:00:00", 
+				"2018-07-17 20:00:00", 
+				600);
+		tcli[1] = new TransportContainerLocationInfo("0004", 
+				"2018-07-17 08:00:00", 
+				"2018-07-17 20:00:00", 
+				600);
 		transportContainerRequests[0] = new TransportContainerRequest(
 				"TCR0001", 
 				"Container005", 
 				"20",
 				1000000, 
-				"0002", 
-				"2018-07-17 08:00:00", 
-				"2018-07-17 20:00:00", 
-				600, 
-				"0004", 
-				"2018-07-17 08:00:00", 
-				"2018-07-17 20:00:00", 
-				600);
+				600,
+				tcli,
+				600
+				);
 		
 		
 		ExportContainerTruckMoocRequest[] exReq = new ExportContainerTruckMoocRequest[1];

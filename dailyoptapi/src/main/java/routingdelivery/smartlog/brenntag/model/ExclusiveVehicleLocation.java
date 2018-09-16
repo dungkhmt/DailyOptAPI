@@ -25,5 +25,7 @@ public class ExclusiveVehicleLocation {
 		// TODO Auto-generated constructor stub
 	}
 	
-	
+	public ExclusiveVehicleLocation clone(){
+		return new ExclusiveVehicleLocation(vehicleCode, locationCode);
+	}
 }

@@ -80,6 +80,10 @@ public class VarRoutesVR{
 		mgr.post(this);
 	}
 	
+	public boolean emptyRoute(int k){
+		if(k <= 0 || k > getNbRoutes()) return true;
+		return next(startPoint(k)) == endPoint(k);
+	}
 	private void scaleUp() {
 		maxNbPoints += MAXP;
 		int[] _next = new int[maxNbPoints];

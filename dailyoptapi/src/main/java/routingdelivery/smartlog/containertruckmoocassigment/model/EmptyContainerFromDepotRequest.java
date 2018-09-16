@@ -9,8 +9,10 @@ public class EmptyContainerFromDepotRequest {
 	
 	private String toLocationCode;// destination location
 	private String earlyArrivalDateTime;
-	private String lateArrivalDateTime;// early and late arrivale time to toLocationCode
+	private String lateArrivalDateTime;// early and late arrival time to toLocationCode
 	private int detachLoadedMoocContainerDuration;
+	
+	
 	public String getOrderID() {
 		return orderID;
 	}

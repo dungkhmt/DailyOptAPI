@@ -6,7 +6,12 @@ public class PickupDeliveryInput {
 	private DistanceElement[] distances;
 	private ConfigParams params;
 	
-	
+	public PickupDeliveryRequest[] cloneRequests(){
+		PickupDeliveryRequest[] req = new PickupDeliveryRequest[requests.length];
+		for(int i = 0; i < req.length; i++)
+			req[i] = requests[i].clone();
+		return req;
+	}
 	public PickupDeliveryInput(PickupDeliveryRequest[] requests,
 			Vehicle[] vehicles, DistanceElement[] distances, ConfigParams params) {
 		super();

@@ -2,6 +2,22 @@ package routingdelivery.model;
 
 public class ConfigParams {
 	private String intCity;
+	private String internalVehicleFirst; 
+	
+	
+	public ConfigParams(String intCity, String internalVehicleFirst) {
+		super();
+		this.intCity = intCity;
+		this.internalVehicleFirst = internalVehicleFirst;
+	}
+
+	public String getInternalVehicleFirst() {
+		return internalVehicleFirst;
+	}
+
+	public void setInternalVehicleFirst(String internalVehicleFirst) {
+		this.internalVehicleFirst = internalVehicleFirst;
+	}
 
 	public String getIntCity() {
 		return intCity;

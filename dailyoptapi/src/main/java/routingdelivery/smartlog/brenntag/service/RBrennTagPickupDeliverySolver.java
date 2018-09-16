@@ -507,7 +507,11 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 		initEndWorkingTimeOfVehicles();
 
 		initializeLog();
-
+		//if(input.getVehicleCategories() == null){
+		//	log(name() + "::computeVehicleSuggestion NULL");
+		//}else{
+		//	log(name() + "::computeVehicleSuggestion NOT NULL????");
+		//}
 		// compute total capacity for estimation
 		int totalCapacity = 0;
 		if (input.getVehicles() != null)
@@ -564,9 +568,11 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 				input.getVehicleCategories()[i].setDescription("SUGGESTED");
 			}
 		int rep = 0;
-		while (totalCapacity + rep * totalVehicleCategoryWeight < totalItemWeights) {
-			rep++;
-		}
+		if(totalVehicleCategoryWeight > 0)
+			while (totalCapacity + rep * totalVehicleCategoryWeight < totalItemWeights) {
+				rep++;
+			}
+		
 		if (log != null) {
 			log.println(name() + "::computeVehicleSuggestion, totalCapacity = "
 					+ totalCapacity + ", totalVehicleCategoryCapacity = "
@@ -608,7 +614,8 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 		}
 		log(name() + "::computeVehicleSuggestion, nbItems = " + nbItems
 				+ ", nbOrders = " + input.getRequests().length
-				+ ", totalItemWeight = " + totalItemWeights);
+				+ ", totalItemWeight = " + totalItemWeights + ", totalVehicleCategoryWeight = " + 
+				totalVehicleCategoryWeight + ", ");
 		log(name()
 				+ "::computeVehicleSuggestion---------------------------------------------------------");
 
@@ -826,6 +833,7 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 				break;
 			lastRemain = remainUnScheduled.size();
 			lastRemainItemWeight = getTotalItemWeight();
+			if(totalVehicleCategoryWeight <= EPS) break;// do not have external vehicle -> do not continue LOOP
 		}
 
 		int[] scheduled_vehicle = reassignOptimizeLoadTruck();
@@ -1613,7 +1621,7 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 					
 					
 					// double delta = evaluateMoveTrip(XR, t[i], t[j]);
-					double delta = evaluateMoveTrip(XR, t[i], t[j], DIXAVEGAN);
+					double delta = evaluateMoveTrip(XR, t[i], t[j], DIXAVEGAN, true);
 
 					// log(name() + "::hillClimbing, delta(" + i + "," + j +
 					// ") = " + delta + ", cost = " + cost.getValue());

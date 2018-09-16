@@ -10,10 +10,13 @@ import routingdelivery.model.PickupDeliveryRequest;
 import routingdelivery.model.PickupDeliverySolution;
 import routingdelivery.model.RoutingElement;
 import routingdelivery.model.RoutingSolution;
+import routingdelivery.model.StatisticInformation;
 import routingdelivery.model.Vehicle;
 import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
 import routingdelivery.smartlog.brenntag.model.ClusterItems;
+import routingdelivery.smartlog.brenntag.model.ExclusiveVehicleLocation;
 import routingdelivery.smartlog.brenntag.model.ModelRoute;
+import routingdelivery.smartlog.brenntag.model.SolutionCollection;
 import routingdelivery.smartlog.brenntag.model.VehicleTrip;
 import routingdelivery.smartlog.brenntag.model.VehicleTripCollection;
 import routingdelivery.smartlog.brenntag.service.BrennTagRouteSolverForOneVehicle;
@@ -23,10 +26,12 @@ import routingdelivery.smartlog.brenntag.service.ItemAmount;
 import routingdelivery.smartlog.brenntag.service.Trip;
 import utils.DateTimeUtils;
 
-public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySolver {
+public class RBrenntagMultiPickupDeliverySolver extends
+		BrenntagPickupDeliverySolver {
 
 	public static int DAYS_MOVE = 100;
-	
+	public SolutionCollection solutionCollection;
+
 	public String name() {
 		return "RBrenntagMultiPickupDeliverySolver";
 	}
@@ -75,11 +80,16 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 			return;
 		int[] idx1 = sortDecreaseVehicleIndex(vehicles);
 		int[] idx2 = sortDecreaseVehicleIndex(externalVehicles);
-		int[] vehicle_index = new int[idx1.length + idx2.length];
-		for (int i = 0; i < idx1.length; i++)
+		int len1 = idx1.length;
+		int len2 = 0;
+		if (idx2 != null)
+			len2 = idx2.length;
+		int[] vehicle_index = new int[len1 + len2];
+		for (int i = 0; i < len1; i++)
 			vehicle_index[i] = idx1[i];
-		for (int i = 0; i < idx2.length; i++)
-			vehicle_index[i + idx1.length] = idx2[i];
+
+		for (int i = 0; i < len2; i++)
+			vehicle_index[i + len1] = idx2[i];
 
 		int k = 0;
 		while (k < vehicle_index.length) {
@@ -216,34 +226,54 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 
 	}
 
-	public void initEndWorkingTimeOfVehicles(){
-		for(int k = 0; k < input.getVehicles().length; k++){
-			Vehicle vh = input.getVehicles()[k];
-			if(vh.getEndWorkingTime() == null){
-				vh.setEndWorkingTime(DateTimeUtils.next(vh.getStartWorkingTime(), DAYS_MOVE));
+	public void initEndWorkingTimeOfVehicles() {
+		if (input.getVehicles() != null)
+			for (int k = 0; k < input.getVehicles().length; k++) {
+				Vehicle vh = input.getVehicles()[k];
+				if (vh.getEndWorkingTime() == null) {
+					vh.setEndWorkingTime(DateTimeUtils.next(
+							vh.getStartWorkingTime(), DAYS_MOVE));
+				}
 			}
-		}
-		for(int k = 0; k < input.getExternalVehicles().length; k++){
-			Vehicle vh = input.getExternalVehicles()[k];
-			if(vh.getEndWorkingTime() == null){
-				vh.setEndWorkingTime(DateTimeUtils.next(vh.getStartWorkingTime(), DAYS_MOVE));
+		if (input.getExternalVehicles() != null)
+			for (int k = 0; k < input.getExternalVehicles().length; k++) {
+				Vehicle vh = input.getExternalVehicles()[k];
+				if (vh.getEndWorkingTime() == null) {
+					vh.setEndWorkingTime(DateTimeUtils.next(
+							vh.getStartWorkingTime(), DAYS_MOVE));
+				}
 			}
-		}
-		for(int k = 0; k < input.getVehicleCategories().length; k++){
-			Vehicle vh = input.getVehicleCategories()[k];
-			if(vh.getEndWorkingTime() == null){
-				vh.setEndWorkingTime(DateTimeUtils.next(vh.getStartWorkingTime(), DAYS_MOVE));
+		if (input.getVehicleCategories() != null)
+			for (int k = 0; k < input.getVehicleCategories().length; k++) {
+				Vehicle vh = input.getVehicleCategories()[k];
+				if (vh.getEndWorkingTime() == null) {
+					vh.setEndWorkingTime(DateTimeUtils.next(
+							vh.getStartWorkingTime(), DAYS_MOVE));
+				}
 			}
-		}
-		
+
 	}
+
 	public PickupDeliverySolution computeVehicleSuggestion(
 			BrennTagPickupDeliveryInput input) {
 		this.input = input;
-		
+
 		initEndWorkingTimeOfVehicles();
-		
+
 		initializeLog();
+
+		if (CHECK_AND_LOG) {
+			String vehicleCode = "60C-424.90";
+			String locationCode = "10008674";
+			if (input.findVehicleLocationConflict(vehicleCode, locationCode)) {
+				log(name()
+						+ "::computeVehicleSuggestion -> setting exclusiveVehicleLocation contains  "
+						+ vehicleCode + " - " + locationCode);
+			} else {
+				log(name()
+						+ "::computeVehicleSuggestion -> setting exclusiveVehicleLocation NOT contains 60C-433.24, 10010805");
+			}
+		}
 
 		// compute total capacity for estimation
 		int totalCapacity = 0;
@@ -301,9 +331,10 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 				input.getVehicleCategories()[i].setDescription("SUGGESTED");
 			}
 		int rep = 0;
-		while (totalCapacity + rep * totalVehicleCategoryWeight < totalItemWeights) {
-			rep++;
-		}
+		if (totalVehicleCategoryWeight > EPS)
+			while (totalCapacity + rep * totalVehicleCategoryWeight < totalItemWeights) {
+				rep++;
+			}
 		if (log != null) {
 			log.println(name() + "::computeVehicleSuggestion, totalCapacity = "
 					+ totalCapacity + ", totalVehicleCategoryCapacity = "
@@ -353,8 +384,8 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 		double lastRemainItemWeight = -1;
 		boolean firstTrial = true;
 		// boolean firstTrial = false;
-		//Gson gson = new Gson();
-		//String jsoninput = gson.toJson(input);
+		// Gson gson = new Gson();
+		// String jsoninput = gson.toJson(input);
 		PickupDeliveryRequest[] bkReq = new PickupDeliveryRequest[input
 				.getRequests().length];
 		for (int i = 0; i < input.getRequests().length; i++) {
@@ -364,7 +395,21 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 				I[j] = input.getRequests()[i].getItems()[j].clone();
 			bkReq[i].setItems(I);
 		}
+		/*
+		 * mVehicle2NotReachedLocations = new HashMap<String,
+		 * HashSet<String>>(); if(input.getVehicles() != null) for(int i = 0; i
+		 * < input.getVehicles().length; i++){ Vehicle v =
+		 * input.getVehicles()[i]; mVehicle2NotReachedLocations.put(v.getCode(),
+		 * new HashSet<String>()); } if(input.getExclusiveVehicleLocations() !=
+		 * null){ for(int i = 0; i <
+		 * input.getExclusiveVehicleLocations().length; i++){
+		 * ExclusiveVehicleLocation e = input.getExclusiveVehicleLocations()[i];
+		 * if(mVehicle2NotReachedLocations.get(e.getVehicleCode())!=null)
+		 * mVehicle2NotReachedLocations
+		 * .get(e.getVehicleCode()).add(e.getLocationCode()); } }
+		 */
 
+		solutionCollection = new SolutionCollection();
 		while (true) {
 			if (firstTrial) {
 				generateVehicles(input, rep);
@@ -400,12 +445,12 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 
 			for (int i = 0; i < requests.length; i++) {
 				mRequest2Index.put(requests[i], i);
-				System.out.println("Order " + requests[i].getOrderID());
+				// System.out.println("Order " + requests[i].getOrderID());
 				double W = 0;
 				for (int j = 0; j < requests[i].getItems().length; j++) {
 					W += requests[i].getItems()[j].getWeight();
 				}
-				System.out.println("W = " + W);
+				// System.out.println("W = " + W);
 			}
 
 			initMapData();
@@ -417,6 +462,9 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 				PickupDeliverySolution sol = new PickupDeliverySolution();
 				// sol.setDescription(inputOK);
 				sol.setErrorMSG(inputOK);
+				System.out
+						.println(name()
+								+ "::computeVehicleSuggestion, input NOT CONSISTENT???");
 				return sol;
 			}
 
@@ -428,7 +476,7 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 			if (log != null) {
 				log.println(name()
 						+ "::computeVehicleSuggestion, external vehicles = "
-						+ input.getExternalVehicles().length
+						// + input.getExternalVehicles().length
 						+ " AFTER SPLIT orders, REMAIN WEIGHT = "
 						+ getTotalItemWeight());
 			}
@@ -441,12 +489,24 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 			logStateAfterMergingFTLOrder();
 
 			int remainItemRequests = computeRemainItemOnRequest();
-			log(name()
-					+ "::computeVehicleSuggestion, number vehicles = "
-					+ (input.getVehicles().length + input.getExternalVehicles().length)
-					+ ", remainItemRequests = " + remainItemRequests);
+			log(name() + "::computeVehicleSuggestion"
+					+ ", after mergeOrderItemsFTL -> remainItemRequests = "
+					+ remainItemRequests);
 			if (remainItemRequests > 0) {
-				continue;
+				// if(totalVehicleCategoryWeight < EPS) break;// do not have
+				// external vehicle ->not need LOOP
+				// continue;
+				if (totalVehicleCategoryWeight < EPS) {
+					PickupDeliverySolution sol = new PickupDeliverySolution();
+					sol.setErrorMSG("Không đủ xe để vận chuyển hết đơn, tổng khả năng vận chuyển của xe nhà = "
+							+ totalCapacity
+							+ ", tổng khối lượng hàng hoá = "
+							+ totalItemWeights);
+					sol.setDescription("KO");
+					return sol;
+				} else {
+					continue;
+				}
 			}
 
 			/*
@@ -483,7 +543,10 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 			}
 
 			System.out.println("AFTER MERGE FTL");
-			for (int k = 0; k < vehicles.length + externalVehicles.length; k++) {
+			int len = 0;
+			if (externalVehicles != null)
+				len = externalVehicles.length;
+			for (int k = 0; k < vehicles.length + len; k++) {
 				Vehicle vh = getVehicle(k);
 				if (trips[k].size() > 0) {
 					System.out.println("Vehicle " + vh.getCode() + ", has "
@@ -529,13 +592,29 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 
 			mapData();
 
-			HashSet<Integer> remainUnScheduled = search();
-			if (!checkAllSolution(XR)) {
-				System.out
-						.println(name()
-								+ "::computeVehicleSuggestion, checkAllSolution after search FAILED");
+			//HashSet<Integer> remainUnScheduled = search();
+
+			HashSet<Integer> remainUnScheduled = greedyConstructMaintainConstraintFTL();
+			if (!checkLoadOnRoute(XR)) {
+				log(name()
+						+ "::search, BEFORE hillClibing, checkLoadOnRoute Failed, BUG????");
 			}
 
+			solutionCollection = new SolutionCollection();
+			PickupDeliverySolution sol = buildSolution(XR);
+			solutionCollection.add(sol);
+
+			//hillClimbing(true);
+			
+			
+			
+			if (CHECK_AND_LOG) {
+				if (!checkAllSolution(XR)) {
+					System.out
+							.println(name()
+									+ "::computeVehicleSuggestion, checkAllSolution after search FAILED");
+				}
+			}
 			unScheduledPointIndices = new HashSet<Integer>();
 			for (int i : remainUnScheduled)
 				unScheduledPointIndices.add(i);
@@ -555,6 +634,9 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 						+ externalVehicles.length + ", REMAIN "
 						+ remainUnScheduled.size() + ", lastRemain = "
 						+ lastRemain);
+
+			// solutionCollection = new SolutionCollection();
+
 			if (remainUnScheduled.size() == 0)
 				break;
 			if (remainUnScheduled.size() == lastRemain
@@ -562,12 +644,37 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 				break;
 			lastRemain = remainUnScheduled.size();
 			lastRemainItemWeight = getTotalItemWeight();
+
+			if (totalVehicleCategoryWeight < EPS)
+				break;// do not have external vehicle ->not need LOOP
 		}
 
+		hillClimbing(true);
+		
+		hillClimbingNewVehicle(true);
+		
+		if (CHECK_AND_LOG) {
+
+			if (!checkLoadOnRoute(XR)) {
+				log(name()
+						+ "::computeVehicleSuggestion, BEFORE reassignOptimizeLoadTruck, checkLoadOnRoute FAILED, BUG???");
+			}
+		}
 		int[] scheduled_vehicle = reassignOptimizeLoadTruck();
+		// int[] scheduled_vehicle = getScheduleVehicle();
+		// int[] scheduled_vehicle = new int[XR.getNbRoutes()];
+		// for(int i = 0; i < scheduled_vehicle.length; i++)
+		// scheduled_vehicle[i] = i;
 
 		mapRoute2Vehicles(scheduled_vehicle);
 		// analyzeTrips();
+
+		if (CHECK_AND_LOG) {
+			if (!checkLoadOnRoute(XR)) {
+				log(name()
+						+ "::computeVehicleSuggestion, AFTER reassignOptimizeLoadTruck, checkLoadOnRoute FAILED, BUG???");
+			}
+		}
 
 		VehicleTripCollection VTC_trip = analyzeTrips(XR);
 		log(name()
@@ -576,6 +683,7 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 		for (int i = 0; i < VTC_trip.trips.size(); i++)
 			log("TRIP: " + VTC_trip.trips.get(i).seqPointString());
 		log("----------------------------------------------------------");
+		/*
 		System.out
 				.println(name()
 						+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS, XR = "
@@ -583,51 +691,69 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 		for (int i = 0; i < VTC_trip.trips.size(); i++)
 			System.out.println("TRIP[" + i + "]: "
 					+ VTC_trip.trips.get(i).seqPointString());
-		if (!checkAllSolution(XR)) {
-			System.out
-					.println(name()
-							+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION FAILED");
-			log(name()
-					+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION FAILED");
-		} else {
-			System.out
-					.println(name()
-							+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION OK!!!!!!!!!!");
-			log(name()
-					+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION OK!!!!!!!!!! , route and time as follows");
-			for (int k = 1; k <= XR.getNbRoutes(); k++) {
-				log(name() + "::computeVehicleSuggestion "
-						+ printRouteAndTime(XR, k));
-			}
-			if (!checkTimeConstraint(XR)) {
+		*/
+		
+		if (CHECK_AND_LOG) {
+			if (!checkAllSolution(XR)) {
+				System.out
+						.println(name()
+								+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION FAILED");
 				log(name()
-						+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS TIME-CONSTRAINT FAILED, BUG???");
-			}
+						+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION FAILED");
+			} else {
+				System.out
+						.println(name()
+								+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION OK!!!!!!!!!!");
+				log(name()
+						+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS --> SOLUTION OK!!!!!!!!!! , route and time as follows");
+				for (int k = 1; k <= XR.getNbRoutes(); k++) {
+					log(name() + "::computeVehicleSuggestion "
+							+ printRouteAndTime(XR, k));
+				}
+				if (!checkTimeConstraint(XR)) {
+					log(name()
+							+ "::computeVehicleSuggestion, BEFORE IMPROVE MERGE TRIPS TIME-CONSTRAINT FAILED, BUG???");
+				}
 
+			}
 		}
 		System.out
 				.println("----------------------------------------------------------");
 
-		improveMergeTrip();
+		// improveMergeTrip();
+
+		if (!checkLoadOnRoute(XR)) {
+			log(name()
+					+ "::computeVehicleSuggestion, AFTER improveMergeTrip, checkLoadOnRoute, FAILED, BUG???");
+		}
 
 		// improveMergeLongTrip();
 
 		VehicleTripCollection VTC = analyzeTrips(XR);
 
-		for(int i = 0; i < vehicles.length + externalVehicles.length; i++){
+		for (int i = 0; i < vehicles.length + externalVehicles.length; i++) {
 			Vehicle vh = getVehicle(i);
-			if(mVehicle2NotReachedLocations.get(vh.getCode()) == null){
-				System.out.println(name() + "::computeVehicleSuggestion, vehicle " + vh.getCode() + " NOT REACHES "
+			if (mVehicle2NotReachedLocations.get(vh.getCode()) == null) {
+				System.out.println(name()
+						+ "::computeVehicleSuggestion, vehicle " + vh.getCode()
+						+ " NOT REACHES "
 						+ mVehicle2NotReachedLocations.get(vh.getCode()));
 			}
 		}
-		
-		ArrayList<ModelRoute> modelRoutes = extractAndAssignNewVehicle(VTC);
+
+		// ArrayList<ModelRoute> modelRoutes = extractAndAssignNewVehicle(VTC);
+		ArrayList<ModelRoute> modelRoutes = new ArrayList<ModelRoute>();
 
 		if (input.getParams().getIntCity().equals("TRUE")) {
 			reOrderDeliveryPointsPrioritizeFurthestPoint(XR);
 			for (ModelRoute MR : modelRoutes) {
 				reOrderDeliveryPointsPrioritizeFurthestPoint(MR.XR);
+
+				if (!checkLoadOnRoute(MR.XR)) {
+					log(name()
+							+ "::computeVehicleSuggestion, AFETR extractAndAssignNewVehicle checkLoadOnRoute(MR.XR), FAILED, BUG???");
+				}
+
 			}
 		}
 
@@ -647,6 +773,11 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 		// for(int k = 0; k < XR.getNbRoutes(); k++) scheduled_vehicle[k] = k;
 
 		boolean solutionAllOK = true;
+		
+		if(unScheduledPointIndices.size() > 0){
+			solutionAllOK = false;
+		}
+		
 		if (!checkAllSolution(XR)) {
 			System.out
 					.println(name()
@@ -763,12 +894,30 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 
 		reassignVehiclePrioritizeInternalVehicles(sol);
 
+		if (!sol.checkLoadConstraint())
+			solutionAllOK = false;
+
 		finalizeLog();
+
+		double totalDistance = 0;
+		for (int i = 0; i < sol.getRoutes().length; i++) {
+			totalDistance += sol.getRoutes()[i].getDistance();
+		}
+		// StatisticInformation info = new
+		// StatisticInformation(totalDistance,sol.getRoutes().length);
+		// sol.setStatistic(info);
+
 		sol.setErrorMSG("OK");
 		if (!solutionAllOK)
 			sol.setDescription("KO");
 		else
 			sol.setDescription("OK");
+
+		PickupDeliverySolution sol1 = solutionCollection.get(0);
+		System.out.println(name()
+				+ "::computeVehicleSuggestion, statistic: nrRoutes = "
+				+ sol1.getStatistic().getNumberTrucks() + ", distance = "
+				+ sol1.getStatistic().getTotalDistance());
 
 		return sol;
 	}
@@ -1190,9 +1339,9 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 			serviceDuration.put(s, 0);// load-unload is 30 minutes
 			// lastestAllowedArrivalTime.put(s,
 			// (int)DateTimeUtils.dateTime2Int(vehicles[k].getEndWorkingTime()));
-			if(vh.getEndWorkingTime() != null)
-			lastestAllowedArrivalTime.put(s,
-					(int) DateTimeUtils.dateTime2Int(vh.getEndWorkingTime()));
+			if (vh.getEndWorkingTime() != null)
+				lastestAllowedArrivalTime.put(s, (int) DateTimeUtils
+						.dateTime2Int(vh.getEndWorkingTime()));
 			// earliestAllowedArrivalTime.put(t,
 			// (int)DateTimeUtils.dateTime2Int(vehicles[k].getStartWorkingTime()));
 			earliestAllowedArrivalTime.put(t,
@@ -1200,9 +1349,9 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 			serviceDuration.put(t, 0);// load-unload is 30 minutes
 			// lastestAllowedArrivalTime.put(t,
 			// (int)DateTimeUtils.dateTime2Int(vehicles[k].getEndWorkingTime()));
-			if(vh.getEndWorkingTime() != null)
-			lastestAllowedArrivalTime.put(t,
-					(int) DateTimeUtils.dateTime2Int(vh.getEndWorkingTime()));
+			if (vh.getEndWorkingTime() != null)
+				lastestAllowedArrivalTime.put(t, (int) DateTimeUtils
+						.dateTime2Int(vh.getEndWorkingTime()));
 
 			// System.out.println("mapData, startWorkingTime = " +
 			// vh.getStartWorkingTime() + ", end working time = " +
@@ -1213,25 +1362,39 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 
 	public HashSet<Integer> search() {
 		HashSet<Integer> remainUnScheduled = greedyConstructMaintainConstraintFTL();
-		hillClimbing();
+		if (!checkLoadOnRoute(XR)) {
+			log(name()
+					+ "::search, BEFORE hillClibing, checkLoadOnRoute Failed, BUG????");
+		}
+
+		solutionCollection = new SolutionCollection();
+		PickupDeliverySolution sol = buildSolution(XR);
+		solutionCollection.add(sol);
+
+		hillClimbing(true);// consider load constraint
+		// hillClimbing(false);// not consider load constraint, allow violation,
+		// find other bigger vehicle
 		return remainUnScheduled;
 	}
 
-	public void hillClimbing() {
-		log(name() + "::hillClimbing START XR = " + toStringShort(XR) + ", START-COST = " + cost.getValue());
-		if(!checkAllSolution(XR)){
-			log(name() + "::hillClimbing, before hillClimbing, checkAllSolution FAILED, BUG?????");
-		}else{
-			log(name() + "::hillClimbing, before hillClimbing, checkAllSolution OK");
+	public void hillClimbing(boolean loadConstraint) {
+		log(name() + "::hillClimbing START XR = " + toStringShort(XR)
+				+ ", START-COST = " + cost.getValue());
+		if (!checkAllSolution(XR)) {
+			log(name()
+					+ "::hillClimbing, before hillClimbing, checkAllSolution FAILED, BUG?????");
+		} else {
+			log(name()
+					+ "::hillClimbing, before hillClimbing, checkAllSolution OK");
 		}
 		logTrips(XR);
-		
-		//if(true) return;
-		
+
+		// if(true) return;
+
 		while (true) {
 			VehicleTripCollection VTC = analyzeTrips(XR);
 			ArrayList<VehicleTrip> trips = VTC.trips;
-			printTrips(XR);
+			//printTrips(XR);
 			VehicleTrip[] t = new VehicleTrip[trips.size()];
 			for (int i = 0; i < t.length; i++) {
 				t[i] = trips.get(i);
@@ -1251,68 +1414,184 @@ public class RBrenntagMultiPickupDeliverySolver extends BrenntagPickupDeliverySo
 			int sel_i = -1;
 			int sel_j = -1;
 			System.out.println(name() + "init cost = " + cost.getValue());
-			
-			boolean DIXAVEGAN = input.getParams().getIntCity().equals("TRUE");// di xa ve gan
-			
+
+			boolean DIXAVEGAN = input.getParams().getIntCity().equals("TRUE");// di
+																				// xa
+																				// ve
+			// gan
+
 			for (int i = 0; i < t.length; i++) {
 				for (int j = i + 1; j < t.length; j++) {
-					//double delta = evaluateMoveTrip(XR, t[i], t[j]);
-					double delta = evaluateMoveTrip(XR, t[i], t[j],DIXAVEGAN);
-					
-					//log(name() + "::hillClimbing, delta(" + i + "," + j + ") = " + delta + ", cost = " + cost.getValue());
-					//System.out.println(name() + "::hillClimbing, delta(" + i + "," + j + ") = " + delta + ", cost = " + cost.getValue() + 
-					//		", XR = " + XR.toStringShort());
+					// double delta = evaluateMoveTrip(XR, t[i], t[j]);
+					double delta = evaluateMoveTrip(XR, t[i], t[j], DIXAVEGAN,
+							loadConstraint);
+
+					// log(name() + "::hillClimbing, delta(" + i + "," + j +
+					// ") = " + delta + ", cost = " + cost.getValue());
+					// System.out.println(name() + "::hillClimbing, delta(" + i
+					// + "," + j + ") = " + delta + ", cost = " +
+					// cost.getValue() +
+					// ", XR = " + XR.toStringShort());
 					if (delta < 0) {
-						if(delta < minDelta){
+						if (delta < minDelta) {
 							minDelta = delta;
 							sel_i = i;
 							sel_j = j;
-							//log(name() + "::hillClimbing, delta(" + i + "," + j + ") = " + delta + 
-							//		", UPDATE minDelta = " + minDelta + ", cost = " + cost.getValue());
+							// log(name() + "::hillClimbing, delta(" + i + "," +
+							// j + ") = " + delta +
+							// ", UPDATE minDelta = " + minDelta + ", cost = " +
+							// cost.getValue());
 						}
 						/*
-						hasMove = true;
-						log(name() + "::hillClimbing, PERFORM HILL CLIMBING, t[" + i + "] = " + t[i].seqPointString()
-								+ ", t[" + j + "] = " + t[j].seqPointString() + ", START delta = " + delta);
-						System.out.println(name() + "::hillClimbing, PERFORM HILL CLIMBING, t[" + i + "] = " + t[i].seqPointString()
-								+ ", t[" + j + "] = " + t[j].seqPointString() + ", START delta = " + delta);
-						performMoveTrip(XR, t[i],t[j]);
-						if(!checkAllSolution(XR)){
-							log(name() + "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution FAILED, BUG????");
-						}else{
-							log(name() + "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution OK");
-						}
-						System.out.println(name() + "::hillClimbing, PERFORM HILL CLIMBING, OK, cost = " + cost.getValue());
-						break;
-						*/
+						 * hasMove = true; log(name() +
+						 * "::hillClimbing, PERFORM HILL CLIMBING, t[" + i +
+						 * "] = " + t[i].seqPointString() + ", t[" + j + "] = "
+						 * + t[j].seqPointString() + ", START delta = " +
+						 * delta); System.out.println(name() +
+						 * "::hillClimbing, PERFORM HILL CLIMBING, t[" + i +
+						 * "] = " + t[i].seqPointString() + ", t[" + j + "] = "
+						 * + t[j].seqPointString() + ", START delta = " +
+						 * delta); performMoveTrip(XR, t[i],t[j]);
+						 * if(!checkAllSolution(XR)){ log(name() +
+						 * "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution FAILED, BUG????"
+						 * ); }else{ log(name() +
+						 * "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution OK"
+						 * ); } System.out.println(name() +
+						 * "::hillClimbing, PERFORM HILL CLIMBING, OK, cost = "
+						 * + cost.getValue()); break;
+						 */
 					}
 				}
-				//if(hasMove) break;
+				// if(hasMove) break;
 			}
-			if(sel_i >= 0){
+			if (sel_i >= 0) {
 				hasMove = true;
-				log(name() + "::hillClimbing, PERFORM HILL CLIMBING, t[" + sel_i + "] = " + 
-				t[sel_i].seqPointString()
-						+ ", t[" + sel_j + "] = " + t[sel_j].seqPointString() + ", START delta = " + 
-				minDelta);
-				System.out.println(name() + "::hillClimbing, PERFORM HILL CLIMBING, t[" + sel_i + "] = " + 
-				t[sel_i].seqPointString()
-						+ ", t[" + sel_j + "] = " + t[sel_j].seqPointString() + ", START delta = " + 
-						minDelta);
-				//performMoveTrip(XR, t[sel_i],t[sel_j]);
-				performMoveTrip(XR, t[sel_i],t[sel_j],DIXAVEGAN);
-				
-				if(!checkAllSolution(XR)){
-					log(name() + "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution FAILED, BUG????");
-				}else{
-					log(name() + "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution OK");
-				}
-				System.out.println(name() + "::hillClimbing, PERFORM HILL CLIMBING, OK, cost = " + cost.getValue());
-				
+				log(name() + "::hillClimbing, PERFORM HILL CLIMBING, t["
+						+ sel_i + "] = " + t[sel_i].seqPointString() + ", t["
+						+ sel_j + "] = " + t[sel_j].seqPointString()
+						+ ", START delta = " + minDelta);
+				System.out.println(name()
+						+ "::hillClimbing, PERFORM HILL CLIMBING, t[" + sel_i
+						+ "] = " + t[sel_i].seqPointString() + ", t[" + sel_j
+						+ "] = " + t[sel_j].seqPointString()
+						+ ", START delta = " + minDelta);
+				// performMoveTrip(XR, t[sel_i],t[sel_j]);
+				performMoveTrip(XR, t[sel_i], t[sel_j], DIXAVEGAN);
+				/*
+				 * if (!checkAllSolution(XR)) { log(name() +
+				 * "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution FAILED, BUG????"
+				 * ); } else { log(name() +
+				 * "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution OK"
+				 * ); } System.out.println(name() +
+				 * "::hillClimbing, PERFORM HILL CLIMBING, OK, cost = " +
+				 * cost.getValue());
+				 */
 			}
-			if(!hasMove) break;
+			if (!hasMove)
+				break;
 		}
-		log(name() + "::hillClimbing FINISHED XR = " + toStringShort(XR) + ", START-COST = " + cost.getValue());
+		log(name() + "::hillClimbing FINISHED XR = " + toStringShort(XR)
+				+ ", START-COST = " + cost.getValue());
+		logTrips(XR);
+	}
+
+	public void hillClimbingNewVehicle(boolean loadConstraint) {
+		log(name() + "::hillClimbingNewVehicle START XR = " + toStringShort(XR)
+				+ ", START-COST = " + cost.getValue());
+		if (!checkAllSolution(XR)) {
+			log(name()
+					+ "::hillClimbingNewVehicle, before hillClimbing, checkAllSolution FAILED, BUG?????");
+		} else {
+			log(name()
+					+ "::hillClimbingNewVehicle, before hillClimbing, checkAllSolution OK");
+		}
+		logTrips(XR);
+
+		// if(true) return;
+
+		while (true) {
+			VehicleTripCollection VTC = analyzeTrips(XR);
+			ArrayList<VehicleTrip> trips = VTC.trips;
+			//printTrips(XR);
+			VehicleTrip[] t = new VehicleTrip[trips.size()];
+			for (int i = 0; i < t.length; i++) {
+				t[i] = trips.get(i);
+			}
+			// sort
+			for (int i = 0; i < t.length; i++) {
+				for (int j = i + 1; j < t.length; j++) {
+					if (t[i].load > t[j].load) {
+						VehicleTrip tmp = t[i];
+						t[i] = t[j];
+						t[j] = tmp;
+					}
+				}
+			}
+			boolean hasMove = false;
+			double minDelta = Integer.MAX_VALUE;
+			int sel_i = -1;
+			int sel_j = -1;
+			int sel_k = -1;
+			System.out.println(name() + "init cost = " + cost.getValue());
+
+			boolean DIXAVEGAN = input.getParams().getIntCity().equals("TRUE");// di
+																				// xa
+																				// ve
+			// gan
+
+			for(int k = 1; k <= XR.getNbRoutes(); k++){
+				if(XR.emptyRoute(k)){
+					log(name() + "::hillClimbingNewVehicle, emptyRoute[" + k + "], vehicle " + 
+				mPoint2Vehicle.get(XR.startPoint(k)).getWeight());
+				}
+			}
+			
+			for (int i = 0; i < t.length; i++) {
+				for (int j = i + 1; j < t.length; j++) {
+					for (int k = 1; k < XR.getNbRoutes(); k++) {
+						if(!XR.emptyRoute(k)) continue;
+						double delta = evaluateMoveTripNewVehicle(XR, t[i], t[j], XR.startPoint(k),
+								DIXAVEGAN, loadConstraint);
+						if (delta < 0) {
+							if (delta < minDelta) {
+								minDelta = delta;
+								sel_i = i;
+								sel_j = j;
+								sel_k = k;
+							}
+						}
+					}
+				}
+			}
+			if (sel_i >= 0) {
+				hasMove = true;
+				log(name() + "::hillClimbingNewVehicle, PERFORM HILL CLIMBING, t["
+						+ sel_i + "] = " + t[sel_i].seqPointString() + ", t["
+						+ sel_j + "] = " + t[sel_j].seqPointString()
+						+ ", START delta = " + minDelta + ", select vehicle " + mPoint2Vehicle.get(XR.startPoint(sel_k)).getWeight());
+				System.out.println(name()
+						+ "::hillClimbingNewVehicle, PERFORM HILL CLIMBING, "
+						//+ "t[" + sel_i
+						//+ "] = " + t[sel_i].seqPointString() + ", t[" + sel_j
+						//+ "] = " + t[sel_j].seqPointString()
+						+ ", START delta = " + minDelta + ", select vehicle " + mPoint2Vehicle.get(XR.startPoint(sel_k)).getWeight());
+				// performMoveTrip(XR, t[sel_i],t[sel_j]);
+				performMoveTripNewVehicle(XR, t[sel_i], t[sel_j], XR.startPoint(sel_k), DIXAVEGAN);
+				/*
+				 * if (!checkAllSolution(XR)) { log(name() +
+				 * "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution FAILED, BUG????"
+				 * ); } else { log(name() +
+				 * "::hillClimbing, after PERFORM HILL CLIMBING, checkAllSolution OK"
+				 * ); } System.out.println(name() +
+				 * "::hillClimbing, PERFORM HILL CLIMBING, OK, cost = " +
+				 * cost.getValue());
+				 */
+			}
+			if (!hasMove)
+				break;
+		}
+		log(name() + "::hillClimbingNewVehicle FINISHED XR = " + toStringShort(XR)
+				+ ", START-COST = " + cost.getValue());
 		logTrips(XR);
 	}
 

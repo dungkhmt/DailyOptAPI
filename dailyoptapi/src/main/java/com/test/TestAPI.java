@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import routingdelivery.model.PickupDeliveryInput;
+import routingdelivery.model.PickupDeliveryRequest;
 import routingdelivery.model.PickupDeliverySolution;
+import routingdelivery.model.Vehicle;
 import routingdelivery.service.PickupDeliverySolver;
 import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
 import routingdelivery.smartlog.brenntag.service.BrenntagPickupDeliverySolver;
@@ -47,6 +49,8 @@ public class TestAPI {
 	// public static final String ROOT_DIR = "C:/DungPQ/daily-opt/tmp/";
 
 	public static final String ROOT_DIR = "/home/smartlog/";
+	public static final String SECONDARY_ROOT_DIR = "C:/DungPQ/daily-opt/tmp/";
+	
 	@RequestMapping(value = "/basic", method = RequestMethod.POST)
 	public TestSolution getFields(HttpServletRequest request,
 			@RequestBody TestInput input) {
@@ -182,6 +186,7 @@ public class TestAPI {
 		}
 	}
 
+	/*
 	@CrossOrigin
 	@RequestMapping(value = "/pickup-delivery", method = RequestMethod.POST)
 	public PickupDeliverySolution computePickupDeliverySolution(
@@ -199,11 +204,14 @@ public class TestAPI {
 		// BrenntagPickupDeliverySolver solver = new
 		// BrenntagPickupDeliverySolver();
 		RBrennTagPickupDeliverySolver solver = new RBrennTagPickupDeliverySolver();
-
 		// return solver.compute(input);
 		// return solver.computeNew(input);
+		//input.setExternalVehicles(null);
+		//input.setVehicleCategories(null);
+		
 		return solver.computeVehicleSuggestion(input);
 	}
+	*/
 
 	@CrossOrigin
 	@RequestMapping(value = "/compute-sequence-route", method = RequestMethod.POST)
@@ -248,7 +256,34 @@ public class TestAPI {
 
 		// return solver.compute(input);
 		// return solver.computeNew(input);
-		return solver.computeVehicleSuggestion(input);
+		
+		//if(true)return solver.computeVehicleSuggestion(input);
+		
+		//solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		
+		
+		if(input.getParams().getInternalVehicleFirst() != null && 
+				input.getParams().getInternalVehicleFirst().equals("Y")){
+			Vehicle[] externalVehicles = input.getExternalVehicles();
+			Vehicle[] vehicleCategory = input.getVehicleCategories();
+			PickupDeliveryRequest[] req = input.cloneRequests();
+			input.setVehicleCategories(null);
+			input.setExternalVehicles(null);
+			PickupDeliverySolution s = solver.computeVehicleSuggestion(input);
+			if(s.getDescription().equals("OK")){
+				return s;
+			}
+			else{// try to use external vehicles
+				input.setExternalVehicles(externalVehicles);
+				input.setVehicleCategories(vehicleCategory);
+				input.setRequests(req);
+				return solver.computeVehicleSuggestion(input);
+			}
+		}else{
+			return solver.computeVehicleSuggestion(input);
+		}
+		//return solver.computeVehicleSuggestion(input);
 	}
 
 	@CrossOrigin

@@ -15,6 +15,16 @@ public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
 	private ExclusiveVehicleLocation[] exclusiveVehicleCategoryLocations;
 	
 	
+	public boolean findVehicleLocationConflict(String vehicleCode, String locationCode){
+		for(int i = 0; i < exclusiveVehicleLocations.length; i++){
+			if(exclusiveVehicleLocations[i].getVehicleCode().equals(vehicleCode)
+					&& exclusiveVehicleLocations[i].getLocationCode().equals(locationCode))
+				return true;
+		}
+		return false;
+	}
+
+	
 	public ExclusiveVehicleLocation[] getExclusiveVehicleCategoryLocations() {
 		return exclusiveVehicleCategoryLocations;
 	}
