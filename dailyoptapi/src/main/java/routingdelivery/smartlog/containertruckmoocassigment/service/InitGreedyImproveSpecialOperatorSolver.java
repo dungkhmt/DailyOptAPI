@@ -11,6 +11,7 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.ComboContainer
 import routingdelivery.smartlog.containertruckmoocassigment.model.Container;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocInput;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocSolution;
+import routingdelivery.smartlog.containertruckmoocassigment.model.DeliveryWarehouseInfo;
 import routingdelivery.smartlog.containertruckmoocassigment.model.DepotContainer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.DepotMooc;
 import routingdelivery.smartlog.containertruckmoocassigment.model.DepotTruck;
@@ -30,9 +31,11 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualWare
 import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualWarehouseRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.KepLechRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Mooc;
+import routingdelivery.smartlog.containertruckmoocassigment.model.PickupWarehouseInfo;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Port;
 import routingdelivery.smartlog.containertruckmoocassigment.model.RouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.RouteElement;
+import routingdelivery.smartlog.containertruckmoocassigment.model.SequenceSolution;
 import routingdelivery.smartlog.containertruckmoocassigment.model.StatisticInformation;
 import routingdelivery.smartlog.containertruckmoocassigment.model.SwapImportExportRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.TangboWarehouseExportRouteComposer;
@@ -84,6 +87,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		return "InitGreedyImproveSpecialOperatorSolver";
 	}
 
+	
 	public void initDirectRoutes() {
 		ArrayList<ExportContainerRequest> s_exReq = new ArrayList<ExportContainerRequest>();
 		ArrayList<ImportContainerRequest> s_imReq = new ArrayList<ImportContainerRequest>();
@@ -149,6 +153,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 
 	}
 
+	/*
 	public void exploreDoubleImport(
 			CandidateRouteComposer candidateRouteComposer) {
 		ImportContainerRequest sel_imReq_k = null;
@@ -261,7 +266,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		}
 
 	}
-
+	*/
+	
 	public void exploreSwapImportExport(
 			CandidateRouteComposer candidateRouteComposer) {
 		RouteSwapImportExportCreator routeSwapImportExportCreator = new RouteSwapImportExportCreator(
@@ -1099,7 +1105,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		while (true) {
 			candidate_routes.clear();
 
-			exploreDoubleImport(candidate_routes);
+			//exploreDoubleImport(candidate_routes);
 			exploreSwapImportExport(candidate_routes);
 			exploreKepLech(candidate_routes);
 			exploreTangBo(candidate_routes);
@@ -1267,7 +1273,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		return sol;
 
 	}
-
+	/*
 	public TruckRouteInfo4Request createNewDirectRoute4ExportRequest(
 			ExportContainerRequest r) {
 		String warehouseCode = r.getWareHouseCode();
@@ -1284,9 +1290,12 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		int latePickupWarehouse = (int) DateTimeUtils.dateTime2Int(r
 				.getLateDateTimeLoadAtWarehouse());
 
+		Port port = mCode2Port.get(r.getPortCode());
+		
 		ComboContainerMoocTruck sel_combo = null;
 		double minDistance = Integer.MAX_VALUE;
 
+		ExportSequenceSolver sequenceSolver = new ExportSequenceSolver();
 		for (int i = 0; i < input.getTrucks().length; i++) {
 			Truck truck = input.getTrucks()[i];
 			for (int j = 0; j < input.getMoocs().length; j++) {
@@ -1317,24 +1326,12 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 
 					int startTime = combo.startTime;
 					String startLocationCode = combo.lastLocationCode;
-					// System.out.println(name() +
-					// "::createDirectRoute4ExportRequest, lastLocationCode = "
-					// + combo.lastLocationCode);
-
+					
 					int arrivalTimeWarehouse = startTime
 							+ getTravelTime(startLocationCode,
 									warehouseLocationCode);
 
-					// if(combo.truck.getCode().equals("Truck0001") &&
-					// combo.mooc.getCode().equals("Mooc0002") &&
-					// combo.container.getCode().equals("Container002"))
-					// System.out.println(name() +
-					// "::createDirectRoute4ExportRequest, arrivalTimeWarehouse = "
-					// +
-					// DateTimeUtils.unixTimeStamp2DateTime(arrivalTimeWarehouse)
-					// +
-					// ", latePickupWarehouse = " +
-					// DateTimeUtils.unixTimeStamp2DateTime(latePickupWarehouse));
+					
 
 					if (arrivalTimeWarehouse > latePickupWarehouse)
 						continue;
@@ -1369,7 +1366,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 							+ sel_combo.truck.getCode() + ", mooc = "
 							+ sel_combo.mooc.getCode() + ", container = "
 							+ sel_combo.container.getCode());
-
+			
 			TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
 			tri.route = tr;
 			tri.lastUsedIndex = -1;
@@ -1605,24 +1602,336 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		}
 		return null;
 	}
+	*/
+	public TruckRouteInfo4Request createNewDirectRoute4ExportRequest(
+			ExportContainerRequest r) {
+		
 
+		Port port = mCode2Port.get(r.getPortCode());
+		
+		ComboContainerMoocTruck sel_combo = null;
+		SequenceSolution sel_seq = null;
+		double minDistance = Integer.MAX_VALUE;
+
+		SequenceSolver sequenceSolver = new SequenceSolver(this);
+		for (int i = 0; i < input.getTrucks().length; i++) {
+			Truck truck = input.getTrucks()[i];
+			for (int j = 0; j < input.getMoocs().length; j++) {
+				Mooc mooc = input.getMoocs()[j];
+				for (int k = 0; k < input.getContainers().length; k++) {
+					Container container = input.getContainers()[k];
+					HashSet<Container> C = mShipCompanyCode2Containers.get(r
+							.getShipCompanyCode());
+
+					if (!C.contains(container))
+						continue;
+					// if(!r.getShipCompanyCode().equals(shipCompanyCode))
+					// continue;
+
+					ComboContainerMoocTruck combo = findLastAvailable(truck,
+							mooc, container);
+					if (combo == null)
+						continue;
+
+					SequenceSolution seq_sol = sequenceSolver.solve(combo, r.getPickupWarehouses(), port);
+					
+					
+					if (seq_sol.evaluation < minDistance) {
+						minDistance = seq_sol.evaluation;
+						sel_combo = combo;
+						sel_seq = seq_sol;
+					}
+				}
+			}
+		}
+		if (sel_combo == null) {
+			logln(name()
+					+ "::createNewDirectRoute4ExportRequest, sel_combo is NULL????");
+			return null;
+		}
+		// create route
+		if (sel_combo.routeElement == null) {
+			TruckRoute tr = createDirectRouteForExportRequest(r, sel_seq.seq,
+					sel_combo.truck, sel_combo.mooc, sel_combo.container);
+			System.out
+					.println(name()
+							+ "::createNewDirectRoute4ExportRequest, create route from all depots, truck = "
+							+ sel_combo.truck.getCode() + ", mooc = "
+							+ sel_combo.mooc.getCode() + ", container = "
+							+ sel_combo.container.getCode());
+			
+			TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+			tri.route = tr;
+			tri.lastUsedIndex = -1;
+			tri.additionalDistance = minDistance;
+			return tri;
+
+		} else if (sel_combo.routeElement.getAction().equals(
+				ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT)) {
+			System.out
+					.println(name()
+							+ "::createDirectRoute4ExportRequest, create route from WAIT_RELEASE_LOADED_CONTAINER_AT_PORT");
+
+			Truck truck = sel_combo.truck;
+			// TruckRoute tr = mTruck2Route.get(truck);
+			TruckItinerary I = mTruck2Itinerary.get(truck);
+			RouteElement e = sel_combo.routeElement;
+			Container container = sel_combo.container;
+			int departureTime = (int) DateTimeUtils.dateTime2Int(e
+					.getDepartureTime());
+
+			ArrayList<RouteElement> L = new ArrayList<RouteElement>();
+
+			RouteElement e2 = new RouteElement();
+			L.add(e2);
+			e2.deriveFrom(e);
+			e2.setDepotContainer(mContainer2LastDepot.get(container));
+			e2.setAction(ActionEnum.TAKE_CONTAINER_AT_DEPOT);
+			e2.setContainer(container);
+			int travelTime = getTravelTime(e, e2);
+			int arrivalTime = departureTime + travelTime;
+			int startServiceTime = MAX(arrivalTime,
+					mContainer2LastTime.get(container));
+			int duration = mContainer2LastDepot.get(container)
+					.getPickupContainerDuration();
+			departureTime = startServiceTime + duration;
+			mPoint2ArrivalTime.put(e2, arrivalTime);
+			mPoint2DepartureTime.put(e2, departureTime);
+			RouteElement lastElement = e2;
+			
+			//Port port = getPortFromCode(r.getPortCode());
+			SequenceSolver SS = new SequenceSolver(this);
+			SequenceSolution sol = SS.solve(e2.getLocationCode(), departureTime, r, port.getLocationCode());
+			int[] seq = sol.seq;
+			
+			RouteElement[] re = new RouteElement[seq.length*2];
+			int idx = -1;
+			for(int i = 0; i < seq.length; i++){
+				PickupWarehouseInfo pwi = r.getPickupWarehouses()[seq[i]];
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(lastElement);
+				re[idx].setWarehouse(mCode2Warehouse.get(pwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.WAIT_LOAD_CONTAINER_AT_WAREHOUSE);
+				re[idx].setExportRequest(r);
+
+				travelTime = getTravelTime(lastElement, re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime,
+						(int) DateTimeUtils.dateTime2Int(pwi
+								.getEarlyDateTimeLoadAtWarehouse()));
+				int finishedServiceTime = startServiceTime + pwi.getLoadDuration();
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+				
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(re[idx-1]);
+				re[idx].setWarehouse(mCode2Warehouse.get(pwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_WAREHOUSE);
+				travelTime = getTravelTime(re[idx-1], re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime, finishedServiceTime);
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+			}
+			
+
+			RouteElement e5 = new RouteElement();
+			L.add(e5);
+			e5.deriveFrom(lastElement);
+			e5.setPort(mCode2Port.get(r.getPortCode()));
+			e5.setAction(ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT);
+			e5.setContainer(null);
+			e5.setExportRequest(null);
+			travelTime = getTravelTime(lastElement, e5);
+			arrivalTime = departureTime + travelTime;
+			startServiceTime = arrivalTime;
+			duration = r.getUnloadDuration();
+			departureTime = startServiceTime + duration;
+			mPoint2ArrivalTime.put(e5, arrivalTime);
+			mPoint2DepartureTime.put(e5, departureTime);
+			// update last depot container, set to not-available
+			mContainer2LastDepot.put(container, null);
+			mContainer2LastTime.put(container, Integer.MAX_VALUE);
+
+			RouteElement e6 = new RouteElement();
+			L.add(e6);
+			e6.deriveFrom(e5);
+			e6.setDepotMooc(mCode2DepotMooc.get(sel_combo.mooc
+					.getDepotMoocCode()));
+			e6.setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
+			e6.setMooc(null);
+			travelTime = getTravelTime(e5, e5);
+			arrivalTime = departureTime + travelTime;
+			startServiceTime = arrivalTime;
+			duration = e6.getDepotMooc().getDeliveryMoocDuration();
+			departureTime = startServiceTime + duration;
+			mPoint2ArrivalTime.put(e6, arrivalTime);
+			mPoint2DepartureTime.put(e6, departureTime);
+			// update last depot and lastTime of mooc
+			mMooc2LastDepot.put(sel_combo.mooc, e6.getDepotMooc());
+			mMooc2LastTime.put(sel_combo.mooc, departureTime);
+
+			RouteElement e7 = new RouteElement();
+			L.add(e7);
+			e7.deriveFrom(e6);
+			e7.setDepotTruck(mCode2DepotTruck.get(truck.getDepotTruckCode()));
+			e7.setAction(ActionEnum.REST_AT_DEPOT);
+
+			travelTime = getTravelTime(e6, e7);
+			arrivalTime = departureTime + travelTime;
+			startServiceTime = arrivalTime;
+			duration = 0;
+			departureTime = startServiceTime + duration;
+			mPoint2ArrivalTime.put(e7, arrivalTime);
+			mPoint2DepartureTime.put(e7, departureTime);
+			// update last depot and last time of truck
+			mTruck2LastDepot.put(truck, e7.getDepotTruck());
+			mTruck2LastTime.put(truck, departureTime);
+
+			TruckRoute newTr = new TruckRoute(truck, L);
+
+			TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+			tri.route = newTr;
+			tri.lastUsedIndex = I.indexOf(e);
+			tri.additionalDistance = minDistance;
+
+			return tri;
+		} else if (sel_combo.routeElement.getAction().equals(
+				ActionEnum.LINK_EMPTY_CONTAINER_AT_WAREHOUSE)) {
+			Truck truck = sel_combo.truck;
+			TruckRoute tr = mTruck2Route.get(truck);
+			RouteElement e = sel_combo.routeElement;
+			Container container = sel_combo.container;
+			int departureTime = sel_combo.startTime;
+			RouteElement lastElement = e;
+			ArrayList<RouteElement> L = new ArrayList<RouteElement>();
+			SequenceSolver SS = new SequenceSolver(this);
+			SequenceSolution sol = SS.solve(e.getLocationCode(), departureTime, r, port.getLocationCode());
+			int[] seq = sol.seq;
+			
+			RouteElement[] re = new RouteElement[seq.length*2];
+			int idx = -1;
+			for(int i = 0; i < seq.length; i++){
+				PickupWarehouseInfo pwi = r.getPickupWarehouses()[seq[i]];
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(lastElement);
+				re[idx].setWarehouse(mCode2Warehouse.get(pwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.WAIT_LOAD_CONTAINER_AT_WAREHOUSE);
+				re[idx].setExportRequest(r);
+
+				int travelTime = getTravelTime(lastElement, re[idx]);
+				int arrivalTime = departureTime + travelTime;
+				int startServiceTime = MAX(arrivalTime,
+						(int) DateTimeUtils.dateTime2Int(pwi
+								.getEarlyDateTimeLoadAtWarehouse()));
+				int finishedServiceTime = startServiceTime + pwi.getLoadDuration();
+				int duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+				
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(re[idx-1]);
+				re[idx].setWarehouse(mCode2Warehouse.get(pwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_WAREHOUSE);
+				travelTime = getTravelTime(re[idx-1], re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime, finishedServiceTime);
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+			}
+
+
+			RouteElement e5 = new RouteElement();
+			L.add(e5);
+			e5.deriveFrom(lastElement);
+			e5.setPort(mCode2Port.get(r.getPortCode()));
+			e5.setAction(ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT);
+			e5.setContainer(null);
+			e5.setExportRequest(null);
+			int travelTime = getTravelTime(lastElement, e5);
+			int arrivalTime = departureTime + travelTime;
+			int startServiceTime = arrivalTime;
+			int duration = r.getUnloadDuration();
+			departureTime = startServiceTime + duration;
+			mPoint2ArrivalTime.put(e5, arrivalTime);
+			mPoint2DepartureTime.put(e5, departureTime);
+			// update last depot container, set to not-available
+			mContainer2LastDepot.put(container, null);
+			mContainer2LastTime.put(container, Integer.MAX_VALUE);
+
+			RouteElement e6 = new RouteElement();
+			L.add(e6);
+			e6.deriveFrom(e5);
+			e6.setDepotMooc(mCode2DepotMooc.get(sel_combo.mooc
+					.getDepotMoocCode()));
+			e6.setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
+			e6.setMooc(null);
+			travelTime = getTravelTime(e5, e5);
+			arrivalTime = departureTime + travelTime;
+			startServiceTime = arrivalTime;
+			duration = e6.getDepotMooc().getDeliveryMoocDuration();
+			departureTime = startServiceTime + duration;
+			mPoint2ArrivalTime.put(e6, arrivalTime);
+			mPoint2DepartureTime.put(e6, departureTime);
+			// update last depot and lastTime of mooc
+			mMooc2LastDepot.put(sel_combo.mooc, e6.getDepotMooc());
+			mMooc2LastTime.put(sel_combo.mooc, departureTime);
+
+			RouteElement e7 = new RouteElement();
+			L.add(e7);
+			e7.deriveFrom(e6);
+			e7.setDepotTruck(mCode2DepotTruck.get(truck.getDepotTruckCode()));
+			e7.setAction(ActionEnum.REST_AT_DEPOT);
+
+			travelTime = getTravelTime(e6, e7);
+			arrivalTime = departureTime + travelTime;
+			startServiceTime = arrivalTime;
+			duration = 0;
+			departureTime = startServiceTime + duration;
+			mPoint2ArrivalTime.put(e7, arrivalTime);
+			mPoint2DepartureTime.put(e7, departureTime);
+			// update last depot and last time of truck
+			mTruck2LastDepot.put(truck, e7.getDepotTruck());
+			mTruck2LastTime.put(truck, departureTime);
+
+			TruckRoute newTr = new TruckRoute(truck, L);
+
+			TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+			tri.route = newTr;
+			tri.lastUsedIndex = tr.indexOf(e);
+			tri.additionalDistance = minDistance;
+
+			return tri;
+		}
+		return null;
+	}
+	
+	
 	public TruckRouteInfo4Request createNewDirectRoute4ExportRequest(
 			Truck truck, Mooc mooc, Container container,
 			ExportContainerRequest r) {
-		String warehouseCode = r.getWareHouseCode();
-		logln(name() + "::createNewDirectRoute4ExportRequest, warehouseCode = "
-				+ warehouseCode);
-
-		Warehouse warehouse = mCode2Warehouse.get(warehouseCode);
-
-		String warehouseLocationCode = warehouse.getLocationCode();
-		String portCode = r.getPortCode();
+				String portCode = r.getPortCode();
 		String portLocationCode = mCode2Port.get(portCode).getLocationCode();
-		int earlyPickupWarehouse = (int) DateTimeUtils.dateTime2Int(r
-				.getEarlyDateTimeLoadAtWarehouse());
-		int latePickupWarehouse = (int) DateTimeUtils.dateTime2Int(r
-				.getLateDateTimeLoadAtWarehouse());
-
+		
 		HashSet<Container> C = mShipCompanyCode2Containers.get(r
 				.getShipCompanyCode());
 
@@ -1638,29 +1947,15 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 
 		int startTime = sel_combo.startTime;
 		String startLocationCode = sel_combo.lastLocationCode;
-		// System.out.println(name() +
-		// "::createDirectRoute4ExportRequest, lastLocationCode = "
-		// + combo.lastLocationCode);
-
-		int arrivalTimeWarehouse = startTime
-				+ getTravelTime(startLocationCode, warehouseLocationCode);
-
-		// if(combo.truck.getCode().equals("Truck0001") &&
-		// combo.mooc.getCode().equals("Mooc0002") &&
-		// combo.container.getCode().equals("Container002"))
-		// System.out.println(name() +
-		// "::createDirectRoute4ExportRequest, arrivalTimeWarehouse = "
-		// +
-		// DateTimeUtils.unixTimeStamp2DateTime(arrivalTimeWarehouse)
-		// +
-		// ", latePickupWarehouse = " +
-		// DateTimeUtils.unixTimeStamp2DateTime(latePickupWarehouse));
-
-		if (arrivalTimeWarehouse > latePickupWarehouse)
-			return null;
-
+		
+		SequenceSolver SS = new SequenceSolver(this);
+		SequenceSolution ss = SS.solve(startLocationCode, startTime, r, portLocationCode);
+		if(ss == null) return null;
+		int[] seq = ss.seq;
+		Warehouse firstWarehouse = getWarehouseFromCode(r.getPickupWarehouses()[seq[0]].getWareHouseCode());
+		
 		double distance = sel_combo.extraDistance
-				+ getDistance(sel_combo.lastLocationCode, warehouseLocationCode);
+				+ getDistance(sel_combo.lastLocationCode, firstWarehouse.getLocationCode());
 		// System.out.println(name() +
 		// "::createDirectRoute4ExportRequest, arrivalTimeWarehouse = "
 		// + arrivalTimeWarehouse +
@@ -1668,7 +1963,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		// ", distance = " + distance);
 		// create route
 		if (sel_combo.routeElement == null) {
-			TruckRoute tr = createDirectRouteForExportRequest(r,
+			TruckRoute tr = createDirectRouteForExportRequest(r,seq,
 					sel_combo.truck, sel_combo.mooc, sel_combo.container);
 			System.out
 					.println(name()
@@ -1711,46 +2006,57 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			departureTime = startServiceTime + duration;
 			mPoint2ArrivalTime.put(e2, arrivalTime);
 			mPoint2DepartureTime.put(e2, departureTime);
+			RouteElement lastElement = e2;
+			
+			RouteElement[] re = new RouteElement[seq.length*2];
+			int idx = -1;
+			for(int i = 0; i < seq.length; i++){
+				PickupWarehouseInfo pwi = r.getPickupWarehouses()[seq[i]];
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(lastElement);
+				re[idx].setWarehouse(mCode2Warehouse.get(pwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.WAIT_LOAD_CONTAINER_AT_WAREHOUSE);
+				re[idx].setExportRequest(r);
 
-			RouteElement e3 = new RouteElement();
-			L.add(e3);
-			e3.deriveFrom(e2);
-			e3.setWarehouse(mCode2Warehouse.get(r.getWareHouseCode()));
-			e3.setAction(ActionEnum.WAIT_LOAD_CONTAINER_AT_WAREHOUSE);
-			e3.setExportRequest(r);
+				travelTime = getTravelTime(lastElement, re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime,
+						(int) DateTimeUtils.dateTime2Int(pwi
+								.getEarlyDateTimeLoadAtWarehouse()));
+				int finishedServiceTime = startServiceTime + pwi.getLoadDuration();
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+				
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(re[idx-1]);
+				re[idx].setWarehouse(mCode2Warehouse.get(pwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_WAREHOUSE);
+				travelTime = getTravelTime(re[idx-1], re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime, finishedServiceTime);
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+			}
 
-			travelTime = getTravelTime(e2, e3);
-			arrivalTime = departureTime + travelTime;
-			startServiceTime = MAX(arrivalTime,
-					(int) DateTimeUtils.dateTime2Int(r
-							.getEarlyDateTimeLoadAtWarehouse()));
-			int finishedServiceTime = startServiceTime + r.getLoadDuration();
-			duration = 0;
-			departureTime = startServiceTime + duration;
-			mPoint2ArrivalTime.put(e3, arrivalTime);
-			mPoint2DepartureTime.put(e3, departureTime);
-
-			RouteElement e4 = new RouteElement();
-			L.add(e4);
-			e4.deriveFrom(e3);
-			e4.setWarehouse(mCode2Warehouse.get(r.getWareHouseCode()));
-			e4.setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_WAREHOUSE);
-			travelTime = getTravelTime(e3, e4);
-			arrivalTime = departureTime + travelTime;
-			startServiceTime = MAX(arrivalTime, finishedServiceTime);
-			duration = 0;
-			departureTime = startServiceTime + duration;
-			mPoint2ArrivalTime.put(e4, arrivalTime);
-			mPoint2DepartureTime.put(e4, departureTime);
 
 			RouteElement e5 = new RouteElement();
 			L.add(e5);
-			e5.deriveFrom(e4);
+			e5.deriveFrom(lastElement);
 			e5.setPort(mCode2Port.get(r.getPortCode()));
 			e5.setAction(ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT);
 			e5.setContainer(null);
 			e5.setExportRequest(null);
-			travelTime = getTravelTime(e4, e5);
+			travelTime = getTravelTime(lastElement, e5);
 			arrivalTime = departureTime + travelTime;
 			startServiceTime = arrivalTime;
 			duration = r.getUnloadDuration();
@@ -1809,51 +2115,61 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			TruckRoute tr = mTruck2Route.get(truck);
 			RouteElement e = sel_combo.routeElement;
 			int departureTime = sel_combo.startTime;
-
+			RouteElement lastElement = e;
+			
 			ArrayList<RouteElement> L = new ArrayList<RouteElement>();
 
-			RouteElement e3 = new RouteElement();
-			L.add(e3);
-			e3.deriveFrom(e);
-			e3.setWarehouse(mCode2Warehouse.get(r.getWareHouseCode()));
-			e3.setAction(ActionEnum.WAIT_LOAD_CONTAINER_AT_WAREHOUSE);
-			e3.setExportRequest(r);
+			RouteElement[] re = new RouteElement[seq.length*2];
+			int idx = -1;
+			for(int i = 0; i < seq.length; i++){
+				PickupWarehouseInfo pwi = r.getPickupWarehouses()[seq[i]];
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(lastElement);
+				re[idx].setWarehouse(mCode2Warehouse.get(pwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.WAIT_LOAD_CONTAINER_AT_WAREHOUSE);
+				re[idx].setExportRequest(r);
 
-			int travelTime = getTravelTime(e, e3);
-			int arrivalTime = departureTime + travelTime;
-			int startServiceTime = MAX(arrivalTime,
-					(int) DateTimeUtils.dateTime2Int(r
-							.getEarlyDateTimeLoadAtWarehouse()));
-			int finishedServiceTime = startServiceTime + r.getLoadDuration();
-			int duration = 0;
-			departureTime = startServiceTime + duration;
-			mPoint2ArrivalTime.put(e3, arrivalTime);
-			mPoint2DepartureTime.put(e3, departureTime);
-
-			RouteElement e4 = new RouteElement();
-			L.add(e4);
-			e4.deriveFrom(e3);
-			e4.setWarehouse(mCode2Warehouse.get(r.getWareHouseCode()));
-			e4.setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_WAREHOUSE);
-			travelTime = getTravelTime(e3, e4);
-			arrivalTime = departureTime + travelTime;
-			startServiceTime = MAX(arrivalTime, finishedServiceTime);
-			duration = 0;
-			departureTime = startServiceTime + duration;
-			mPoint2ArrivalTime.put(e4, arrivalTime);
-			mPoint2DepartureTime.put(e4, departureTime);
+				int travelTime = getTravelTime(lastElement, re[idx]);
+				int arrivalTime = departureTime + travelTime;
+				int startServiceTime = MAX(arrivalTime,
+						(int) DateTimeUtils.dateTime2Int(pwi
+								.getEarlyDateTimeLoadAtWarehouse()));
+				int finishedServiceTime = startServiceTime + pwi.getLoadDuration();
+				int duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+				
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(re[idx-1]);
+				re[idx].setWarehouse(mCode2Warehouse.get(pwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_WAREHOUSE);
+				travelTime = getTravelTime(re[idx-1], re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime, finishedServiceTime);
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+			}
 
 			RouteElement e5 = new RouteElement();
 			L.add(e5);
-			e5.deriveFrom(e4);
+			e5.deriveFrom(lastElement);
 			e5.setPort(mCode2Port.get(r.getPortCode()));
 			e5.setAction(ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT);
 			e5.setContainer(null);
 			e5.setExportRequest(null);
-			travelTime = getTravelTime(e4, e5);
-			arrivalTime = departureTime + travelTime;
-			startServiceTime = arrivalTime;
-			duration = r.getUnloadDuration();
+			int travelTime = getTravelTime(lastElement, e5);
+			int arrivalTime = departureTime + travelTime;
+			int startServiceTime = arrivalTime;
+			int duration = r.getUnloadDuration();
 			departureTime = startServiceTime + duration;
 			mPoint2ArrivalTime.put(e5, arrivalTime);
 			mPoint2DepartureTime.put(e5, departureTime);
@@ -2729,45 +3045,59 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			departureTime = startServiceTime + duration;
 			mPoint2ArrivalTime.put(e2, arrivalTime);
 			mPoint2DepartureTime.put(e2, departureTime);
-
-			RouteElement e3 = new RouteElement();
-			L.add(e3);
-			e3.deriveFrom(e2);
-			e3.setWarehouse(mCode2Warehouse.get(r.getWareHouseCode()));
-			e3.setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
-			travelTime = getTravelTime(e2, e3);
-			arrivalTime = departureTime + travelTime;
-			startServiceTime = MAX(arrivalTime,
-					(int) DateTimeUtils.dateTime2Int(r
-							.getEarlyDateTimeUnloadAtWarehouse()));
-			int finishedServiceTime = startServiceTime + r.getUnloadDuration();
-			duration = 0;
-			departureTime = startServiceTime + duration;
-			mPoint2ArrivalTime.put(e3, arrivalTime);
-			mPoint2DepartureTime.put(e3, departureTime);
-
-			RouteElement e4 = new RouteElement();
-			L.add(e4);
-			e4.deriveFrom(e3);
-			e4.setWarehouse(mCode2Warehouse.get(r.getWareHouseCode()));
-			e4.setAction(ActionEnum.LINK_EMPTY_CONTAINER_AT_WAREHOUSE);
-			e4.setImportRequest(null);
-			travelTime = getTravelTime(e3, e4);
-			arrivalTime = departureTime + travelTime;
-			startServiceTime = MAX(arrivalTime, finishedServiceTime);
-			duration = 0;
-			departureTime = startServiceTime + duration;
-			mPoint2ArrivalTime.put(e4, arrivalTime);
-			mPoint2DepartureTime.put(e4, departureTime);
+			RouteElement lastElement = e2;
+			
+			SequenceSolver SS = new SequenceSolver(this);
+			SequenceSolution ss = SS.solve(lastElement.getLocationCode(), departureTime, r, null);
+			int[]seq = ss.seq;
+			RouteElement[] re = new RouteElement[2*seq.length];
+			int idx = -1;
+			for(int i = 0; i < re.length; i++){
+				DeliveryWarehouseInfo dwi = r.getDeliveryWarehouses()[seq[i]];
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(lastElement);
+				re[idx].setWarehouse(mCode2Warehouse.get(dwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
+				travelTime = getTravelTime(lastElement, re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime,
+						(int) DateTimeUtils.dateTime2Int(dwi
+								.getEarlyDateTimeUnloadAtWarehouse()));
+				int finishedServiceTime = startServiceTime + dwi.getUnloadDuration();
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+				
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(lastElement);
+				re[idx].setWarehouse(mCode2Warehouse.get(dwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.LINK_EMPTY_CONTAINER_AT_WAREHOUSE);
+				re[idx].setImportRequest(null);
+				travelTime = getTravelTime(lastElement, re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime, finishedServiceTime);
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+			}
+			
 
 			RouteElement e5 = new RouteElement();
 			L.add(e5);
-			e5.deriveFrom(e4);
+			e5.deriveFrom(lastElement);
 			e5.setDepotContainer(mCode2DepotContainer.get(r
 					.getDepotContainerCode()));
 			e5.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 			e5.setContainer(null);
-			travelTime = getTravelTime(e4, e5);
+			travelTime = getTravelTime(lastElement, e5);
 			arrivalTime = departureTime + travelTime;
 			startServiceTime = arrivalTime;
 			duration = e5.getDepotContainer().getDeliveryContainerDuration();
@@ -2892,45 +3222,59 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			departureTime = startServiceTime + duration;
 			mPoint2ArrivalTime.put(e2, arrivalTime);
 			mPoint2DepartureTime.put(e2, departureTime);
+			RouteElement lastElement = e2;
+			
+			SequenceSolver SS = new SequenceSolver(this);
+			SequenceSolution ss = SS.solve(lastElement.getLocationCode(), departureTime, r, null);
+			int[]seq = ss.seq;
+			RouteElement[] re = new RouteElement[2*seq.length];
+			int idx = -1;
+			for(int i = 0; i < re.length; i++){
+				DeliveryWarehouseInfo dwi = r.getDeliveryWarehouses()[seq[i]];
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(e2);
+				re[idx].setWarehouse(mCode2Warehouse.get(dwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
+				travelTime = getTravelTime(lastElement, re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime,
+						(int) DateTimeUtils.dateTime2Int(dwi
+								.getEarlyDateTimeUnloadAtWarehouse()));
+				int finishedServiceTime = startServiceTime + dwi.getUnloadDuration();
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+				
+				idx++;
+				re[idx] = new RouteElement();
+				L.add(re[idx]);
+				re[idx].deriveFrom(lastElement);
+				re[idx].setWarehouse(mCode2Warehouse.get(dwi.getWareHouseCode()));
+				re[idx].setAction(ActionEnum.LINK_EMPTY_CONTAINER_AT_WAREHOUSE);
+				re[idx].setImportRequest(null);
+				travelTime = getTravelTime(lastElement, re[idx]);
+				arrivalTime = departureTime + travelTime;
+				startServiceTime = MAX(arrivalTime, finishedServiceTime);
+				duration = 0;
+				departureTime = startServiceTime + duration;
+				mPoint2ArrivalTime.put(re[idx], arrivalTime);
+				mPoint2DepartureTime.put(re[idx], departureTime);
+				lastElement = re[idx];
+			}
 
-			RouteElement e3 = new RouteElement();
-			L.add(e3);
-			e3.deriveFrom(e2);
-			e3.setWarehouse(mCode2Warehouse.get(r.getWareHouseCode()));
-			e3.setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
-			travelTime = getTravelTime(e2, e3);
-			arrivalTime = departureTime + travelTime;
-			startServiceTime = MAX(arrivalTime,
-					(int) DateTimeUtils.dateTime2Int(r
-							.getEarlyDateTimeUnloadAtWarehouse()));
-			int finishedServiceTime = startServiceTime + r.getUnloadDuration();
-			duration = 0;
-			departureTime = startServiceTime + duration;
-			mPoint2ArrivalTime.put(e3, arrivalTime);
-			mPoint2DepartureTime.put(e3, departureTime);
-
-			RouteElement e4 = new RouteElement();
-			L.add(e4);
-			e4.deriveFrom(e3);
-			e4.setWarehouse(mCode2Warehouse.get(r.getWareHouseCode()));
-			e4.setAction(ActionEnum.LINK_EMPTY_CONTAINER_AT_WAREHOUSE);
-			e4.setImportRequest(null);
-			travelTime = getTravelTime(e3, e4);
-			arrivalTime = departureTime + travelTime;
-			startServiceTime = MAX(arrivalTime, finishedServiceTime);
-			duration = 0;
-			departureTime = startServiceTime + duration;
-			mPoint2ArrivalTime.put(e4, arrivalTime);
-			mPoint2DepartureTime.put(e4, departureTime);
 
 			RouteElement e5 = new RouteElement();
 			L.add(e5);
-			e5.deriveFrom(e4);
+			e5.deriveFrom(lastElement);
 			e5.setDepotContainer(mCode2DepotContainer.get(r
 					.getDepotContainerCode()));
 			e5.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 			e5.setContainer(null);
-			travelTime = getTravelTime(e4, e5);
+			travelTime = getTravelTime(lastElement, e5);
 			arrivalTime = departureTime + travelTime;
 			startServiceTime = arrivalTime;
 			duration = e5.getDepotContainer().getDeliveryContainerDuration();

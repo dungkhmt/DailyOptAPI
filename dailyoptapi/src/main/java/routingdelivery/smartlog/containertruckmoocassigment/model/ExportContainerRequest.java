@@ -1,5 +1,7 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
+import com.havestplanning.utils.DateTimeUtils;
+
 public class ExportContainerRequest {
 	private String orderItemID;
 	
@@ -28,7 +30,14 @@ public class ExportContainerRequest {
 	
 	//private String planSegment;// "1","2","12","13","123",...
 	
-	
+	public String getLateDateTimeLoadAtWarehouse(){
+		String s = pickupWarehouses[0].getLateDateTimeLoadAtWarehouse();
+		for(int i = 1; i < pickupWarehouses.length; i++){
+			if(DateTimeUtils.dateTime2Int(s) < DateTimeUtils.dateTime2Int(pickupWarehouses[i].getLateDateTimeLoadAtWarehouse()))
+				s = pickupWarehouses[i].getLateDateTimeLoadAtWarehouse();
+		}
+		return s;
+	}
 	public ExportContainerRequest() {
 		super();
 		// TODO Auto-generated constructor stub

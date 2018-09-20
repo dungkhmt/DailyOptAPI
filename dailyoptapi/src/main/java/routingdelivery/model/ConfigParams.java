@@ -3,8 +3,26 @@ package routingdelivery.model;
 public class ConfigParams {
 	private String intCity;
 	private String internalVehicleFirst; 
+	private int timeLimit;// in minute
 	
 	
+
+	public ConfigParams(String intCity, String internalVehicleFirst,
+			int timeLimit) {
+		super();
+		this.intCity = intCity;
+		this.internalVehicleFirst = internalVehicleFirst;
+		this.timeLimit = timeLimit;
+	}
+
+	public int getTimeLimit() {
+		return timeLimit;
+	}
+
+	public void setTimeLimit(int timeLimit) {
+		this.timeLimit = timeLimit;
+	}
+
 	public ConfigParams(String intCity, String internalVehicleFirst) {
 		super();
 		this.intCity = intCity;

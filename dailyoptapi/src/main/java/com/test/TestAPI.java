@@ -186,7 +186,7 @@ public class TestAPI {
 		}
 	}
 
-	/*
+	
 	@CrossOrigin
 	@RequestMapping(value = "/pickup-delivery", method = RequestMethod.POST)
 	public PickupDeliverySolution computePickupDeliverySolution(
@@ -211,7 +211,7 @@ public class TestAPI {
 		
 		return solver.computeVehicleSuggestion(input);
 	}
-	*/
+	
 
 	@CrossOrigin
 	@RequestMapping(value = "/compute-sequence-route", method = RequestMethod.POST)
@@ -259,9 +259,11 @@ public class TestAPI {
 		
 		//if(true)return solver.computeVehicleSuggestion(input);
 		
-		//solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
-		solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
 		
+		if(input.getParams().getTimeLimit() == 0)
+			input.getParams().setTimeLimit(10);
 		
 		if(input.getParams().getInternalVehicleFirst() != null && 
 				input.getParams().getInternalVehicleFirst().equals("Y")){

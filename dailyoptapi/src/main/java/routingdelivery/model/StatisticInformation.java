@@ -3,9 +3,48 @@ package routingdelivery.model;
 public class StatisticInformation {
 	private double totalDistance;
 	private int numberTrucks;
+	private String executionTime;
+	private String timeLimitExpired;
 	private StatisticRoute[] routeInfo;
 	
 	
+	
+	public StatisticInformation(double totalDistance, int numberTrucks,
+			String executionTime, String timeLimitExpired,
+			StatisticRoute[] routeInfo) {
+		super();
+		this.totalDistance = totalDistance;
+		this.numberTrucks = numberTrucks;
+		this.executionTime = executionTime;
+		this.timeLimitExpired = timeLimitExpired;
+		this.routeInfo = routeInfo;
+	}
+
+	public String getTimeLimitExpired() {
+		return timeLimitExpired;
+	}
+
+	public void setTimeLimitExpired(String timeLimitExpired) {
+		this.timeLimitExpired = timeLimitExpired;
+	}
+
+	public StatisticInformation(double totalDistance, int numberTrucks,
+			String executionTime, StatisticRoute[] routeInfo) {
+		super();
+		this.totalDistance = totalDistance;
+		this.numberTrucks = numberTrucks;
+		this.executionTime = executionTime;
+		this.routeInfo = routeInfo;
+	}
+
+	public String getExecutionTime() {
+		return executionTime;
+	}
+
+	public void setExecutionTime(String executionTime) {
+		this.executionTime = executionTime;
+	}
+
 	public StatisticInformation(double totalDistance, int numberTrucks,
 			StatisticRoute[] routeInfo) {
 		super();

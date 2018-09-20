@@ -44,7 +44,7 @@ public class RouteDoubleImportCreator {
 
 		return true;
 	}
-
+	/*
 	public TruckRouteInfo4Request createDoubleImportRequest(Truck truck,
 			Mooc mooc, ImportContainerRequest ir1, ImportContainerRequest ir2) {
 		// truck-mooc -> port(ir1) -> port(ir2) -> warehouse(ir1/ir2) ->
@@ -57,8 +57,8 @@ public class RouteDoubleImportCreator {
 
 		Port port1 = solver.mCode2Port.get(ir1.getPortCode());
 		Port port2 = solver.mCode2Port.get(ir2.getPortCode());
-		Warehouse wh1 = solver.mCode2Warehouse.get(ir1.getWareHouseCode());
-		Warehouse wh2 = solver.mCode2Warehouse.get(ir2.getWareHouseCode());
+		//Warehouse wh1 = solver.mCode2Warehouse.get(ir1.getWareHouseCode());
+		//Warehouse wh2 = solver.mCode2Warehouse.get(ir2.getWareHouseCode());
 		Container container1 = solver.mCode2Container.get(ir1
 				.getContainerCode());
 		Container container2 = solver.mCode2Container.get(ir2
@@ -333,23 +333,7 @@ public class RouteDoubleImportCreator {
 		}
 		DepotContainer depotContainer1 = solver.findDepotContainer4Deposit(ir1, e7, container1);
 		DepotContainer depotContainer2 = solver.findDepotContainer4Deposit(ir2, e7, container2);
-		
-		/*
-		DepotContainer depotContainer1 = solver
-				.findDepotForReleaseContainer(container1);
-		DepotContainer depotContainer2 = solver
-				.findDepotForReleaseContainer(container2);
-		
-		if (depotContainer1 == null) {
-			depotContainer1 = solver.mCode2DepotContainer.get(ir1
-					.getDepotContainerCode());
-		}
-		if (depotContainer2 == null) {
-			depotContainer2 = solver.mCode2DepotContainer.get(ir2
-					.getDepotContainerCode());
-		}
-		*/
-
+	
 		// if(depotContainer1 == null){
 		// System.out.println(name() +
 		// "::createDoubleImportRequest depotContainer1 = NULL");
@@ -484,5 +468,5 @@ public class RouteDoubleImportCreator {
 		return tri;
 
 	}
-
+	*/
 }

@@ -193,7 +193,9 @@ public class PickupDeliverySolver {
 
 	public PrintWriter log;
 	public boolean CHECK_AND_LOG = true;
-
+	public long startExecutionTime;
+	public boolean timeLimitExpired = false;
+	
 	public void log2Console(String s) {
 		if (!CHECK_AND_LOG)
 			return;

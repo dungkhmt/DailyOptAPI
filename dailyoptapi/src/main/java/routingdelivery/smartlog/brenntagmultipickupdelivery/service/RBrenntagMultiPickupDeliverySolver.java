@@ -91,6 +91,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		for (int i = 0; i < len2; i++)
 			vehicle_index[i + len1] = idx2[i];
 
+		int nbVehicles = vehicle_index.length;
 		int k = 0;
 		while (k < vehicle_index.length) {
 			if (a_items.size() == 0)
@@ -147,11 +148,21 @@ public class RBrenntagMultiPickupDeliverySolver extends
 					matchTrips[vh_idx][clusterItems.size() - 1] = t;
 
 					Vehicle vh = getVehicle(vh_idx);
-					if (vh.getWeight() < minW) {
-						minW = vh.getWeight();
+					//System.out.println(name()
+					//		+ "::processMergeOrderItemsFTL, T.sz = " + T.size() + ", vehicle weight = " + vh.getWeight()
+					//		+ ", MAX_INT = " + minW);
+					
+					if (vh.getWeight()/1000 < minW) {
+						minW = vh.getWeight()/1000;
 						sel_trip = t;
 					}
 				}
+				//System.out.println(name()
+				//		+ "::processMergeOrderItemsFTL, T.sz = " + T.size());
+				
+				//System.out.println(name()
+				//					+ "::processMergeOrderItemsFTL, vehicle = " + sel_trip.start.vehicleIndex);
+				
 				trips[sel_trip.start.vehicleIndex].add(sel_trip);
 				ArrayList<ItemAmount> IA = sel_trip.start.items;
 				Item[] items_of_trip = new Item[IA.size()];
@@ -176,6 +187,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 					pi, di, a_items, fix_load_time, fix_unload_time);
 
 			if (collectItems.size() == 0) {
+				//System.out.println(name()
+				//		+ "::processMergeOrderItemsFTL, vehicle " + k + "/" + nbVehicles + " -> loadFTLToVehicle FAILED");
 				k++;
 				// System.out
 				// .println("FAILED -> TRY LoadFTL for new vehicle, a_items = "
@@ -257,7 +270,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 	public PickupDeliverySolution computeVehicleSuggestion(
 			BrennTagPickupDeliveryInput input) {
 		this.input = input;
-
+		startExecutionTime = System.currentTimeMillis();
+		timeLimitExpired = false;
+		
 		initEndWorkingTimeOfVehicles();
 
 		initializeLog();
@@ -331,10 +346,12 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				input.getVehicleCategories()[i].setDescription("SUGGESTED");
 			}
 		int rep = 0;
-		if (totalVehicleCategoryWeight > EPS)
+		if (totalVehicleCategoryWeight > EPS){
 			while (totalCapacity + rep * totalVehicleCategoryWeight < totalItemWeights) {
 				rep++;
 			}
+			if(rep == 0) rep = 1;
+		}
 		if (log != null) {
 			log.println(name() + "::computeVehicleSuggestion, totalCapacity = "
 					+ totalCapacity + ", totalVehicleCategoryCapacity = "
@@ -462,6 +479,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				PickupDeliverySolution sol = new PickupDeliverySolution();
 				// sol.setDescription(inputOK);
 				sol.setErrorMSG(inputOK);
+				sol.setDescription("OK");
 				System.out
 						.println(name()
 								+ "::computeVehicleSuggestion, input NOT CONSISTENT???");
@@ -481,8 +499,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 						+ getTotalItemWeight());
 			}
 
-			System.out.println("BEFORE MERGE FTL");
-			printRequestsOfDistinctLocations();
+			//System.out.println("BEFORE MERGE FTL");
+			//printRequestsOfDistinctLocations();
 
 			processMergeOrderItemsFTL();
 
@@ -492,6 +510,10 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			log(name() + "::computeVehicleSuggestion"
 					+ ", after mergeOrderItemsFTL -> remainItemRequests = "
 					+ remainItemRequests);
+			System.out.println(name() + "::computeVehicleSuggestion"
+					+ ", after mergeOrderItemsFTL -> remainItemRequests = "
+					+ remainItemRequests);
+			
 			if (remainItemRequests > 0) {
 				// if(totalVehicleCategoryWeight < EPS) break;// do not have
 				// external vehicle ->not need LOOP
@@ -509,31 +531,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				}
 			}
 
-			/*
-			 * GreedyMatchingVehicleTrip solver= new
-			 * GreedyMatchingVehicleTrip(this); solver.solve(matchTrips,
-			 * clusterItems, externalVehicles); ArrayList<Integer> sol_cluster =
-			 * solver.getSolutionCluster(); ArrayList<Integer> sol_vehicle =
-			 * solver.getSolutionVehicle(); //logMatchTripVehicleCluster();
-			 * log(name() +
-			 * "::computeVehicleSuggestion, FOUND MATCH VEHICLE-CLUSTER");
-			 * for(int k = 0; k < sol_cluster.size(); k++){
-			 * log(sol_vehicle.get(k) + " -- " + sol_cluster.get(k)); Vehicle vh
-			 * = getVehicle(sol_vehicle.get(k)); ClusterItems ci =
-			 * clusterItems.get(sol_cluster.get(k)); log(vh.getCode() +
-			 * ", weight " + vh.getWeight() + " -- " + ci.weight); }
-			 * 
-			 * if(sol_cluster.size() < clusterItems.size()){ continue; }
-			 */
-
-			// trips[8].add(matchTrips[8][2]);
-			// log(name() + "::computeVehicleSuggestion, LOG-TRIPS");
-			// logTripsOfVehicle(8);
-
-			// for(Item I: clusterItems.get(2).items){
-			// removeScheduledItem(I);
-			// }
-
+			
 			if (log != null) {
 				log.println(name()
 						+ "::computeVehicleSuggestion, external vehicles = "
@@ -571,8 +569,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				}
 			}
 
-			System.out.println("AFTER merge FTL");
-			printRequestsOfDistinctLocations();
+			//System.out.println("AFTER merge FTL");
+			//printRequestsOfDistinctLocations();
 
 			// processSeparateItemsAtEachLocation();
 
@@ -648,7 +646,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			if (totalVehicleCategoryWeight < EPS)
 				break;// do not have external vehicle ->not need LOOP
 		}
-
+		long time1 = System.currentTimeMillis() - startExecutionTime;
+		
+		System.out.println("STARTING HillClimbing, time = " + (time1*0.001) + ", timeLimit = " + input.getParams().getTimeLimit());
 		hillClimbing(true);
 		
 		hillClimbingNewVehicle(true);
@@ -919,6 +919,16 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				+ sol1.getStatistic().getNumberTrucks() + ", distance = "
 				+ sol1.getStatistic().getTotalDistance());
 
+		long time = System.currentTimeMillis() - startExecutionTime;
+		time = time/1000;
+		String hms = DateTimeUtils.second2HMS((int)time);
+		sol.getStatistic().setExecutionTime(hms);
+		
+		if(timeLimitExpired){
+			sol.getStatistic().setTimeLimitExpired("Y");
+		}else{
+			sol.getStatistic().setTimeLimitExpired("N");
+		}
 		return sol;
 	}
 
@@ -1392,6 +1402,15 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		// if(true) return;
 
 		while (true) {
+			
+			double time = System.currentTimeMillis() - startExecutionTime;
+			if(time > input.getParams().getTimeLimit()*60*1000){
+				System.out.println(name()
+						+ "::hillClimbing + TIME LIMIT EXPIRED, BREAK");
+				timeLimitExpired = true;
+				break;
+			}
+			
 			VehicleTripCollection VTC = analyzeTrips(XR);
 			ArrayList<VehicleTrip> trips = VTC.trips;
 			//printTrips(XR);
@@ -1471,10 +1490,12 @@ public class RBrenntagMultiPickupDeliverySolver extends
 						+ sel_j + "] = " + t[sel_j].seqPointString()
 						+ ", START delta = " + minDelta);
 				System.out.println(name()
-						+ "::hillClimbing, PERFORM HILL CLIMBING, t[" + sel_i
+						+ "::hillClimbing, time = " + (time*0.001) + ", timeLimit = " + input.getParams().getTimeLimit()
+						+ ", PERFORM HILL CLIMBING, t[" + sel_i
 						+ "] = " + t[sel_i].seqPointString() + ", t[" + sel_j
 						+ "] = " + t[sel_j].seqPointString()
 						+ ", START delta = " + minDelta);
+				
 				// performMoveTrip(XR, t[sel_i],t[sel_j]);
 				performMoveTrip(XR, t[sel_i], t[sel_j], DIXAVEGAN);
 				/*
@@ -1496,6 +1517,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 	}
 
 	public void hillClimbingNewVehicle(boolean loadConstraint) {
+		// timelimit in seconds
 		log(name() + "::hillClimbingNewVehicle START XR = " + toStringShort(XR)
 				+ ", START-COST = " + cost.getValue());
 		if (!checkAllSolution(XR)) {
@@ -1508,8 +1530,16 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		logTrips(XR);
 
 		// if(true) return;
-
+		
 		while (true) {
+			double time = System.currentTimeMillis() - startExecutionTime;
+			if(time > input.getParams().getTimeLimit()*60*1000){
+				System.out.println(name()
+					+ "::hillClimbingNewVehicle + TIME LIMIT EXPIRED, BREAK");
+				timeLimitExpired = true;
+				break;
+			}
+			
 			VehicleTripCollection VTC = analyzeTrips(XR);
 			ArrayList<VehicleTrip> trips = VTC.trips;
 			//printTrips(XR);
@@ -1570,7 +1600,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 						+ sel_j + "] = " + t[sel_j].seqPointString()
 						+ ", START delta = " + minDelta + ", select vehicle " + mPoint2Vehicle.get(XR.startPoint(sel_k)).getWeight());
 				System.out.println(name()
-						+ "::hillClimbingNewVehicle, PERFORM HILL CLIMBING, "
+						+ "::hillClimbingNewVehicle, time = " + (time*0.001) + ", timeLimit = " + 
+						input.getParams().getTimeLimit() + 
+						", PERFORM HILL CLIMBING, "
 						//+ "t[" + sel_i
 						//+ "] = " + t[sel_i].seqPointString() + ", t[" + sel_j
 						//+ "] = " + t[sel_j].seqPointString()
