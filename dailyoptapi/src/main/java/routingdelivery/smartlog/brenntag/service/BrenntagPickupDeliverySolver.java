@@ -5023,6 +5023,11 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				// String vehicleCode = getVehicle(k - 1).getCode();
 				Vehicle vh = getVehicle(v);// mPoint2Vehicle.get(XR.startPoint(k));
 				String vehicleCode = vh.getCode();
+				Point s = XR.startPoint(k);
+				Vehicle vhr = mPoint2Vehicle.get(s);
+				if(!isInternalVehicle(vh) && isInternalVehicle(vhr)){
+					forbidden[v][k-1] = true;
+				}
 				for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
 						.next(p)) {
 					String locationCode = mPoint2LocationCode.get(p);
@@ -7079,6 +7084,26 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		return sol;
 	}
 
+	public void rearrangeExploitAllInternalVehicles(VarRoutesVR XR){
+		// DO NOTHING
+		if(true) return;
+		HashSet<Vehicle> notUsedVehicle = new HashSet<Vehicle>();
+		HashSet<Vehicle> usedVehicle = new HashSet<Vehicle>();
+		for(int k = 1; k <= XR.getNbRoutes(); k++){
+			Point s = XR.startPoint(k);
+			Vehicle vh = mPoint2Vehicle.get(s);
+			if(isInternalVehicle(vh))usedVehicle.add(vh);
+		}
+		for(int i = 0; i < vehicles.length; i++){
+			Vehicle vh = vehicles[i];
+			if(!usedVehicle.contains(vh)) notUsedVehicle.add(vh);
+		}
+		
+		VehicleTripCollection VTC = analyzeTrips(XR);
+		ArrayList<VehicleTrip> trips = VTC.trips;
+		
+	}
+	
 	public void reassignVehiclePrioritizeInternalVehicles(
 			PickupDeliverySolution sol) {
 		HashSet<Vehicle> notUsedVehicles = new HashSet<Vehicle>();// internal
