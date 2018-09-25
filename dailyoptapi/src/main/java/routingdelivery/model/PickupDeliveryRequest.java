@@ -1,5 +1,7 @@
 package routingdelivery.model;
 
+import com.havestplanning.utils.DateTimeUtils;
+
 public class PickupDeliveryRequest {
 	private String orderID;
 	private String orderCode;
@@ -35,7 +37,9 @@ public class PickupDeliveryRequest {
 		this.splitDelivery = splitDelivery;
 		this.description = description;
 	}
-	
+	public void extendLateDelivery(int delta){
+		lateDeliveryTime = DateTimeUtils.extendDateTime(lateDeliveryTime, delta);
+	}
 	public String getOrderCode() {
 		return orderCode;
 	}

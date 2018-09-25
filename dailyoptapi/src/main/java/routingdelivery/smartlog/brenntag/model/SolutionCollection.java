@@ -15,7 +15,13 @@ public class SolutionCollection {
 	public PickupDeliverySolution get(int i){
 		return solutions.get(i);
 	}
+	public PickupDeliverySolution getLast(){
+		if(size() == 0) return null;
+		return solutions.get(size()-1);
+	}
+	
 	public int size(){
 		return solutions.size();
 	}
+	
 }

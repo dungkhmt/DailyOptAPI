@@ -3,9 +3,27 @@ package routingdelivery.model;
 public class ConfigParams {
 	private String intCity;
 	private String internalVehicleFirst; 
+	private int extendLateDelivery;
 	private int timeLimit;// in minute
 	
 	
+
+	public ConfigParams(String intCity, String internalVehicleFirst,
+			int extendLateDelivery, int timeLimit) {
+		super();
+		this.intCity = intCity;
+		this.internalVehicleFirst = internalVehicleFirst;
+		this.extendLateDelivery = extendLateDelivery;
+		this.timeLimit = timeLimit;
+	}
+
+	public int getExtendLateDelivery() {
+		return extendLateDelivery;
+	}
+
+	public void setExtendLateDelivery(int extendLateDelivery) {
+		this.extendLateDelivery = extendLateDelivery;
+	}
 
 	public ConfigParams(String intCity, String internalVehicleFirst,
 			int timeLimit) {

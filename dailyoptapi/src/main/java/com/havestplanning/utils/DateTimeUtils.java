@@ -5,6 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DateTimeUtils {
+	public static String extendDateTime(String dt, int s){// s seconds
+		long d = dateTime2Int(dt);
+		return unixTimeStamp2DateTime(d + s);
+	}
 	public static String date2YYYYMMDD(Date d){
 		SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-DD");
 		
@@ -147,5 +151,7 @@ public class DateTimeUtils {
 		System.out.println(DT);
 		
 		System.out.println(DateTimeUtils.currentDate());
+		
+		System.out.println(DateTimeUtils.extendDateTime(dt, 1800));
 	}
 }

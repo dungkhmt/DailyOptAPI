@@ -1225,8 +1225,6 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		if (arrival_depot > end_work_time_vehicle && end_work_time_vehicle >= 0)
 			return false;
 
-		
-
 		return true;
 	}
 
@@ -5025,8 +5023,8 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				String vehicleCode = vh.getCode();
 				Point s = XR.startPoint(k);
 				Vehicle vhr = mPoint2Vehicle.get(s);
-				if(!isInternalVehicle(vh) && isInternalVehicle(vhr)){
-					forbidden[v][k-1] = true;
+				if (!isInternalVehicle(vh) && isInternalVehicle(vhr)) {
+					forbidden[v][k - 1] = true;
 				}
 				for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
 						.next(p)) {
@@ -6312,14 +6310,13 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				Item I = r.getItems()[j];
 				boolean okdelivery = false;
 				for (int k = 0; k < nbVehicles; k++) {
-					//Trip t = createDirectTrip4OnItem(k, pickuplocationIndex,
-					//		deliveryLocationIndex, I, r.getFixLoadTime(),
-					//		r.getFixUnloadTime());
+					// Trip t = createDirectTrip4OnItem(k, pickuplocationIndex,
+					// deliveryLocationIndex, I, r.getFixLoadTime(),
+					// r.getFixUnloadTime());
 					boolean check = canVehicleDelivery(k, pickuplocationIndex,
 							deliveryLocationIndex, I, r.getFixLoadTime(),
 							r.getFixUnloadTime());
-					
-					
+
 					if (check) {
 						okdelivery = true;
 						break;
@@ -7084,26 +7081,136 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		return sol;
 	}
 
-	public void rearrangeExploitAllInternalVehicles(VarRoutesVR XR){
+	public void rearrangeExploitAllInternalVehicles(VarRoutesVR XR) {
 		// DO NOTHING
-		if(true) return;
+		if (true)
+			return;
 		HashSet<Vehicle> notUsedVehicle = new HashSet<Vehicle>();
 		HashSet<Vehicle> usedVehicle = new HashSet<Vehicle>();
+		for (int k = 1; k <= XR.getNbRoutes(); k++) {
+			Point s = XR.startPoint(k);
+			Vehicle vh = mPoint2Vehicle.get(s);
+			if (isInternalVehicle(vh))
+				usedVehicle.add(vh);
+		}
+		for (int i = 0; i < vehicles.length; i++) {
+			Vehicle vh = vehicles[i];
+			if (!usedVehicle.contains(vh))
+				notUsedVehicle.add(vh);
+		}
+
+		VehicleTripCollection VTC = analyzeTrips(XR);
+		ArrayList<VehicleTrip> trips = VTC.trips;
+
+	}
+	public void reassignExternalVehicleOptimizeLoad(VarRoutesVR XR){
+		HashSet<Vehicle> notUsedExternalVehicles = new HashSet<Vehicle>();
+		HashMap<Vehicle, Integer> mVehicle2RouteIndex = new HashMap<Vehicle, Integer>();
 		for(int k = 1; k <= XR.getNbRoutes(); k++){
 			Point s = XR.startPoint(k);
 			Vehicle vh = mPoint2Vehicle.get(s);
-			if(isInternalVehicle(vh))usedVehicle.add(vh);
-		}
-		for(int i = 0; i < vehicles.length; i++){
-			Vehicle vh = vehicles[i];
-			if(!usedVehicle.contains(vh)) notUsedVehicle.add(vh);
+			mVehicle2RouteIndex.put(vh, k);
+			if(XR.emptyRoute(k) && !isInternalVehicle(vh)){
+				notUsedExternalVehicles.add(vh);
+			}
 		}
 		
 		VehicleTripCollection VTC = analyzeTrips(XR);
-		ArrayList<VehicleTrip> trips = VTC.trips;
+		
+		
+		for(int k = 1; k <= XR.getNbRoutes(); k++){
+			Point s = XR.startPoint(k);
+			Vehicle vh = mPoint2Vehicle.get(s);
+			if(XR.emptyRoute(k)) continue;
+			if(isInternalVehicle(vh)) continue;
+			
+			double load = 0;
+			for(VehicleTrip t: VTC.mVehicle2Trips.get(vh)){
+				if(load < t.load) load = t.load;
+			}
+			Vehicle sel_v = null;
+			double minW = -1;//Integer.MAX_VALUE;
+			for(Vehicle v: notUsedExternalVehicles){
+				if(v.getWeight() >= load && v.getWeight() < vh.getWeight()){
+					if(sel_v == null){
+						sel_v = v; minW = v.getWeight();
+					}else{
+						if(minW > v.getWeight()){
+							sel_v = v; minW = v.getWeight();
+						}
+					}
+				}
+			}
+			
+			if(sel_v != null){
+				int idx = mVehicle2RouteIndex.get(sel_v);
+				Point startPoint = XR.startPoint(idx);
+				mPoint2Vehicle.put(startPoint, vh);
+				mPoint2Vehicle.put(s, sel_v);
+				mVehicle2RouteIndex.put(sel_v, k);
+				mVehicle2RouteIndex.put(vh, idx);
+			}
+		}
 		
 	}
 	
+	public void reassignVehiclePrioritizeInternalVehicles(VarRoutesVR XR) {
+		HashSet<Vehicle> notUsedVehicles = new HashSet<Vehicle>();// internal
+		// vehicles
+		// not-used
+		HashSet<Vehicle> usedVehicles = new HashSet<Vehicle>();// internal
+		// vehicles used
+		HashMap<Vehicle, Integer> mVehicle2RouteIndex = new HashMap<Vehicle, Integer>();
+		
+		for (int i = 0; i < vehicles.length; i++)
+			notUsedVehicles.add(vehicles[i]);
+
+		for(int k = 1; k <= XR.getNbRoutes(); k++){
+			Point s = XR.startPoint(k);
+			Vehicle vh = mPoint2Vehicle.get(s);
+			mVehicle2RouteIndex.put(vh, k);
+			if(XR.emptyRoute(k)) continue;
+			
+			log(name() + "::reassignVehiclePrioritizeInternalVehicles, routed Vehicle " + vh.getCode() + ", cap = " + vh.getWeight());
+			if(isInternalVehicle(vh)){
+				usedVehicles.add(vh);
+				notUsedVehicles.remove(vh);
+			}
+		}
+		log(name() + "::reassignVehiclePrioritizeInternalVehicles, notUsedVehicle.sz = " + notUsedVehicles.size());
+		for(Vehicle v: notUsedVehicles){
+			log(name() + "::reassignVehiclePrioritizeInternalVehicles, notUsedVehicle " + v.getCode() + ", cap = " + v.getWeight());
+		}
+		for(int k = 1; k <= XR.getNbRoutes(); k++){
+			if(XR.emptyRoute(k)) continue;
+			
+			Point s = XR.startPoint(k);
+			Vehicle vh = mPoint2Vehicle.get(s);
+			if (!usedVehicles.contains(vh)) {
+				log(name() + "::reassignVehiclePrioritizeInternalVehicles, external vehicle " + vh.getCode() + ", cap = " + vh.getWeight());
+				for (Vehicle ivh : notUsedVehicles) {
+					if (equalVehicle(vh, ivh)) {
+					//if(Math.abs(vh.getWeight()-ivh.getWeight()) < 0.1){
+						int idx = mVehicle2RouteIndex.get(ivh);
+						usedVehicles.add(ivh);
+						notUsedVehicles.remove(ivh);
+						//rs.setVehicle(ivh);
+						mPoint2Vehicle.put(s, ivh);
+						Point startP = XR.startPoint(idx);
+						mPoint2Vehicle.put(startP, vh);
+						mVehicle2RouteIndex.put(ivh, k);
+						mVehicle2RouteIndex.put(vh, idx);
+						
+						log(name() + "::reassignVehiclePrioritizeInternalVehicles, REPLACE ["
+								+ vh.getCode() + "," + vh.getWeight() + "] by"
+								+ "  [" + ivh.getCode() + "," + ivh.getWeight());
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	public void reassignVehiclePrioritizeInternalVehicles(
 			PickupDeliverySolution sol) {
 		HashSet<Vehicle> notUsedVehicles = new HashSet<Vehicle>();// internal

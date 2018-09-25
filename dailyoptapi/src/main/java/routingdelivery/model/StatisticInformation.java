@@ -3,12 +3,46 @@ package routingdelivery.model;
 public class StatisticInformation {
 	private double totalDistance;
 	private int numberTrucks;
+	private int numberInternalTrucks;
+	private int numberExternalTrucks;
+	
 	private String executionTime;
 	private String timeLimitExpired;
+	
 	private StatisticRoute[] routeInfo;
 	
 	
 	
+	public StatisticInformation(double totalDistance, int numberTrucks,
+			int numberInternalTrucks, int numberExternalTrucks,
+			String executionTime, String timeLimitExpired,
+			StatisticRoute[] routeInfo) {
+		super();
+		this.totalDistance = totalDistance;
+		this.numberTrucks = numberTrucks;
+		this.numberInternalTrucks = numberInternalTrucks;
+		this.numberExternalTrucks = numberExternalTrucks;
+		this.executionTime = executionTime;
+		this.timeLimitExpired = timeLimitExpired;
+		this.routeInfo = routeInfo;
+	}
+
+	public int getNumberInternalTrucks() {
+		return numberInternalTrucks;
+	}
+
+	public void setNumberInternalTrucks(int numberInternalTrucks) {
+		this.numberInternalTrucks = numberInternalTrucks;
+	}
+
+	public int getNumberExternalTrucks() {
+		return numberExternalTrucks;
+	}
+
+	public void setNumberExternalTrucks(int numberExternalTrucks) {
+		this.numberExternalTrucks = numberExternalTrucks;
+	}
+
 	public StatisticInformation(double totalDistance, int numberTrucks,
 			String executionTime, String timeLimitExpired,
 			StatisticRoute[] routeInfo) {
