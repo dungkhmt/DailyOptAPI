@@ -12,6 +12,9 @@ public class SolutionCollection {
 	public void add(PickupDeliverySolution s){
 		solutions.add(s);
 	}
+	public void remove(int i){
+		solutions.remove(i);
+	}
 	public PickupDeliverySolution get(int i){
 		return solutions.get(i);
 	}

@@ -1128,9 +1128,11 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 							+ getVehicle(vehicle_index).getCode()
 							+ ", INFO TRIP = " + t.toString());
 				}
+				Vehicle sel_vh = getVehicle(vehicle_index);
 				trips[vehicle_index].add(t);
 				// System.out.println("CONSIDER OK********************");
-				log(name() + "::loadFTLToVehicle, create-trip " + t.toString());
+				log(name() + "::loadFTLToVehicle, create-trip " + t.toString() + " for vehicle " + sel_vh.getCode() +
+						", GOT trips.sz = " + trips[vehicle_index].size());
 				log(name()
 						+ "::loadFTLToVehicle, CONSIDER OK********************");
 				return collectItems;
@@ -3096,6 +3098,246 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		// + distinct_pickupLocationCodes.size());
 
 	}
+	public void processMergeOrderItemsFTLInternalVehicleFIRST(String pickuplocationCode,
+			String deliveryLocationCode, HashSet<Integer> RI) {
+		// pre-schedule FTL for items of requests in RI from pickupLocationCode
+		// -> deliveryLocationCode
+		
+		 //System.out.println(name() + "::processMergeOrderItemsFTL(" +
+		 //pickuplocationCode + "," + deliveryLocationCode + ", RI.sz = " +
+		 //RI.size() + ")"); 
+		 
+		 log(name() + "::processMergeOrderItemsFTLInternalVehicleFIRST(" +
+		 pickuplocationCode + "," + deliveryLocationCode + ", RI.sz = " +
+		 RI.size() + ") RBrenntagMultiPickupDelivery");
+		 
+
+		String debug_delivery_location_code = "";
+
+		int pi = mLocationCode2Index.get(pickuplocationCode);
+		int di = mLocationCode2Index.get(deliveryLocationCode);
+		ArrayList<Item> a_items = new ArrayList<Item>();
+		for (int i : RI) {
+			for (int j = 0; j < requests[i].getItems().length; j++) {
+				Item I = requests[i].getItems()[j];
+				a_items.add(I);
+				if (deliveryLocationCode.equals(debug_delivery_location_code)) {
+					log(name() + "::processMergeOrderItemsFTLInternalVehicleFIRST, item "
+							+ I.getCode() + ", " + I.getWeight());
+				}
+			}
+		}
+		a_items = sortDecreasing(a_items);
+
+		ClusterItems CI = new ClusterItems(a_items);
+		clusterItems.add(CI);
+		mCluster2Index.put(CI, clusterItems.size() - 1);
+
+		int fix_load_time = -1;
+		int fix_unload_time = -1;
+		for (int i : RI) {
+			fix_load_time = requests[i].getFixLoadTime();
+			fix_unload_time = requests[i].getFixUnloadTime();
+			break;
+		}
+		if (fix_load_time < 0)
+			return;
+		int[] idx1 = sortDecreaseVehicleIndex(vehicles);
+		int[] idx2 = sortDecreaseVehicleIndex(externalVehicles);
+		int len1 = idx1.length;
+		int len2 = 0;
+		if (idx2 != null)
+			len2 = idx2.length;
+		int[] vehicle_index = new int[len1 + len2];
+		for (int i = 0; i < len1; i++)
+			vehicle_index[i] = idx1[i];
+
+		for (int i = 0; i < len2; i++)
+			vehicle_index[i + len1] = idx2[i];
+
+		int nbVehicles = vehicle_index.length;
+		int k = 0;
+		while (k < vehicle_index.length) {
+			if (a_items.size() == 0)
+				break;
+
+			if (deliveryLocationCode.equals(debug_delivery_location_code)
+					|| debug_delivery_location_code == null) {
+				double W = 0;
+				for (Item I : a_items)
+					W += I.getWeight();
+
+				if (deliveryLocationCode.equals(debug_delivery_location_code)) {
+					System.out
+							.print(name()
+									+ "::processMergeOrderItemsFTLInternalVehicleFIRST -> prepare LoadFTL for vehicle "
+									+ getVehicle(vehicle_index[k]).getCode()
+									+ ", cap = "
+									+ getVehicle(vehicle_index[k]).getWeight()
+									+ " a_items = " + a_items.size() + ", W = "
+									+ W + ", items = ");
+					for (int jj = 0; jj < a_items.size(); jj++) {
+						System.out.print(a_items.get(jj).getWeight() + ", ");
+					}
+					System.out.println();
+				}
+
+			}
+			/*
+			 * // find if a vehicle can load ALL for (int k1 = 0; k1 <
+			 * vehicle_index.length; k1++) { boolean ok =
+			 * canLoadAllFTLToVehicle(vehicle_index[k1], pi, di, a_items,
+			 * fix_load_time, fix_unload_time); if (ok) {// return if find ONE,
+			 * try to optimize this later if (deliveryLocationCode
+			 * .equals(debug_delivery_location_code) ||
+			 * debug_delivery_location_code == null) System.out .println(name()
+			 * + "::processMergeOrderItemsFTL at location " +
+			 * deliveryLocationCode +
+			 * " -> Can load all order to a vehicle --> RETURN"); return; } }
+			 */
+			ArrayList<Trip> T = new ArrayList<Trip>();
+			for (int k1 = 0; k1 < idx1.length; k1++) {
+				Trip t = createTripLoadAllFTLToVehicle(idx1[k1], pi,
+						di, a_items, fix_load_time, fix_unload_time);
+				Vehicle vh = getVehicle(idx1[k1]);
+				if (t != null){
+					T.add(t);
+				
+					log(name() + "::processMergeOrderItemsFTLInternalVehicleFIRST, FOUND FTL trip for vehicle " + vh.getCode());
+				}
+			}
+			if(T.size() == 0){
+				// consider external vehicles
+				if(idx2 != null)for (int k1 = 0; k1 < idx2.length; k1++) {
+					Trip t = createTripLoadAllFTLToVehicle(idx2[k1], pi,
+							di, a_items, fix_load_time, fix_unload_time);
+					Vehicle vh = getVehicle(idx2[k1]);
+					if (t != null){
+						T.add(t);
+					
+						log(name() + "::processMergeOrderItemsFTLInternalVehicleFIRST, FOUND FTL trip for vehicle " + vh.getCode());
+					}
+				}					
+			}
+			
+			/*
+			for (int k1 = 0; k1 < vehicle_index.length; k1++) {
+				Trip t = createTripLoadAllFTLToVehicle(vehicle_index[k1], pi,
+						di, a_items, fix_load_time, fix_unload_time);
+				Vehicle vh = getVehicle(vehicle_index[k1]);
+				if (t != null){
+					T.add(t);
+				
+					log(name() + "::processMergeOrderItemsFTLInternalVehicleFIRST, FOUND FTL trip for vehicle " + vh.getCode());
+				}
+			}
+			*/
+			
+			if (T.size() > 0) {
+				// ClusterItems cl = new ClusterItems(a_items);
+				// clusterItems.add(cl);
+				Trip sel_trip = null;
+				double minW = Integer.MAX_VALUE;
+				for (Trip t : T) {
+					int vh_idx = t.start.vehicleIndex;
+					matchTrips[vh_idx][clusterItems.size() - 1] = t;
+					
+					Vehicle vh = getVehicle(vh_idx);
+					// System.out.println(name()
+					// + "::processMergeOrderItemsFTL, T.sz = " + T.size() +
+					// ", vehicle weight = " + vh.getWeight()
+					// + ", MAX_INT = " + minW);
+
+					if (vh.getWeight() / 1000 < minW) {
+						minW = vh.getWeight() / 1000;
+						sel_trip = t;
+					}
+				}
+				// System.out.println(name()
+				// + "::processMergeOrderItemsFTL, T.sz = " + T.size());
+
+				// System.out.println(name()
+				// + "::processMergeOrderItemsFTL, vehicle = " +
+				// sel_trip.start.vehicleIndex);
+
+				Vehicle vh = getVehicle(sel_trip.start.vehicleIndex);
+				trips[sel_trip.start.vehicleIndex].add(sel_trip);
+				log(name() + "::processMergeOrderItemsFTLInternalVehicleFIRST, ADD-TRIP trips[" + vh.getCode() + "].sz = " + trips[sel_trip.start.vehicleIndex].size());
+				ArrayList<ItemAmount> IA = sel_trip.start.items;
+				Item[] items_of_trip = new Item[IA.size()];
+				for (int ii = 0; ii < IA.size(); ii++) {
+					items_of_trip[ii] = items.get(IA.get(ii).itemIndex);
+				}
+				mTrip2Items.put(sel_trip, items_of_trip);
+
+				for (Item I : a_items) {
+					removeScheduledItem(I);
+				}
+				return;
+			}
+
+			if (deliveryLocationCode.equals(debug_delivery_location_code))
+				log(name()
+						+ "::::processMergeOrderItemsFTLInternalVehicleFIRST, prepare LoadFTL for vehicle "
+						+ getVehicle(vehicle_index[k]).getCode()
+						+ ", a_items = " + a_items.size());
+
+			ArrayList<Item> collectItems = loadFTLToVehicle(vehicle_index[k],
+					pi, di, a_items, fix_load_time, fix_unload_time);
+
+			if (collectItems.size() == 0) {
+				// System.out.println(name()
+				// + "::processMergeOrderItemsFTL, vehicle " + k + "/" +
+				// nbVehicles + " -> loadFTLToVehicle FAILED");
+				k++;
+				// System.out
+				// .println("FAILED -> TRY LoadFTL for new vehicle, a_items = "
+				// + a_items.size());
+			} else {
+				if (log != null) {
+					Vehicle vh = getVehicle(vehicle_index[k]);
+					if (deliveryLocationCode
+							.equals(debug_delivery_location_code))
+						log.println(name()
+								+ "::processMergeOrderItemsFTLInternalVehicleFIRST, LOAD-FTL for vehicle "
+								+ vh.getCode() + "-" + vh.getVehicleCategory()
+								+ ", weight " + vh.getWeight()
+								+ ", remain weight = " + getTotalItemWeight());
+				}
+				System.out
+						.println(name()
+								+ "::processMergeOrderItemsFTLInternalVehicleFIRST, LOAD-FTL, remain weight = "
+								+ getTotalItemWeight());
+
+				if (deliveryLocationCode.equals(debug_delivery_location_code)
+						|| debug_delivery_location_code == null) {
+					System.out.print(name() + "::processMergeOrderItemsFTLInternalVehicleFIRST at "
+							+ deliveryLocationCode
+							+ " -> LoadFTL success for vehicle "
+							+ getVehicle(vehicle_index[k]).getCode()
+							+ ", cap = "
+							+ getVehicle(vehicle_index[k]).getWeight()
+							+ ", collectItems = " + collectItems.size() + ": ");
+					double w = 0;
+					for (int jj = 0; jj < collectItems.size(); jj++) {
+						System.out.print(collectItems.get(jj).getWeight()
+								+ ", ");
+						w += collectItems.get(jj).getWeight();
+					}
+					//System.out.println(", total served weight = " + w);
+				}
+
+				for (Item ite : collectItems) {
+					int idx = mItem2Index.get(ite);
+					PickupDeliveryRequest r = requests[mItemIndex2RequestIndex
+							.get(idx)];
+					// remove Item
+					removeItemFromRequest(r, ite);
+				}
+			}
+		}
+
+	}
 
 	public void processMergeOrderItemsFTL() {
 		initializeLog();
@@ -3122,10 +3364,17 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			// "::processMergeOrderItemsFTL, nbVehicles = " + nbVehicles +
 			// ", i = " + i + "/" + "distinct_locations.sz = " +
 			// distinct_deliveryLocationCodes.size());
+			
+			if(input.getParams().getInternalVehicleFirst().equals("Y")){
+				processMergeOrderItemsFTLInternalVehicleFIRST(distinct_pickupLocationCodes.get(i),
+						distinct_deliveryLocationCodes.get(i),
+						distinct_request_indices.get(i));
+					
+			}else{
 			processMergeOrderItemsFTL(distinct_pickupLocationCodes.get(i),
 					distinct_deliveryLocationCodes.get(i),
 					distinct_request_indices.get(i));
-
+			}
 		}
 
 		// finalizeLog();
@@ -7189,7 +7438,32 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			if (!usedVehicles.contains(vh)) {
 				log(name() + "::reassignVehiclePrioritizeInternalVehicles, external vehicle " + vh.getCode() + ", cap = " + vh.getWeight());
 				for (Vehicle ivh : notUsedVehicles) {
-					if (equalVehicle(vh, ivh)) {
+					boolean ok = true;
+					/*if(ivh.getCode().equals("51C-595.35")){
+						if(mVehicle2NotReachedLocations.get(ivh.getCode()) == null){
+							log(name() + "::reassignVehiclePrioritizeInternalVehicles, vehicle " + ivh.getCode() + " REACH ALL");
+						}else{
+							for(String lc: mVehicle2NotReachedLocations.get(ivh.getCode())){
+								log(name() + "::reassignVehiclePrioritizeInternalVehicles, vehicle " + ivh.getCode() + " FORBID " + lc);
+							}
+						}
+					}
+					*/
+					for(Point x = s; x != XR.endPoint(k); x = XR.next(x)){
+						String lcx = mPoint2LocationCode.get(x);
+						if(mVehicle2NotReachedLocations.get(ivh.getCode()) != null)
+							if(mVehicle2NotReachedLocations.get(ivh.getCode()).contains(lcx)){
+								/*if(ivh.getCode().equals("51C-595.20")){
+									log(name() + "::reassignVehiclePrioritizeInternalVehicles vehicle " + ivh.getCode() + 
+											" FORBID location " + lcx + " -> IGNORE");
+								}
+								*/
+								ok = false; break;
+							}
+					}
+					if(!ok) continue;
+					
+					if (equalVehicle(vh, ivh) || ivh.getWeight() >= vh.getWeight()) {
 					//if(Math.abs(vh.getWeight()-ivh.getWeight()) < 0.1){
 						int idx = mVehicle2RouteIndex.get(ivh);
 						usedVehicles.add(ivh);

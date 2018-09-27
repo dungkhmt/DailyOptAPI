@@ -5,6 +5,7 @@ public class StatisticInformation {
 	private int numberTrucks;
 	private int numberInternalTrucks;
 	private int numberExternalTrucks;
+	private int numberTrips;
 	
 	private String executionTime;
 	private String timeLimitExpired;
@@ -13,6 +14,29 @@ public class StatisticInformation {
 	
 	
 	
+	public StatisticInformation(double totalDistance, int numberTrucks,
+			int numberInternalTrucks, int numberExternalTrucks,
+			int numberTrips, String executionTime, String timeLimitExpired,
+			StatisticRoute[] routeInfo) {
+		super();
+		this.totalDistance = totalDistance;
+		this.numberTrucks = numberTrucks;
+		this.numberInternalTrucks = numberInternalTrucks;
+		this.numberExternalTrucks = numberExternalTrucks;
+		this.numberTrips = numberTrips;
+		this.executionTime = executionTime;
+		this.timeLimitExpired = timeLimitExpired;
+		this.routeInfo = routeInfo;
+	}
+
+	public int getNumberTrips() {
+		return numberTrips;
+	}
+
+	public void setNumberTrips(int numberTrips) {
+		this.numberTrips = numberTrips;
+	}
+
 	public StatisticInformation(double totalDistance, int numberTrucks,
 			int numberInternalTrucks, int numberExternalTrucks,
 			String executionTime, String timeLimitExpired,
