@@ -313,8 +313,8 @@ public class TestAPI {
 		
 		//if(true)return solver.computeVehicleSuggestion(input);
 		
-		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
-		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		//solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
 		
 		if(input.getParams().getTimeLimit() == 0)
 			input.getParams().setTimeLimit(10);
@@ -339,13 +339,24 @@ public class TestAPI {
 				PickupDeliveryRequest[] req1 = input.cloneRequests();
 				PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
 				PickupDeliverySolution[] solutions = solver.collectSolutions();
+				for(int i = 0; i < solutions.length; i++){
+					solutions[i].setDescription(solutions[i].getDescription() + " ORIGINAL");
+				}
 				PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
-				if(input.getParams().getExtendLateDelivery() == 0){
+				if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
 					return ms;
 				}
 				ArrayList<PickupDeliverySolution> L = new ArrayList<PickupDeliverySolution>();
 				for(int i = 0; i < solutions.length; i++) L.add(solutions[i]);
 				
+				for(int i = 0; i < input.getVehicles().length; i++){
+					Vehicle vh = input.getVehicles()[i];
+					vh.setWeight(vh.getWeight() + input.getParams().getExtendCapacity());
+				}
+				for(int i = 0; i < input.getVehicleCategories().length; i++){
+					Vehicle vh = input.getVehicleCategories()[i];
+					vh.setWeight(vh.getWeight() + input.getParams().getExtendCapacity());
+				}
 				
 				input.setRequests(req1);
 				for(int i = 0; i < input.getRequests().length; i++){
@@ -354,6 +365,9 @@ public class TestAPI {
 				}
 				sol = solver.computeVehicleSuggestion(input);
 				PickupDeliverySolution[] ext_solutions = solver.collectSolutions();
+				for(int i = 0; i < ext_solutions.length; i++){
+					ext_solutions[i].setDescription(ext_solutions[i].getDescription() + " EXTEND");
+				}
 				for(int i = 0; i < ext_solutions.length; i++) L.add(ext_solutions[i]);
 				
 				PickupDeliverySolution[] final_solutions = new PickupDeliverySolution[L.size()];
@@ -367,7 +381,7 @@ public class TestAPI {
 			PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
 			PickupDeliverySolution[] solutions = solver.collectSolutions();
 			PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
-			if(input.getParams().getExtendLateDelivery() == 0){
+			if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
 				return ms;
 			}
 			

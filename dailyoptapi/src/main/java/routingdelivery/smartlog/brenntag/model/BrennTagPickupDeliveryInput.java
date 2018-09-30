@@ -142,4 +142,33 @@ public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
 		// TODO Auto-generated constructor stub
 	}
 	
+	public String analyzeDistanceAndTravelTime(){
+		double maxD = -1;
+		double maxT = -1;
+		double minD = Integer.MAX_VALUE;
+		double minT = Integer.MAX_VALUE;
+		
+		for(int k = 0; k < this.travelTime.length; k++){
+			DistanceElement de = this.travelTime[k];
+			String src = de.getSrcCode();
+			String dest = de.getDestCode();
+			if(!src.equals(dest)){
+				if(minT > de.getDistance()) minT = de.getDistance();
+				if(maxT < de.getDistance()) maxT = de.getDistance();
+			}
+		}
+	
+		for(int k = 0; k < this.getDistances().length; k++){
+			DistanceElement de = this.getDistances()[k];
+			String src = de.getSrcCode();
+			String dest = de.getDestCode();
+			if(!src.equals(dest)){
+				if(minD > de.getDistance()) minD = de.getDistance();
+				if(maxD < de.getDistance()) maxD = de.getDistance();
+			}
+		}
+	
+		String rs = "minD = " + minD + ", maxD = " + maxD + ", minT = " + minT + ", maxT = " + maxT;
+		return rs;
+	}
 }

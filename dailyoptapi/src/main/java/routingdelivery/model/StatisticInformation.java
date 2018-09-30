@@ -1,6 +1,10 @@
 package routingdelivery.model;
 
+import routingdelivery.smartlog.brenntag.model.SolutionIndicator;
+
 public class StatisticInformation {
+	private SolutionIndicator indicator;
+	
 	private double totalDistance;
 	private int numberTrucks;
 	private int numberInternalTrucks;
@@ -14,6 +18,30 @@ public class StatisticInformation {
 	
 	
 	
+	public StatisticInformation(SolutionIndicator indicator,
+			double totalDistance, int numberTrucks, int numberInternalTrucks,
+			int numberExternalTrucks, int numberTrips, String executionTime,
+			String timeLimitExpired, StatisticRoute[] routeInfo) {
+		super();
+		this.indicator = indicator;
+		this.totalDistance = totalDistance;
+		this.numberTrucks = numberTrucks;
+		this.numberInternalTrucks = numberInternalTrucks;
+		this.numberExternalTrucks = numberExternalTrucks;
+		this.numberTrips = numberTrips;
+		this.executionTime = executionTime;
+		this.timeLimitExpired = timeLimitExpired;
+		this.routeInfo = routeInfo;
+	}
+
+	public SolutionIndicator getIndicator() {
+		return indicator;
+	}
+
+	public void setIndicator(SolutionIndicator indicator) {
+		this.indicator = indicator;
+	}
+
 	public StatisticInformation(double totalDistance, int numberTrucks,
 			int numberInternalTrucks, int numberExternalTrucks,
 			int numberTrips, String executionTime, String timeLimitExpired,
