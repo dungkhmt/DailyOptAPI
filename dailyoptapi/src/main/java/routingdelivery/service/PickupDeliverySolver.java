@@ -2391,7 +2391,7 @@ public class PickupDeliverySolver {
 		// return Integer.MAX_VALUE;
 	}
 	public boolean fixVehicleTrip(Vehicle vh, VehicleTrip t){
-		if(true)return false;
+		//if(true)return false;
 		
 		int idx = mVehicle2Index.get(vh);
 		for(Point p: t.seqPoints){
@@ -2399,10 +2399,10 @@ public class PickupDeliverySolver {
 				int idxP = mDeliveryPoint2DeliveryIndex.get(p);
 				if(CHECK_AND_LOG){
 					log(name() + "::fixVehicleTrip, idx vehicle = " + idx + ", idxP = " + idxP);
-					System.out.println(name() + "::fixVehicleTrip, idx vehicle = " + idx + ", idxP = " + idxP);
+					//System.out.println(name() + "::fixVehicleTrip, idx vehicle = " + idx + ", idxP = " + idxP);
 					if(fixVehiclePoint == null)
 						System.out.println(name() + "::fixVehicleTrip, idx vehicle = " + 
-					idx + ", idxP = " + idxP + ", fixVehiclePoint = NULLNULL");
+					idx + ", idxP = " + idxP + ", fixVehiclePoint = NULLNULL, BUG???");
 				}
 				if(fixVehiclePoint[idx][idxP]) return true;
 			}

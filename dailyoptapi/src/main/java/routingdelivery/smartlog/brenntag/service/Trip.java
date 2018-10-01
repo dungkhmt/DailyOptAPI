@@ -12,7 +12,7 @@ public class Trip {
 	public RouteNode start;
 	public RouteNode end;
 	public String type;
-	public Vehicle vh;
+	private Vehicle vh;
 	BrenntagPickupDeliverySolver solver;
 	
 	public Trip(RouteNode start, RouteNode end, String type) {
@@ -21,8 +21,17 @@ public class Trip {
 		this.end = end;
 		this.type = type;
 		this.solver = start.solver;
+		this.vh = solver.getVehicle(start.vehicleIndex);
 	}
 	
+	public Vehicle getVh() {
+		return vh;
+	}
+
+	public void setVh(Vehicle vh) {
+		this.vh = vh;
+	}
+
 	public boolean checkTime(){
 		return start.checkPickupTime() && end.checkDeliveryTime();
 	}

@@ -17,6 +17,7 @@ import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
 import routingdelivery.smartlog.brenntag.model.ClusterItems;
 import routingdelivery.smartlog.brenntag.model.ExclusiveVehicleLocation;
 import routingdelivery.smartlog.brenntag.model.ModelRoute;
+import routingdelivery.smartlog.brenntag.model.PairInt;
 import routingdelivery.smartlog.brenntag.model.SolutionCollection;
 import routingdelivery.smartlog.brenntag.model.VehicleTrip;
 import routingdelivery.smartlog.brenntag.model.VehicleTripCollection;
@@ -58,9 +59,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		// pre-schedule FTL for items of requests in RI from pickupLocationCode
 		// -> deliveryLocationCode
 
-		// System.out.println(name() + "::processMergeOrderItemsFTL(" +
-		// pickuplocationCode + "," + deliveryLocationCode + ", RI.sz = " +
-		// RI.size() + ")");
+		System.out.println(name() + "::processMergeOrderItemsFTL(" +
+		pickuplocationCode + "," + deliveryLocationCode + ", RI.sz = " +
+		RI.size() + ") NEWNEWNEW");
 
 		log(name() + "::processMergeOrderItemsFTL(" + pickuplocationCode + ","
 				+ deliveryLocationCode + ", RI.sz = " + RI.size()
@@ -195,6 +196,11 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				log(name() + "::processMergeOrderItemsFTL, ADD-TRIP trips["
 						+ vh.getCode() + "].sz = "
 						+ trips[sel_trip.start.vehicleIndex].size());
+				System.out.println(name() + "::processMergeOrderItemsFTL, ADD-TRIP trips["
+						+ vh.getCode() + "].sz = "
+						+ trips[sel_trip.start.vehicleIndex].size());
+				System.out.println(name() + "::processMergeOrderItemsFTL, ADD-TRIP vehicle of trip = " + sel_trip.getVh().getCode());
+				
 				ArrayList<ItemAmount> IA = sel_trip.start.items;
 				Item[] items_of_trip = new Item[IA.size()];
 				for (int ii = 0; ii < IA.size(); ii++) {
@@ -452,22 +458,10 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				I[j] = input.getRequests()[i].getItems()[j].clone();
 			bkReq[i].setItems(I);
 		}
-		/*
-		 * mVehicle2NotReachedLocations = new HashMap<String,
-		 * HashSet<String>>(); if(input.getVehicles() != null) for(int i = 0; i
-		 * < input.getVehicles().length; i++){ Vehicle v =
-		 * input.getVehicles()[i]; mVehicle2NotReachedLocations.put(v.getCode(),
-		 * new HashSet<String>()); } if(input.getExclusiveVehicleLocations() !=
-		 * null){ for(int i = 0; i <
-		 * input.getExclusiveVehicleLocations().length; i++){
-		 * ExclusiveVehicleLocation e = input.getExclusiveVehicleLocations()[i];
-		 * if(mVehicle2NotReachedLocations.get(e.getVehicleCode())!=null)
-		 * mVehicle2NotReachedLocations
-		 * .get(e.getVehicleCode()).add(e.getLocationCode()); } }
-		 */
-
 		solutionCollection = new SolutionCollection(10);
 		while (true) {
+			System.out.println(name() + "::computeVehicleSuggestion, while(true)...");
+					
 			if (firstTrial) {
 				generateVehicles(input, rep);
 				firstTrial = false;
@@ -567,17 +561,20 @@ public class RBrenntagMultiPickupDeliverySolver extends
 					sol.setDescription("KO");
 					return sol;
 				} else {
+					System.out.println(name() + "::computeVehicleSuggestion"
+							+ ", after mergeOrderItemsFTL -> remainItemRequests = "
+							+ remainItemRequests + " --> continue");
 					continue;
 				}
 			}
 
-			if (log != null) {
-				log.println(name()
-						+ "::computeVehicleSuggestion, external vehicles = "
-						+ input.getExternalVehicles().length
-						+ " AFTER MERGE FTL orders, REMAIN WEIGHT = "
-						+ getTotalItemWeight());
-			}
+			//if (log != null) {
+			//	log.println(name()
+			//			+ "::computeVehicleSuggestion, external vehicles = "
+			//			+ input.getExternalVehicles().length
+			//			+ " AFTER MERGE FTL orders, REMAIN WEIGHT = "
+			//			+ getTotalItemWeight());
+			//}
 
 			/*
 			System.out.println("AFTER MERGE FTL");
@@ -614,6 +611,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			
 			disableSplitRequests();
 			
+			System.out.println(name()
+			+ "::computeVehicleSuggestion, START mapData");
 			mapData();
 
 			
@@ -647,7 +646,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 						+ remainUnScheduled.size());
 			}
 			System.out
-					.println("LOOP, externalVehicles = "
+					.println(name()
+							+ "::computeVehicleSuggestion, LOOP, externalVehicles = "
 							+ externalVehicles.length + ", REMAIN "
 							+ remainUnScheduled.size() + ", lastRemain = "
 							+ lastRemain);
@@ -1246,15 +1246,48 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		mPickupPoint2PickupIndex = new HashMap<Point, Integer>();
 		mDeliveryPoint2DeliveryIndex = new HashMap<Point, Integer>();
 
-		M = vehicles.length + externalVehicles.length;
+		M = 0;
+		int nbInternalVehicles = 0;
+		if(vehicles != null){
+			M += vehicles.length;
+			nbInternalVehicles = vehicles.length;
+		}
+		if(externalVehicles != null)
+			M += externalVehicles.length;
+		
+		mVehicle2Index = new HashMap<Vehicle, Integer>();
+		if(vehicles != null){
+			for(int i = 0; i < vehicles.length; i++){
+				mVehicle2Index.put(vehicles[i], i);
+				//System.out.println(name() + "::initPoints, mVehicle2Index.put(" + vehicles[i].getCode() + "," + i);
+			}
+		}
+		if(externalVehicles != null){
+			for(int i = 0; i < externalVehicles.length; i++){
+				mVehicle2Index.put(externalVehicles[i], i+nbInternalVehicles);
+				//System.out.println(name() + "::initPoints, mVehicle2Index.put(" + 
+				//externalVehicles[i].getCode() + "," + mVehicle2Index.get(externalVehicles[i]));
+			}
+		}
 		int idxPoint = -1;
 		HashSet<String> IC = new HashSet<String>();
-
+		ArrayList<PairInt> PI = new ArrayList<PairInt>();
+		
 		// create points from init FTL trips
 		for (int k = 0; k < M; k++) {
 			if (trips[k].size() > 0) {
 				for (int j = 0; j < trips[k].size(); j++) {
 					Trip t = trips[k].get(j);
+					if(t.getVh() == null){
+						System.out.println(name() + "::initPoints, trip " + t.toStringShort() + ", DOES NOT MAP VEHICLE, BUG???");
+						log(name() + "::initPoints, trip " + t.toStringShort() + ", DOES NOT MAP VEHICLE, BUG???");
+					}
+					if(mVehicle2Index.get(t.getVh()) == null){
+						System.out.println(name() + "::initPoints, vehicle " + t.getVh().getCode() + ", NOT MAP INDEX, BUG????");
+						log(name() + "::initPoints, vehicle " + t.getVh().getCode() + ", NOT MAP INDEX, BUG????");
+					}
+					int idxVH = mVehicle2Index.get(t.getVh());
+					
 					if (t.type.equals("FTL")) {// create new points
 						ArrayList<Integer> L = new ArrayList<Integer>();
 						for (int i = 0; i < t.start.items.size(); i++) {
@@ -1320,6 +1353,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 							mDeliveryPoint2DeliveryIndex.put(delivery,
 									deliveryPoints.size() - 1);
 
+							
+							PI.add(new PairInt(idxVH, mDeliveryPoint2DeliveryIndex.get(delivery)));
+							
 							mPoint2Index.put(delivery, idxPoint);
 							mPoint2LocationCode.put(delivery,
 									deliveryLocationCode);
@@ -1427,6 +1463,10 @@ public class RBrenntagMultiPickupDeliverySolver extends
 							mPoint2PossibleVehicles.put(delivery,
 									new HashSet<Integer>());
 
+							if(t.type.equals("COLLECT_TO_FTL")){
+								PI.add(new PairInt(idxVH, mDeliveryPoint2DeliveryIndex.get(delivery)));
+							}
+							
 							pickup2DeliveryOfGood.put(pickup, delivery);
 							allPoints.add(pickup);
 							allPoints.add(delivery);
@@ -1457,138 +1497,17 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				}
 			}
 		}
-
-		/*
-		 * processDistinctPickupDeliveryLocationCodes(); for (int I = 0; I <
-		 * distinct_deliveryLocationCodes.size(); I++) { String
-		 * pickupLocationCode = distinct_pickupLocationCodes.get(I); String
-		 * deliveryLocationCode = distinct_deliveryLocationCodes.get(I);
-		 * 
-		 * System.out.println("processMergeOrderItemsFTL(" +
-		 * distinct_pickupLocationCodes.get(I) + " --> " +
-		 * distinct_deliveryLocationCodes.get(I) + ", RI = " +
-		 * distinct_request_indices.get(I).size()); for (int i :
-		 * distinct_request_indices.get(I)) { System.out.print(i + ","); }
-		 * System.out.println(); for (int i : distinct_request_indices.get(I)) {
-		 * System.out.print(i + ": "); for (int jj = 0; jj <
-		 * requests[i].getItems().length; jj++) System.out.print("[Order" +
-		 * requests[i].getOrderID() + ", Item" +
-		 * requests[i].getItems()[jj].getCode() + "," +
-		 * requests[i].getItems()[jj].getWeight() + "] "); System.out.println();
-		 * }
-		 * 
-		 * ConflictBasedExtractor extractor = new ConflictBasedExtractor(this,
-		 * log); ArrayList<HashSet<Integer>> lstNonConflictRequests = extractor
-		 * .clusterRequestBasedItemConflict(distinct_request_indices .get(I));
-		 * 
-		 * for (HashSet<Integer> C : lstNonConflictRequests) {
-		 * 
-		 * idxPoint++; Point pickup = new Point(idxPoint);
-		 * pickupPoints.add(pickup); mPickupPoint2PickupIndex.put(pickup,
-		 * pickupPoints.size() - 1);
-		 * 
-		 * // mRequest2PointIndices.get(i).add(pickupPoints.size()-1); //
-		 * mPickupPoint2RequestIndex.put(pickup, i);
-		 * 
-		 * mPoint2Index.put(pickup, idxPoint); //
-		 * mPoint2LocationCode.put(pickup, //
-		 * requests[i].getPickupLocationCode()); mPoint2LocationCode.put(pickup,
-		 * pickupLocationCode);
-		 * 
-		 * double demand = 0; int pickupDuration = 0; int deliveryDuration = 0;
-		 * // for (int i : distinct_request_indices.get(I)) { for (int i : C) {
-		 * for (int j = 0; j < requests[i].getItems().length; j++) { demand =
-		 * demand + requests[i].getItems()[j].getWeight(); deliveryDuration =
-		 * deliveryDuration + requests[i].getItems()[j] .getDeliveryDuration();
-		 * pickupDuration = pickupDuration +
-		 * requests[i].getItems()[j].getPickupDuration(); } }
-		 * 
-		 * // for (int i : distinct_request_indices.get(I)) { for (int i : C) {
-		 * if (mPoint2Request.get(pickup) == null) mPoint2Request.put(pickup,
-		 * new ArrayList<PickupDeliveryRequest>());
-		 * mPoint2Request.get(pickup).add(requests[i]); }
-		 * 
-		 * mPoint2Demand.put(pickup, demand); // mPoint2Request.put(pickup,
-		 * requests[i]);
-		 * 
-		 * mPoint2Type.put(pickup, "P"); mPoint2PossibleVehicles.put(pickup, new
-		 * HashSet<Integer>());
-		 * 
-		 * int sz = 0; // for (int i : distinct_request_indices.get(I)) { for
-		 * (int i : C) { sz += requests[i].getItems().length; } Integer[] L =
-		 * new Integer[sz];
-		 * 
-		 * int idx = -1; // for (int i : distinct_request_indices.get(I)) { for
-		 * (int i : C) { for (int ii = 0; ii < requests[i].getItems().length;
-		 * ii++) { Item item = requests[i].getItems()[ii];
-		 * IC.add(item.getCode()); idx++; L[idx] = mItem2Index.get(item); } }
-		 * mPoint2IndexItems.put(pickup, L);
-		 * 
-		 * // for (int i : distinct_request_indices.get(I)) { for (int i : C) {
-		 * for (int j = 0; j < requests[i].getItems().length; j++)
-		 * mItem2ExclusiveItems.put( requests[i].getItems()[j].getCode(), new
-		 * HashSet<String>()); }
-		 * 
-		 * // delivery idxPoint++; Point delivery = new Point(idxPoint);
-		 * deliveryPoints.add(delivery);
-		 * mDeliveryPoint2DeliveryIndex.put(delivery, deliveryPoints.size() -
-		 * 1);
-		 * 
-		 * mPoint2Index.put(delivery, idxPoint); //
-		 * mPoint2LocationCode.put(delivery
-		 * ,requests[i].getDeliveryLocationCode());
-		 * mPoint2LocationCode.put(delivery, deliveryLocationCode);
-		 * mPoint2Demand.put(delivery, -demand); // mPoint2Request.put(delivery,
-		 * requests[i]);
-		 * 
-		 * // for (int i : distinct_request_indices.get(I)) { for (int i : C) {
-		 * if (mPoint2Request.get(delivery) == null)
-		 * mPoint2Request.put(delivery, new ArrayList<PickupDeliveryRequest>());
-		 * mPoint2Request.get(delivery).add(requests[i]); }
-		 * 
-		 * mPoint2Type.put(delivery, "D"); mPoint2PossibleVehicles.put(delivery,
-		 * new HashSet<Integer>()); // mPoint2LoadedItems.put(delivery, new
-		 * HashSet<String>());
-		 * 
-		 * pickup2DeliveryOfGood.put(pickup, delivery); allPoints.add(pickup);
-		 * allPoints.add(delivery);
-		 * 
-		 * int earliestAllowedArrivalTimePickup = -1; int
-		 * latestAllowedArrivalTimePickup = Integer.MAX_VALUE; int
-		 * earliestAllowedArrivalTimeDelivery = -1; int
-		 * latestAllowedArrivalTimeDelivery = Integer.MAX_VALUE;
-		 * 
-		 * // for (int i : distinct_request_indices.get(I)) { for (int i : C) {
-		 * if (earliestAllowedArrivalTimePickup < (int) DateTimeUtils
-		 * .dateTime2Int(requests[i].getEarlyPickupTime()))
-		 * earliestAllowedArrivalTimePickup = (int) DateTimeUtils
-		 * .dateTime2Int(requests[i].getEarlyPickupTime());
-		 * 
-		 * if (earliestAllowedArrivalTimeDelivery < (int) DateTimeUtils
-		 * .dateTime2Int(requests[i].getEarlyDeliveryTime()))
-		 * earliestAllowedArrivalTimeDelivery = (int) DateTimeUtils
-		 * .dateTime2Int(requests[i] .getEarlyDeliveryTime());
-		 * 
-		 * if (latestAllowedArrivalTimePickup > (int) DateTimeUtils
-		 * .dateTime2Int(requests[i].getLatePickupTime()))
-		 * latestAllowedArrivalTimePickup = (int) DateTimeUtils
-		 * .dateTime2Int(requests[i].getLatePickupTime());
-		 * 
-		 * if (latestAllowedArrivalTimeDelivery > (int) DateTimeUtils
-		 * .dateTime2Int(requests[i].getLateDeliveryTime()))
-		 * latestAllowedArrivalTimeDelivery = (int) DateTimeUtils
-		 * .dateTime2Int(requests[i].getLateDeliveryTime());
-		 * 
-		 * } earliestAllowedArrivalTime.put(pickup,
-		 * earliestAllowedArrivalTimePickup); serviceDuration.put(pickup,
-		 * pickupDuration); lastestAllowedArrivalTime.put(pickup,
-		 * latestAllowedArrivalTimePickup);
-		 * 
-		 * earliestAllowedArrivalTime.put(delivery,
-		 * earliestAllowedArrivalTimeDelivery); serviceDuration.put(delivery,
-		 * deliveryDuration); lastestAllowedArrivalTime.put(delivery,
-		 * latestAllowedArrivalTimeDelivery); } }
-		 */
+		if(CHECK_AND_LOG){
+			log(name()+ "::initPoints, nbVehicles = " + M + ", nbDelivery = " + deliveryPoints.size() + ", PI.sz = " + PI.size());
+		}
+		fixVehiclePoint = new boolean[M][deliveryPoints.size()];
+		for(int i = 0; i < M; i++)
+			for(int j = 0; j < deliveryPoints.size(); j++)
+				fixVehiclePoint[i][j] = false;
+		for(PairInt pi: PI){
+			fixVehiclePoint[pi.i][pi.j] = true;
+		}
+		
 		log(name() + "::initPoint, set of item codes = IC.sz = " + IC.size());
 
 		// init start-end points for vehicles
@@ -2662,15 +2581,15 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			for (int i = 0; i < t.length; i++) {
 				Vehicle vi = t[i].vehicle;
 				VehicleTrip vt1 = t[i];
-				///if (!isInternalVehicle(vi))
-				//	continue;
+				if (!isInternalVehicle(vi))
+					continue;
 				
 				for (int j = i+1; j < t.length; j++) {
 					Vehicle vj = t[j].vehicle;
 					VehicleTrip vt2 = t[j];
-					//if (!isInternalVehicle(vj))
-					//	continue;
-					// if(vi == vj) continue;
+					if (!isInternalVehicle(vj))
+						continue;
+					if(vi == vj) continue;
 
 					if(conflictTrips(vt1, vt2)) continue;
 					
@@ -2739,6 +2658,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				
 				performExchangeRequestPoints(XR, sel_pickup1, sel_delivery1, sel_vt2, sel_pickup2, sel_delivery2, sel_vt1, 
 						DIXAVEGAN, loadConstraint);
+				System.out
+				.println(name()
+						+ "::hillClimbingExchangeRequestPoints2Trips, after move, cost = " + cost.getValue());
 			}
 
 			if (!hasMove)

@@ -261,8 +261,8 @@ public class TestAPI {
 		
 		//if(true)return solver.computeVehicleSuggestion(input);
 		
-		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
-		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		//solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
 		
 		if(input.getParams().getTimeLimit() == 0)
 			input.getParams().setTimeLimit(10);
@@ -346,6 +346,7 @@ public class TestAPI {
 				if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
 					return ms;
 				}
+				
 				ArrayList<PickupDeliverySolution> L = new ArrayList<PickupDeliverySolution>();
 				for(int i = 0; i < solutions.length; i++) L.add(solutions[i]);
 				
@@ -363,6 +364,7 @@ public class TestAPI {
 					PickupDeliveryRequest r = input.getRequests()[i];
 					r.extendLateDelivery(input.getParams().getExtendLateDelivery());
 				}
+				
 				sol = solver.computeVehicleSuggestion(input);
 				PickupDeliverySolution[] ext_solutions = solver.collectSolutions();
 				for(int i = 0; i < ext_solutions.length; i++){
