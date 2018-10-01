@@ -8383,7 +8383,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			if(isInternalVehicle(vh)) continue;
 			double maxLoad = s.computeMaxLoad();
 			Vehicle sel_vc = null;
-			double minCap = Integer.MAX_VALUE;
+			double minCap = vh.getWeight();
 			if(input.getVehicleCategories() != null){
 				for(int j = 0; j < input.getVehicleCategories().length; j++){
 					Vehicle vc = input.getVehicleCategories()[j];
