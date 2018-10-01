@@ -71,6 +71,7 @@ import routingdelivery.model.Vehicle;
 import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
 import routingdelivery.smartlog.brenntag.model.ExclusiveItem;
 import routingdelivery.smartlog.brenntag.model.ExclusiveVehicleLocation;
+import routingdelivery.smartlog.brenntag.model.InputIndicator;
 import routingdelivery.smartlog.brenntag.model.ModelRoute;
 import routingdelivery.smartlog.brenntag.model.SolutionIndicator;
 import routingdelivery.smartlog.brenntag.model.VehicleTrip;
@@ -144,6 +145,8 @@ public class PickupDeliverySolver {
 
 	public HashMap<Integer, HashSet<Integer>> mRequest2PointIndices;
 
+	public InputIndicator inputIndicator;
+	
 	public HashMap<Point, Integer> earliestAllowedArrivalTime;
 	public HashMap<Point, Integer> serviceDuration;
 	public HashMap<Point, Integer> lastestAllowedArrivalTime;
@@ -265,6 +268,8 @@ public class PickupDeliverySolver {
 		double externalTruckLoad = 0;
 		double internalCapacity = 0;
 		double externalCapacity = 0;
+		double longestRoute = 0;
+		double shortestRoute = Integer.MAX_VALUE;
 		
 		VehicleTripCollection VTC = analyzeTrips(XR);
 		
@@ -272,10 +277,15 @@ public class PickupDeliverySolver {
 		
 		for(int k = 1; k <= XR.getNbRoutes(); k++){
 			if(XR.emptyRoute(k)) continue;
+			double dis = 0;
 			for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
-				distance += awm.getDistance(p, XR.next(p));
+				distance += getDistance(p, XR.next(p));//awm.getDistance(p, XR.next(p));
+				dis += getDistance(p, XR.next(p));//awm.getDistance(p, XR.next(p));
 			}
-			
+			if(longestRoute < dis) longestRoute = dis;
+			if(shortestRoute > dis) shortestRoute = dis;
+					
+					
 			Point s = XR.startPoint(k);
 			Vehicle vh = mPoint2Vehicle.get(s);
 			if(isInternalVehicle(vh)){
@@ -307,7 +317,7 @@ public class PickupDeliverySolver {
 		}
 		//SolutionIndicator I = new SolutionIndicator(distance, nbInternalTrucks, nbExternalTrucks, nbTrips, internalTruckLoad, externalTruckLoad);
 		SolutionIndicator I = new SolutionIndicator(distance, nbInternalTrucks, nbExternalTrucks, nbTrips, 
-				internalTruckLoad, externalTruckLoad, internalCapacity, externalCapacity);
+				internalTruckLoad, externalTruckLoad, internalCapacity, externalCapacity, longestRoute, shortestRoute);
 		
 		return I;
 	}
@@ -6760,6 +6770,7 @@ public class PickupDeliverySolver {
 		info.setNumberInternalTrucks(nbInternalTrucks);
 		info.setNumberTrips(trips.size());
 		info.setIndicator(indicator);
+		info.setInputIndicator(inputIndicator);
 		
 		long time = System.currentTimeMillis() - startExecutionTime;
 		time = time / 1000;

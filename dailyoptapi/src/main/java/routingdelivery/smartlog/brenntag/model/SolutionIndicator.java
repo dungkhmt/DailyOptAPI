@@ -12,6 +12,8 @@ public class SolutionIndicator {
 	private double externalTruckLoad;
 	private double internalCapacity;
 	private double externalCapacity;
+	private double longestRoute;
+	private double shortestRoute;
 	
 	public SolutionIndicator(double distance, int nbInternalTrucks,
 			int nbExternalTrucks, int nbTrips, double internalTruckLoad,
@@ -27,6 +29,40 @@ public class SolutionIndicator {
 		this.internalCapacity = internalCapacity;
 		this.externalCapacity = externalCapacity;
 	}
+	
+	public SolutionIndicator(double distance, int nbInternalTrucks,
+			int nbExternalTrucks, int nbTrips, double internalTruckLoad,
+			double externalTruckLoad, double internalCapacity,
+			double externalCapacity, double longestRoute, double shortestRoute) {
+		super();
+		this.distance = distance;
+		this.nbInternalTrucks = nbInternalTrucks;
+		this.nbExternalTrucks = nbExternalTrucks;
+		this.nbTrips = nbTrips;
+		this.internalTruckLoad = internalTruckLoad;
+		this.externalTruckLoad = externalTruckLoad;
+		this.internalCapacity = internalCapacity;
+		this.externalCapacity = externalCapacity;
+		this.longestRoute = longestRoute;
+		this.shortestRoute = shortestRoute;
+	}
+
+	public double getLongestRoute() {
+		return longestRoute;
+	}
+
+	public void setLongestRoute(double longestRoute) {
+		this.longestRoute = longestRoute;
+	}
+
+	public double getShortestRoute() {
+		return shortestRoute;
+	}
+
+	public void setShortestRoute(double shortestRoute) {
+		this.shortestRoute = shortestRoute;
+	}
+
 	public double getInternalCapacity() {
 		return internalCapacity;
 	}

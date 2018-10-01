@@ -670,6 +670,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			if (totalVehicleCategoryWeight < EPS)
 				break;// do not have external vehicle ->not need LOOP
 		}
+		
+		inputIndicator = analyzeInput();
+		
 		long time1 = System.currentTimeMillis() - startExecutionTime;
 
 		System.out.println("STARTING HillClimbing, time = " + (time1 * 0.001)
@@ -726,6 +729,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				log(name() + "::computeVehicleSuggestion, BEFORE WHILE OK");
 			}
 		}
+		
+		if(input.getParams().getInternalVehicleFirst().equals("Y")){
 		int iter = 0;
 		while (iter <= 2) {
 			double time = System.currentTimeMillis() - startExecutionTime;
@@ -780,6 +785,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingOptimizeDistanceInternalVehicleTrips OK");
 				}
 			}
+			
 			hasChanged = hasChanged || ok2;
 			//reassignExternalVehicleOptimizeLoad(XR);
 			PickupDeliverySolution solution02 = buildSolution(XR);
@@ -813,11 +819,11 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			hasChanged = hasChanged || ok4;
 			
 			boolean ok5 = hillClimbingExchangeRequestPoints2Trips(true);
-			PickupDeliverySolution solution031 = buildSolution(XR);
-			
+			PickupDeliverySolution solution031 = buildSolution(XR);			
 			reassignExternalVehicleOptimizeLoad(XR);
 			
 			PickupDeliverySolution solution04 = buildSolution(XR);
+			reassignVehicleOptimizeLoadExternalVehicles(solution04);
 			solutionCollection.add(solution04,input.getParams());
 
 			log(name()
@@ -835,6 +841,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			iter++;
 		}
 
+		}
+		
 		
 			boolean ok6 = hillClimbing(true);
 			hasChanged = hasChanged || ok6;
@@ -871,6 +879,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			}
 		
 		PickupDeliverySolution solution1 = buildSolution(XR);
+		reassignVehicleOptimizeLoadExternalVehicles(solution1);
 		solutionCollection.add(solution1,input.getParams());
 
 		if (input.getParams().getInternalVehicleFirst().equals("Y")) {
@@ -1166,7 +1175,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 					+ rs.getVehicle().getWeight());
 		}
 
-		// reassignVehiclePrioritizeInternalVehicles(sol);
+		//reassignVehiclePrioritizeInternalVehicles(sol);
+		reassignVehicleOptimizeLoadExternalVehicles(sol);
 
 		if (!sol.checkLoadConstraint())
 			solutionAllOK = false;

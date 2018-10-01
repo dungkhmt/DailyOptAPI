@@ -8,6 +8,15 @@ public class RoutingSolution {
 	private double load;
 	private double distance;
 	
+	public double computeMaxLoad(){
+		double maxLoad = 0;
+		if(elements!=null){
+			for(int i = 0; i < elements.length; i++){
+				if(elements[i].getLoad() > maxLoad) maxLoad = elements[i].getLoad();
+			}
+		}
+		return maxLoad;
+	}
 	public void insertHead(ArrayList<RoutingElement> RE){
 		ArrayList<RoutingElement> tmp = new ArrayList<RoutingElement>();
 		double baseDistance = 0;

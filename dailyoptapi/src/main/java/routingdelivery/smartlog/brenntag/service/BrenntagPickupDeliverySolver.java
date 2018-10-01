@@ -21,6 +21,7 @@ import localsearch.domainspecific.vehiclerouting.vrp.functions.LexMultiFunctions
 import localsearch.domainspecific.vehiclerouting.vrp.functions.TotalCostVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightEdgesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightNodesVR;
+import routingdelivery.model.DistanceElement;
 import routingdelivery.model.Item;
 import routingdelivery.model.PickupDeliveryRequest;
 import routingdelivery.model.PickupDeliverySolution;
@@ -33,6 +34,7 @@ import routingdelivery.smartlog.brenntag.model.ClusterItems;
 import routingdelivery.smartlog.brenntag.model.ExclusiveItem;
 import routingdelivery.smartlog.brenntag.model.ExclusiveVehicleLocation;
 import routingdelivery.smartlog.brenntag.model.GreedyMatchingVehicleTrip;
+import routingdelivery.smartlog.brenntag.model.InputIndicator;
 import routingdelivery.smartlog.brenntag.model.ModelRoute;
 import routingdelivery.smartlog.brenntag.model.MoveMergeTrip;
 import routingdelivery.smartlog.brenntag.model.PairInt;
@@ -7377,6 +7379,64 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		int iq = mLocationCode2Index.get(lq);
 		return a_distance[ip][iq];
 	}
+	public InputIndicator analyzeInput(){
+		double shortestDistance = Integer.MAX_VALUE;
+		double longestDistance = 0;
+		double shortestTravelTime = Integer.MAX_VALUE;
+		double longestTravelTime = 0;
+		double minInternalTruckCapacity = Integer.MAX_VALUE;
+		double maxInternalTruckCapacity = 0;
+		double minExternalTruckCapacity = Integer.MAX_VALUE;
+		double maxExternalTruckCapacity = 0;
+		int nbIntCityLocations = 0;
+		int nbExtCityLocations = 0;
+		double totalItemWeights = 0;
+		
+		for(int i = 0; i < input.getDistances().length; i++){
+			DistanceElement de = input.getDistances()[i];
+			if(!de.getSrcCode().equals(de.getDestCode())){
+				double d = de.getDistance();
+				if(shortestDistance > d) shortestDistance = d;
+				if(longestDistance < d) longestDistance = d;
+			}
+		}
+		for(int i = 0; i < input.getTravelTime().length; i++){
+			DistanceElement de = input.getTravelTime()[i];
+			if(!de.getSrcCode().equals(de.getDestCode())){
+				double d = de.getDistance();
+				if(shortestTravelTime > d) shortestTravelTime = d;
+				if(longestTravelTime < d) longestTravelTime = d;
+			}
+		}
+		if(input.getVehicles() != null)for(int i = 0; i < input.getVehicles().length; i++){
+			double w = input.getVehicles()[i].getWeight();
+			if(minInternalTruckCapacity > w) minInternalTruckCapacity = w;
+			if(maxInternalTruckCapacity < w) maxInternalTruckCapacity = w;
+		}
+		if(input.getVehicleCategories() != null)
+			for(int i = 0; i < input.getVehicleCategories().length; i++){
+				double w = input.getVehicleCategories()[i].getWeight();
+				if(minExternalTruckCapacity > w) minExternalTruckCapacity = w;
+				if(maxExternalTruckCapacity < w) maxExternalTruckCapacity = w;
+			}
+		for(int i = 0; i < locationCodes.size(); i++){
+			String lc = locationCodes.get(i);
+			if(mLocation2Type.get(lc).equals(NOI_THANH))
+				nbIntCityLocations++;
+			else
+				nbExtCityLocations++;
+		}
+		if(input.getRequests() != null)
+			for(int i = 0; i < input.getRequests().length; i++){
+				for(int j = 0; j < input.getRequests()[i].getItems().length;j++){
+					double w = input.getRequests()[i].getItems()[j].getWeight();
+					totalItemWeights += w;
+				}
+			}
+		
+		return new InputIndicator(shortestDistance, longestDistance, shortestTravelTime, longestTravelTime, minInternalTruckCapacity, maxInternalTruckCapacity, minExternalTruckCapacity, maxExternalTruckCapacity, nbIntCityLocations, nbExtCityLocations, totalItemWeights);
+		
+	}
 
 	public void reOrderDeliveryPointsPrioritizeFurthestPoint(VarRoutesVR XR) {
 		VehicleTripCollection VTC = analyzeTrips(XR);
@@ -8312,6 +8372,38 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 					+ vh.getCode() + ", " + vh.getWeight());
 		}
 
+	}
+
+	public void reassignVehicleOptimizeLoadExternalVehicles(
+			PickupDeliverySolution sol) {
+
+		for(int i = 0; i < sol.getRoutes().length; i++){
+			RoutingSolution s = sol.getRoutes()[i];
+			Vehicle vh = s.getVehicle();
+			if(isInternalVehicle(vh)) continue;
+			double maxLoad = s.computeMaxLoad();
+			Vehicle sel_vc = null;
+			double minCap = Integer.MAX_VALUE;
+			if(input.getVehicleCategories() != null){
+				for(int j = 0; j < input.getVehicleCategories().length; j++){
+					Vehicle vc = input.getVehicleCategories()[j];
+					if(vc.getWeight() >= maxLoad){
+						if(vc.getWeight() < minCap){
+							sel_vc = vc;
+							minCap = vc.getWeight();
+						}
+					}
+				}
+			}
+			if(sel_vc != null){
+				log(name() + "::reassignVehicleOptimizeLoadExternalVehicles, REPLACE vehicle " 
+			+ s.getVehicle().getCode() + " - cap " + s.getVehicle().getWeight() + " BY vehicle-cap " + sel_vc.getWeight());
+				System.out.println(name() + "::reassignVehicleOptimizeLoadExternalVehicles, REPLACE vehicle " 
+						+ s.getVehicle().getCode() + " - cap " + s.getVehicle().getWeight() + " BY vehicle-cap " + sel_vc.getWeight());
+							
+				s.setVehicle(sel_vc);
+			}
+		}
 	}
 
 	public boolean equalVehicle(Vehicle v1, Vehicle v2) {
