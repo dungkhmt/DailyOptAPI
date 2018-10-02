@@ -342,10 +342,12 @@ public class TestAPI {
 				PickupDeliveryRequest[] req1 = input.cloneRequests();
 				PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
 				PickupDeliverySolution[] solutions = solver.collectSolutions();
-				for(int i = 0; i < solutions.length; i++){
-					solutions[i].setDescription(solutions[i].getDescription() + " ORIGINAL");
-				}
+				//for(int i = 0; i < solutions.length; i++){
+				//	solutions[i].setDescription(solutions[i].getDescription() + " ORIGINAL");
+				//}
 				PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+				return ms;
+				/*
 				if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
 					return ms;
 				}
@@ -381,11 +383,14 @@ public class TestAPI {
 				ms = new PickupDeliveryMultiSolutions(final_solutions);
 				
 				return ms;
+				*/
 			}
 		}else{
 			PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
 			PickupDeliverySolution[] solutions = solver.collectSolutions();
 			PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+			return ms;
+			/*
 			if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
 				return ms;
 			}
@@ -406,6 +411,7 @@ public class TestAPI {
 			
 			ms = new PickupDeliveryMultiSolutions(final_solutions);
 			return ms;
+			*/
 		}
 		//return solver.computeVehicleSuggestion(input);
 	}

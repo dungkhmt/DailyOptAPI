@@ -899,6 +899,10 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				solutionCollection.remove(0);
 			}
 		}
+		
+		
+		relaxLoadTimeConstraintAndSolve();
+		
 
 		/*
 		 * if (input.getParams().getInternalVehicleFirst().equals("Y")) {
@@ -1238,6 +1242,76 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		return sol;
 	}
 
+	public void relaxLoadTimeConstraintAndSolve(){
+		if(input.getParams().getExtendCapacity() == 0 && input.getParams().getExtendLateDelivery() == 0) return;
+		//input.getParams().setExtendCapacity(200000);
+		//input.getParams().setExtendLateDelivery(36000);
+		
+		int nbIntVehicles = computeInternalVehicles();
+		int nbExtVehicles = computeExternalVehicles();
+		for(int i = 0; i < nbIntVehicles; i++){
+			Vehicle vh = vehicles[i];
+			vh.setWeight(vh.getWeight() + input.getParams().getExtendCapacity());
+		}
+		for(int i = 0; i < nbExtVehicles; i++){
+			Vehicle vh = externalVehicles[i];
+			vh.setWeight(vh.getWeight() + input.getParams().getExtendCapacity());
+		}
+		
+		if(input.getRequests() != null){
+			for(int i = 0; i < input.getRequests().length; i++){
+				PickupDeliveryRequest r = input.getRequests()[i];
+				r.setLatePickupTime(DateTimeUtils.extendDateTime(r.getLatePickupTime(),input.getParams().getExtendLateDelivery()));
+				r.setLateDeliveryTime(DateTimeUtils.extendDateTime(r.getLateDeliveryTime(), input.getParams().getExtendLateDelivery()));
+			}
+		}
+		for(Point p: pickupPoints){
+			ArrayList<PickupDeliveryRequest> lr = mPoint2Request.get(p);
+			int newLatestAllowedArrivalTime = Integer.MAX_VALUE;
+			for(PickupDeliveryRequest r: lr){
+				int d = (int)DateTimeUtils.dateTime2Int(r.getLatePickupTime());
+				if(d < newLatestAllowedArrivalTime) newLatestAllowedArrivalTime = d;
+			}
+			lastestAllowedArrivalTime.put(p, newLatestAllowedArrivalTime);
+		}
+		
+		for(Point p: deliveryPoints){
+			ArrayList<PickupDeliveryRequest> lr = mPoint2Request.get(p);
+			int newLatestAllowedArrivalTime = Integer.MAX_VALUE;
+			for(PickupDeliveryRequest r: lr){
+				int d = (int)DateTimeUtils.dateTime2Int(r.getLateDeliveryTime());
+				if(d < newLatestAllowedArrivalTime) newLatestAllowedArrivalTime = d;
+			}
+			lastestAllowedArrivalTime.put(p, newLatestAllowedArrivalTime);
+		}
+		
+		boolean ok1 = hillClimbingMoveRequestFromExternalToInternalVehicle(true);
+		reassignExternalVehicleOptimizeLoad(XR);
+		PickupDeliverySolution sol1 = buildSolution(XR);
+		solutionCollection.add(sol1, input.getParams());
+		sol1.setDescription(sol1.getDescription() + " - EXTEND - 1" );
+		
+		boolean ok2 = hillClimbingOptimizeDistanceInternalVehicleTrips(true);
+		reassignExternalVehicleOptimizeLoad(XR);
+		PickupDeliverySolution sol2 = buildSolution(XR);
+		solutionCollection.add(sol2, input.getParams());
+		sol2.setDescription(sol2.getDescription() + " - EXTEND - 2" );
+		
+		boolean ok3 = hillClimbing(true);
+		reassignExternalVehicleOptimizeLoad(XR);
+		PickupDeliverySolution sol3 = buildSolution(XR);
+		solutionCollection.add(sol3, input.getParams());
+		sol3.setDescription(sol3.getDescription() + " - EXTEND - 3" );
+		
+		boolean ok4 = hillClimbingNewVehicle(true);
+		reassignExternalVehicleOptimizeLoad(XR);
+		PickupDeliverySolution sol4 = buildSolution(XR);
+		solutionCollection.add(sol4, input.getParams());
+		sol4.setDescription(sol4.getDescription() + " - EXTEND - 3" );
+		
+		
+		
+	}
 	public void initPoints() {
 		startPoints = new ArrayList<Point>();
 		endPoints = new ArrayList<Point>();
@@ -1810,7 +1884,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		// if(true) return;
 
 		while (true) {
-
+			System.out.println(name() + "::hillClimbingMoveRequestFromExternalToInternalVehicle, info = " + shortInfo());
 			double time = System.currentTimeMillis() - startExecutionTime;
 			if (time > input.getParams().getTimeLimit() * 60 * 1000) {
 				System.out
@@ -1895,7 +1969,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 									lst_delivery, tj, s, DIXAVEGAN, loadConstraint);
 
 							// if (delta < 0) {
-							if (delta < minDelta) {
+							if (delta < minDelta-1) {
 								minDelta = delta;
 								sel_lst_pickup = lst_pickup;
 								sel_lst_delivery = lst_delivery;
@@ -1912,7 +1986,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 								lst_delivery, null, start, DIXAVEGAN, loadConstraint);
 
 						// if (delta < 0) {
-						if (delta < minDelta) {
+						if (delta < minDelta-1) {
 							minDelta = delta;
 							sel_lst_pickup = lst_pickup;
 							sel_lst_delivery = lst_delivery;
@@ -2410,7 +2484,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		// if(true) return;
 
 		while (true) {
-
+			System.out.println(name() + "::hillClimbingOptimizeDistanceInternalVehicleTrips, info = " + shortInfo());
+			
 			double time = System.currentTimeMillis() - startExecutionTime;
 			if (time > input.getParams().getTimeLimit() * 60 * 1000) {
 				System.out

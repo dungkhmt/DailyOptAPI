@@ -8,6 +8,10 @@ import java.util.Date;
 public class DateTimeUtils {
 	public static final String START_DATE_TIME = "2000-01-01 00:00:00";
 
+	public static String extendDateTime(String dt, int s){// s seconds
+		long d = dateTime2Int(dt);
+		return unixTimeStamp2DateTime(d + s);
+	}
 	public static String next(String dt, int numberDays){
 		Date d = convertDateTimeStr2Date(dt);
 		Date nd = next(d,numberDays);
