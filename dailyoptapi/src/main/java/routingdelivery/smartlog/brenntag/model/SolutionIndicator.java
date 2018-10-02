@@ -14,6 +14,8 @@ public class SolutionIndicator {
 	private double externalCapacity;
 	private double longestRoute;
 	private double shortestRoute;
+	private double rateDelivery;
+	private double rateReturn;
 	
 	public SolutionIndicator(double distance, int nbInternalTrucks,
 			int nbExternalTrucks, int nbTrips, double internalTruckLoad,

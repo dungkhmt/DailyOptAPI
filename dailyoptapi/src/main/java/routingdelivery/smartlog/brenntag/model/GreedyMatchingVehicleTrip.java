@@ -62,7 +62,7 @@ public class GreedyMatchingVehicleTrip {
 		this.A = A;
 		this.clusterItems = clusterItems;
 		this.vehicles = vehicles;
-		n = vehicles.length;
+		n = vehicles != null ? vehicles.length : 0;
 		m = clusterItems.size();
 		used_vehicle = new boolean[n];
 		used_cluster = new boolean[m];

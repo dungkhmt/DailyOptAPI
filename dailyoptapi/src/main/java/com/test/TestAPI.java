@@ -1,11 +1,14 @@
 package com.test;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Scanner;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -500,4 +503,123 @@ public class TestAPI {
 			return out;
 		}
 	}
+
+	public void computeMultiPickupDeliveryMultiSolution(String jsonfilename){
+		try{
+			BrennTagPickupDeliveryInput input = null;
+			//Scanner in = new Scanner(new File(jsonfilename));
+			Gson gson = new Gson();
+			BufferedReader in = new BufferedReader(new FileReader(jsonfilename));
+			input = gson.fromJson(in, BrennTagPickupDeliveryInput.class);
+			
+
+			RBrenntagMultiPickupDeliverySolver solver = new RBrenntagMultiPickupDeliverySolver();
+
+			// return solver.compute(input);
+			// return solver.computeNew(input);
+			
+			//if(true)return solver.computeVehicleSuggestion(input);
+			
+			//solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+			solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+			
+			if(input.getParams().getTimeLimit() == 0)
+				input.getParams().setTimeLimit(10);
+			
+			if(input.getParams().getInternalVehicleFirst() != null && 
+					input.getParams().getInternalVehicleFirst().equals("Y")){
+				Vehicle[] externalVehicles = input.getExternalVehicles();
+				Vehicle[] vehicleCategory = input.getVehicleCategories();
+				PickupDeliveryRequest[] req = input.cloneRequests();
+				input.setVehicleCategories(null);
+				input.setExternalVehicles(null);
+				PickupDeliverySolution s = solver.computeVehicleSuggestion(input);
+				if(s.getDescription().equals("OK")){
+					PickupDeliverySolution[] solutions = solver.collectSolutions();
+					PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+					return;
+				}
+				else{// try to use external vehicles
+					input.setExternalVehicles(externalVehicles);
+					input.setVehicleCategories(vehicleCategory);
+					input.setRequests(req);
+					PickupDeliveryRequest[] req1 = input.cloneRequests();
+					PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
+					PickupDeliverySolution[] solutions = solver.collectSolutions();
+					for(int i = 0; i < solutions.length; i++){
+						solutions[i].setDescription(solutions[i].getDescription() + " ORIGINAL");
+					}
+					PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+					if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
+						return;
+					}
+					
+					ArrayList<PickupDeliverySolution> L = new ArrayList<PickupDeliverySolution>();
+					for(int i = 0; i < solutions.length; i++) L.add(solutions[i]);
+					
+					for(int i = 0; i < input.getVehicles().length; i++){
+						Vehicle vh = input.getVehicles()[i];
+						vh.setWeight(vh.getWeight() + input.getParams().getExtendCapacity());
+					}
+					for(int i = 0; i < input.getVehicleCategories().length; i++){
+						Vehicle vh = input.getVehicleCategories()[i];
+						vh.setWeight(vh.getWeight() + input.getParams().getExtendCapacity());
+					}
+					
+					input.setRequests(req1);
+					for(int i = 0; i < input.getRequests().length; i++){
+						PickupDeliveryRequest r = input.getRequests()[i];
+						r.extendLateDelivery(input.getParams().getExtendLateDelivery());
+					}
+					
+					sol = solver.computeVehicleSuggestion(input);
+					PickupDeliverySolution[] ext_solutions = solver.collectSolutions();
+					for(int i = 0; i < ext_solutions.length; i++){
+						ext_solutions[i].setDescription(ext_solutions[i].getDescription() + " EXTEND");
+					}
+					for(int i = 0; i < ext_solutions.length; i++) L.add(ext_solutions[i]);
+					
+					PickupDeliverySolution[] final_solutions = new PickupDeliverySolution[L.size()];
+					for(int i = 0; i < final_solutions.length; i++) final_solutions[i] = L.get(i);
+					
+					ms = new PickupDeliveryMultiSolutions(final_solutions);
+					
+					return;
+				}
+			}else{
+				PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
+				PickupDeliverySolution[] solutions = solver.collectSolutions();
+				PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+				if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
+					return;
+				}
+				
+				ArrayList<PickupDeliverySolution> L = new ArrayList<PickupDeliverySolution>();
+				for(int i = 0; i < solutions.length; i++) L.add(solutions[i]);
+				
+				for(int i = 0; i < input.getRequests().length; i++){
+					PickupDeliveryRequest r = input.getRequests()[i];
+					r.extendLateDelivery(input.getParams().getExtendLateDelivery());
+				}
+				sol = solver.computeVehicleSuggestion(input);
+				PickupDeliverySolution[] ext_solutions = solver.collectSolutions();
+				for(int i = 0; i < ext_solutions.length; i++) L.add(ext_solutions[i]);
+				
+				PickupDeliverySolution[] final_solutions = new PickupDeliverySolution[L.size()];
+				for(int i = 0; i < final_solutions.length; i++) final_solutions[i] = L.get(i);
+				
+				ms = new PickupDeliveryMultiSolutions(final_solutions);
+				return;
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+	}
+			
+	public static void main(String[] args){
+		System.out.println("hello");
+		TestAPI T =new TestAPI();
+		T.computeMultiPickupDeliveryMultiSolution("C:/DungPQ/daily-opt/projects/tmp/request.txt");
+	}
+
 }

@@ -38,6 +38,37 @@ public class VehicleTrip {
 			if(x == p) return true;
 		return false;
 	}
+	public ArrayList<ArrayList<Point>> computeDeliveryPointsSameLocation(){
+		ArrayList<ArrayList<Point>> L = new ArrayList<ArrayList<Point>>();
+		int i = 0;
+		while(i < seqPoints.size()){
+			Point p = seqPoints.get(i);
+			//System.out.println("i = " + i);
+			if(solver.mPoint2Type.get(p).equals("P")){i++; continue;}
+			String lc = solver.mPoint2LocationCode.get(p);
+			
+			ArrayList<Point> Lp = new ArrayList<Point>();
+			Lp.add(p);
+			int j = i+1;
+			while(j < seqPoints.size()){
+				//System.out.println("j = " + j);
+				Point q = seqPoints.get(j);
+				if(solver.mPoint2LocationCode.get(q).equals(lc)){
+					Lp.add(q);
+					j++;
+				}else{
+					break;
+				}				
+			}
+			L.add(Lp);
+			i = j;
+		}
+		return L;
+	}
+	public Point getLastPickupPoint(){
+		if(lst_pickup == null || lst_pickup.size() == 0) return null;
+		return lst_pickup.get(lst_pickup.size()-1);
+	}
 	public ArrayList<Point> getPickupSeqPoints(){
 		return lst_pickup;
 		/*
@@ -69,5 +100,24 @@ public class VehicleTrip {
 			s = s + seqPoints.get(i).ID + "[" + solver.mPoint2Type.get(seqPoints.get(i)) + "], ";
 		}
 		return s;
+	}
+	
+	public static void main(String[] args){
+		int[] a= new int[]{1};
+		int i = 0; 
+		while(i < a.length){
+			System.out.print(a[i] + " ");
+			int j = i+1;
+			while(j < a.length){
+				if(a[i] == a[j]){
+					System.out.print(a[j] + " ");
+					j++;
+				}else{
+					break;
+				}
+			}
+			System.out.println();
+			i = j;
+		}
 	}
 }
