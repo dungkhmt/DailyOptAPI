@@ -756,9 +756,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			
 			if(CHECK_AND_LOG){
 				if(!checkAllSolution(XR)){
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingMerge4EachVehicle FAILED????");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingMerge4EachVehicle FAILED????");
 				}else{
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingMerge4EachVehicle OK");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingMerge4EachVehicle OK");
 				}
 			}
 			
@@ -769,9 +769,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			boolean ok1 = hillClimbingExchangeTrips2InternalVehicles(true);
 			if(CHECK_AND_LOG){
 				if(!checkAllSolution(XR)){
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingExchangeTrips2InternalVehicles FAILED????");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingExchangeTrips2InternalVehicles FAILED????");
 				}else{
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingExchangeTrips2InternalVehicles OK");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingExchangeTrips2InternalVehicles OK");
 				}
 			}
 			
@@ -789,9 +789,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			boolean ok2 = hillClimbingOptimizeDistanceInternalVehicleTrips(true);
 			if(CHECK_AND_LOG){
 				if(!checkAllSolution(XR)){
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingOptimizeDistanceInternalVehicleTrips FAILED????");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingOptimizeDistanceInternalVehicleTrips FAILED????");
 				}else{
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingOptimizeDistanceInternalVehicleTrips OK");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingOptimizeDistanceInternalVehicleTrips OK");
 				}
 			}
 			//System.out.println("FFF");
@@ -803,9 +803,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			boolean ok3 = hillClimbingMoveRequestFromExternalToInternalVehicle(true);
 			if(CHECK_AND_LOG){
 				if(!checkAllSolution(XR)){
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingMoveRequestFromExternalToInternalVehicle FAILED????");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingMoveRequestFromExternalToInternalVehicle FAILED????");
 				}else{
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingMoveRequestFromExternalToInternalVehicle OK");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingMoveRequestFromExternalToInternalVehicle OK");
 				}
 			}
 			hasChanged = hasChanged || ok3;
@@ -820,9 +820,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			boolean ok4 = hillClimbingNewVehicleOptimizeDistanceExternalVehicle(true);
 			if(CHECK_AND_LOG){
 				if(!checkAllSolution(XR)){
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingNewVehicleOptimizeDistanceExternalVehicle FAILED????");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingNewVehicleOptimizeDistanceExternalVehicle FAILED????");
 				}else{
-					log(name() + "::computeVehicleSuggestion, AFTER hillClimbingNewVehicleOptimizeDistanceExternalVehicle OK");
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingNewVehicleOptimizeDistanceExternalVehicle OK");
 				}
 			}
 			hasChanged = hasChanged || ok4;
@@ -845,6 +845,14 @@ public class RBrenntagMultiPickupDeliverySolver extends
 						.println(name()
 								+ "::computeVehicleSuggestion, CANNOT IMPROVE -> BREAK");
 				break;
+			}
+			
+			if(CHECK_AND_LOG){
+				if(!checkAllSolution(XR)){
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingNewVehicleOptimizeDistanceExternalVehicle endofwhile FAILED????");
+				}else{
+					log(name() + "::computeVehicleSuggestion, iter = " + iter + ", AFTER hillClimbingNewVehicleOptimizeDistanceExternalVehicle endofwhile OK");
+				}
 			}
 			
 			iter++;
@@ -1243,6 +1251,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 	}
 
 	public void relaxLoadTimeConstraintAndSolve(){
+		log(name() + "::relaxLoadTimeConstraintAndSolve START");
 		if(input.getParams().getExtendCapacity() == 0 && input.getParams().getExtendLateDelivery() == 0) return;
 		//input.getParams().setExtendCapacity(200000);
 		//input.getParams().setExtendLateDelivery(36000);
@@ -1288,30 +1297,35 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		boolean ok1 = hillClimbingMoveRequestFromExternalToInternalVehicle(true);
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution sol1 = buildSolution(XR);
-		solutionCollection.add(sol1, input.getParams());
-		sol1.setDescription(sol1.getDescription() + " - EXTEND - 1" );
+		//solutionCollection.add(sol1, input.getParams());
+		sol1.setDescription(sol1.getDescription() + " EXTEND" );
 		
 		boolean ok2 = hillClimbingOptimizeDistanceInternalVehicleTrips(true);
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution sol2 = buildSolution(XR);
-		solutionCollection.add(sol2, input.getParams());
-		sol2.setDescription(sol2.getDescription() + " - EXTEND - 2" );
+		//solutionCollection.add(sol2, input.getParams());
+		sol2.setDescription(sol2.getDescription() + " EXTEND" );
+		
+		boolean ok21 = hillClimbingNewVehicleOptimizeDistanceExternalVehicle(true);
+		reassignExternalVehicleOptimizeLoad(XR);
+		PickupDeliverySolution sol21 = buildSolution(XR);
+		solutionCollection.add(sol21, input.getParams());
+		sol21.setDescription(sol21.getDescription() + " EXTEND" );
+		
 		
 		boolean ok3 = hillClimbing(true);
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution sol3 = buildSolution(XR);
-		solutionCollection.add(sol3, input.getParams());
-		sol3.setDescription(sol3.getDescription() + " - EXTEND - 3" );
+		//solutionCollection.add(sol3, input.getParams());
+		sol3.setDescription(sol3.getDescription() + " EXTEND" );
 		
 		boolean ok4 = hillClimbingNewVehicle(true);
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution sol4 = buildSolution(XR);
 		solutionCollection.add(sol4, input.getParams());
-		sol4.setDescription(sol4.getDescription() + " - EXTEND - 3" );
-		
-		
-		
+		sol4.setDescription(sol4.getDescription() + " EXTEND" );
 	}
+	
 	public void initPoints() {
 		startPoints = new ArrayList<Point>();
 		endPoints = new ArrayList<Point>();
@@ -2424,7 +2438,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 						// if (delta < THRESHOLD_DELTA_NEGATIVE) {
 						// if(eval[0] <= 0){// totalCost not increase; HIEN
 						// NHIEN cost giam khi merge
-						if (eval[1] < minDelta) {// minimize cost of the merged
+						if (eval[0] < Integer.MAX_VALUE && eval[1] < minDelta) {// minimize cost of the merged
 													// trip
 							minDelta = eval[1];
 							sel_i = i;
@@ -2436,6 +2450,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 					}
 				}
 			}
+			
 			if (sel_ti != null) {
 				hasMove = true;
 				log(name()
@@ -2453,7 +2468,20 @@ public class RBrenntagMultiPickupDeliverySolver extends
 						+ minDelta);
 
 				// performMoveTrip(XR, t[sel_i],t[sel_j]);
-				performMoveTrip(XR, sel_ti, sel_tj, DIXAVEGAN);
+				if(!checkAllSolution(XR)){
+					log(name() + "::hillClimbingMerge4EachVehicle, JUST BEFORE performMoveTrip FAILED???");
+				}else{
+					log(name() + "::hillClimbingMerge4EachVehicle, JUST BEFORE performMoveTrip OK");
+				}
+				//performMoveTrip(XR, sel_ti, sel_tj, DIXAVEGAN);
+				performMoveTripOneVehicle(XR, sel_ti, sel_tj, DIXAVEGAN, loadConstraint);
+				
+				if(!checkAllSolution(XR)){
+					log(name() + "::hillClimbingMerge4EachVehicle, JUST AFTER performMoveTrip FAILED???");
+				}else{
+					log(name() + "::hillClimbingMerge4EachVehicle, JUST AFTER performMoveTrip OK");
+				}
+				
 				hasChanged = true;
 			}
 			if (!hasMove)
@@ -2482,7 +2510,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		logTrips(XR);
 
 		// if(true) return;
-
+		double bestCost = cost.getValue();
 		while (true) {
 			System.out.println(name() + "::hillClimbingOptimizeDistanceInternalVehicleTrips, info = " + shortInfo());
 			
@@ -2617,6 +2645,11 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				 */
 			}
 
+			if(bestCost > cost.getValue()){
+				bestCost = cost.getValue();
+			}else{
+				break;
+			}
 			if (!hasMove)
 				break;
 		}
