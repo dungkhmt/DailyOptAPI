@@ -909,7 +909,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		}
 		
 		
-		relaxLoadTimeConstraintAndSolve();
+		PickupDeliverySolution sol = solutionCollection.selectBest(input.getParams());
+		
+		//relaxLoadTimeConstraintAndSolve();
 		
 
 		/*
@@ -1112,7 +1114,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		//if (!input.getParams().getInternalVehicleFirst().equals("Y")) {
 		//	sol = solutionCollection.getLast();
 		//}
-		PickupDeliverySolution sol = solutionCollection.selectBest(input.getParams());
+		
+		//PickupDeliverySolution sol = solutionCollection.selectBest(input.getParams());
 		
 		System.out.println(name()
 				+ "::computeVehicleSuggestion, BEFORE APPEND, sz = "

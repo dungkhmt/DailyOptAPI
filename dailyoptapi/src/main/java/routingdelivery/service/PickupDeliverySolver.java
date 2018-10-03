@@ -4483,6 +4483,8 @@ public class PickupDeliverySolver {
 		p = XR.next(p);
 
 		while (p != XR.endPoint(k)) {
+			
+			
 			// Point p = s;
 			String locationCode = mPoint2LocationCode.get(p);
 			if (log != null && DEBUG) {
@@ -4531,22 +4533,42 @@ public class PickupDeliverySolver {
 			// DateTimeUtils.unixTimeStamp2DateTime(startTime) + ", fixTime = "
 			// + fixTime);
 			// }
-			int departureTime = startTime + duration;
+			
 
 			mPoint2ArrivalTime.put(p, startTime);
+			
+			String lc = mPoint2LocationCode.get(p);
+			
+			if(lc.equals("10008314")){
+				log(name() + "::propagateArrivalDepartureTime, startTime = " + DateTimeUtils.unixTimeStamp2DateTime(startTime) + 
+						", earliestAllowedArrivalTime = "
+						 + DateTimeUtils.unixTimeStamp2DateTime(earliestAllowedArrivalTime.get(p)));
+			}
+			
+			if(startTime < earliestAllowedArrivalTime.get(p))
+				startTime = earliestAllowedArrivalTime.get(p);
+			
+			
+			int departureTime = startTime + duration;
+			
 			mPoint2DepartureTime.put(p, departureTime);
 			if (log != null && DEBUG) {
 				// log.println("SET START point p = " + p.ID + ", SET arr = "
 				// + mPoint2ArrivalTime.get(p) + ", dep = "
 				// + mPoint2DepartureTime.get(p));
 			}
-
+			
+			// WHILE LOOP to fill infos for points at the same location
 			np = XR.next(p);
 			while (np != null) {
 				if (!mPoint2LocationCode.get(np).equals(locationCode))
 					break;
 
 				mPoint2ArrivalTime.put(np, startTime);
+				
+				//if(startTime < earliestAllowedArrivalTime.get(np))
+				//	startTime = earliestAllowedArrivalTime.get(np);
+				
 				mPoint2DepartureTime.put(np, departureTime);
 				if (log != null && DEBUG) {
 					// log.println("KEEP point " + np.ID + ", SET arr = "
@@ -4736,9 +4758,14 @@ public class PickupDeliverySolver {
 				// + duration);
 			}
 
+			mPoint2ArrivalTime.put(p, startTime);
+			
+			if(startTime < earliestAllowedArrivalTime.get(p))
+				startTime = earliestAllowedArrivalTime.get(p);
+			
 			int departureTime = startTime + duration;
 
-			mPoint2ArrivalTime.put(p, startTime);
+			
 			mPoint2DepartureTime.put(p, departureTime);
 			if (log != null && DEBUG) {
 				// log.println("SET START point p = " + p.ID + ", SET arr = "
@@ -7193,9 +7220,20 @@ public class PickupDeliverySolver {
 						long at = mPoint2ArrivalTime.get(p);
 						long dt = mPoint2DepartureTime.get(p);
 
+						
 						String s_at = DateTimeUtils.unixTimeStamp2DateTime(at);
 						String s_dt = DateTimeUtils.unixTimeStamp2DateTime(dt);
 
+						//if(locationCode.equals("10008314")){
+						//if(mPoint2Type.get(p).equals("D")){
+						//	if(DateTimeUtils.dateTime2Int(r.getLateDeliveryTime()) < at){
+						//		log(name() + "::buildSolution, BUG?? Location " + locationCode + 
+						//			", arrivalTime " + s_at + ", lateDeliveryTime = " + r.getLateDeliveryTime()
+						//			+ ", departureTime = " + s_dt);
+							//}
+						//}
+						//}
+						
 						e = new RoutingElement(locationCode, "-", lat + ","
 								+ lng, lat, lng, s_at, s_dt);
 						// e = new RoutingElement(requests[ir].getOrderID(),
