@@ -7,6 +7,7 @@ public class RoutingElement {
 	private double lat;
 	private double lng;
 	private String arrivalTime;
+	//private String startServiceTime;
 	private String departureTime;
 	private String description;
 	private String orderId;

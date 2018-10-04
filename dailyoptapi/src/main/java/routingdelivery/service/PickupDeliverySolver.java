@@ -7219,7 +7219,8 @@ public class PickupDeliverySolver {
 						// long dt = at + serviceDuration.get(p);
 						long at = mPoint2ArrivalTime.get(p);
 						long dt = mPoint2DepartureTime.get(p);
-
+						if(at < earliestAllowedArrivalTime.get(p))
+							at = earliestAllowedArrivalTime.get(p);
 						
 						String s_at = DateTimeUtils.unixTimeStamp2DateTime(at);
 						String s_dt = DateTimeUtils.unixTimeStamp2DateTime(dt);
