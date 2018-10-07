@@ -316,8 +316,8 @@ public class TestAPI {
 		
 		//if(true)return solver.computeVehicleSuggestion(input);
 		
-		//solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
-		solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
 		
 		if(input.getParams().getTimeLimit() == 0)
 			input.getParams().setTimeLimit(10);
