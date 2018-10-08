@@ -81,17 +81,28 @@ public class VRManager {
     
     		
     }
-
-	public void performRemoveAllClientPoints() {
+    
+	public boolean performRemoveAllClientPoints() {
 		for (int k = 1; k <= X.getNbRoutes(); k++) {
 			Point p = X.next(X.startPoint(k));
 			while (p != X.endPoint(k)) {
-				performRemoveOnePoint(p);
+				boolean ok = performRemoveOnePoint(p);
 				//System.out.println(name() + "::performRemoveOnePoint(" + p.ID
 				//		+ " on route " + k + "), XR = " + X.toString());
 				p = X.next(X.startPoint(k));
 			}
 		}
+		return true;
+	}
+	public boolean performRemoveAllClientPoints(int k) {
+			Point p = X.next(X.startPoint(k));
+			while (p != X.endPoint(k)) {
+				boolean ok = performRemoveOnePoint(p);
+				//System.out.println(name() + "::performRemoveOnePoint(" + p.ID
+				//		+ " on route " + k + "), XR = " + X.toString());
+				p = X.next(X.startPoint(k));
+			}
+			return true;
 	}
 
 	// move of type a [Groer et al., 2010]
@@ -366,18 +377,22 @@ public class VRManager {
 		}
 	}
 
-	public void performAddOnePoint(Point x, Point y) {
-		X.performAddOnePoint(x, y);
+	public boolean performAddOnePoint(Point x, Point y) {
+		boolean ok = X.performAddOnePoint(x, y);
+		if(!ok) return ok;
 		for (InvariantVR f : invariants) {
 			f.propagateAddOnePoint(x, y);
 		}
+		return ok;
 	}
 
-	public void performRemoveOnePoint(Point x) {
-		X.performRemoveOnePoint(x);
+	public boolean performRemoveOnePoint(Point x) {
+		boolean ok = X.performRemoveOnePoint(x);
+		if(!ok) return ok;
 		for (InvariantVR f : invariants) {
 			f.propagateRemoveOnePoint(x);
 		}
+		return ok;
 	}
 	
 	public void performAddTwoPoints(Point x1, Point y1, Point x2, Point y2) {

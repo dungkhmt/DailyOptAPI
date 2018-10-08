@@ -1674,17 +1674,23 @@ public class VarRoutesVR{
     	    	&& route[getIndex(y1)] == route[getIndex(y2)] && index[getIndex(y1)] <= index[getIndex(y2)]);
     }
     
-    public void performAddOnePoint(Point x, Point y){
+    public boolean performAddOnePoint(Point x, Point y){
     	// add point x between y and next[y]
     	if (!checkPerformAddOnePoint(x, y)) {
     		System.out.println(name() + ":: Error performAddOneMove: " + x + " " + y + "\n" + toString());
-    		System.exit(-1);
+    		//System.exit(-1);
+    		return false;
     	}
     	int idx = getIndex(x);
     	int idy = getIndex(y);
     	performAddOnePoint(idx, idy);
+    	return true;
     }
-    
+    public ArrayList<Point> getClientPointList(int k){
+    	ArrayList<Point> L = new ArrayList<Point>();
+    	for(Point p = next(startPoint(k)); p != endPoint(k); p = next(p)) L.add(p);
+    	return L;
+    }
     private void performAddOnePoint(int x, int y){
     	copySolution();
     	prev[next[y]] = x;
@@ -1723,11 +1729,12 @@ public class VarRoutesVR{
     			&& index[getIndex(x1)] < index[getIndex(x2)]);
     }
     
-    public void performRemoveOnePoint(Point x){
+    public boolean performRemoveOnePoint(Point x){
     	// remove x from its current route
     	if (!checkPerformRemoveOnePoint(x)) {
     		System.out.println(name() + ":: Error performRemoveOneMove: " + x + "\n" + toString());
-    		System.exit(-1);
+    		//System.exit(-1);
+    		return false;
     	}
     	int idx = getIndex(x);
     	copySolution();
@@ -1736,6 +1743,7 @@ public class VarRoutesVR{
     	next[idx] = prev[idx] = route[idx] = Constants.NULL_POINT;
     	update(old_route[idx]);
     	index[idx] = Constants.NULL_POINT;
+    	return true;
     }
     
     public void performRemoveTwoPoints(Point x1, Point x2){
