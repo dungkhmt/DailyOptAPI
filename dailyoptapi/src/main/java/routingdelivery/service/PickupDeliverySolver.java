@@ -1827,6 +1827,12 @@ public class PickupDeliverySolver {
 		for(Point q: L) if(q == p) return true;
 		return false;
 	}
+	public double computeLoad(ArrayList<Point> lst_pickup){
+		double load = 0;
+		for(Point p: lst_pickup)
+			load += mPoint2Demand.get(p);
+		return load;
+	}
 	public String shortInfo(){
 		String s = "cost = " + cost.getValue();
 		int nbIntV = 0;
@@ -2168,16 +2174,18 @@ public class PickupDeliverySolver {
 		return delta;
 	}
 
-	public double evaluateMoveSetPoints(VarRoutesVR XR,
+	public double[] evaluateMoveSetPointsNewRoute(VarRoutesVR XR,
 			ArrayList<Point> lst_pickup, ArrayList<Point> lst_delivery,
-			VehicleTrip vt, Point s, boolean DIXAVEGAN, boolean loadConstraint) {
-		// move set of delivery points (lst_pickup, lst_delivery) to vt
-		// containing s, after s, lst_pickup, lst_delivery is not a neccesarily a consecutive sequence of points, just a set
+			int k, boolean DIXAVEGAN, boolean loadConstraint) {
+		// move set of delivery points (lst_pickup, lst_delivery) route[k] of XR, at the begining of route[k]
+		// lst_pickup, lst_delivery is not a neccesarily a consecutive sequence of points, just a set
 		
+		Point s = XR.startPoint(k);
 				
-		if(vt != null)for(Point p: lst_delivery) if(vt.contains(p)) return Integer.MAX_VALUE;
+		//if(vt != null)for(Point p: lst_delivery) if(vt.contains(p)) return Integer.MAX_VALUE;
+		if(lst_pickup == null || lst_pickup.size() == 0) return new double[]{1,Integer.MAX_VALUE};
 		
-		
+		/*
 		HashMap<Point, Point> mPoint2Prev = new HashMap<Point, Point>();
 		HashMap<Point, Integer> mPoint2Sequence = new HashMap<Point, Integer>();
 		for(Point p: lst_pickup){
@@ -2188,23 +2196,26 @@ public class PickupDeliverySolver {
 			mPoint2Prev.put(p, XR.prev(p));
 			mPoint2Sequence.put(p, XR.index(p));
 		}
+		*/
 		
 		Point p1 = lst_pickup.get(0);
 		int k1 = XR.route(p1);
+		ArrayList<Point> restore_L1 = XR.getClientPointList(k1);
+		ArrayList<Point> restore_L = XR.getClientPointList(k);
 		
 		//System.out.println(name() + "::evaluateMoveSequencePoints, XR = " + XR.toStringShort());
 		//System.out.println(name() + "::evaluateMoveSequencePoints, lst_pickup = " + toStringListPoints(lst_pickup)
-		//		+ ", lst_delivery = " + toStringListPoints(lst_delivery) + ", vt = " + (vt != null ? vt.seqPointString() : "NIL")
-		//		+ ", s = " + s.ID);
+		//		+ ", lst_delivery = " + toStringListPoints(lst_delivery)
+		//		+ ", k = " + k + ", s = " + s.ID);
 		
 		// check if t[i] and be moved to route XR.route(k) w.r.t
 		// exclusiveVehicleLocations
 		Point startPoint = s;
-		int k = XR.route(s);
 		
-		if(k == k1) return Integer.MAX_VALUE;// consider only cases where points of lst_pickup and lst_delivery is not on the same route with s
 		
-		Vehicle vh = mPoint2Vehicle.get(XR.startPoint(k));
+		if(k == k1) return new double[]{1,Integer.MAX_VALUE};// consider only cases where points of lst_pickup and lst_delivery is not on the same route with s
+		
+		Vehicle vh = mPoint2Vehicle.get(s);
 		double load = 0;
 		for (Point p : lst_pickup)
 			load += mPoint2Demand.get(p);
@@ -2212,28 +2223,28 @@ public class PickupDeliverySolver {
 		for (Point p : lst_pickup) {
 			String lc = mPoint2LocationCode.get(p);
 			if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(lc))
-				return Integer.MAX_VALUE;
+				return new double[]{1,Integer.MAX_VALUE};
 		}
 		for (Point p : lst_delivery) {
 			String lc = mPoint2LocationCode.get(p);
 			if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(lc))
-				return Integer.MAX_VALUE;
+				return new double[]{1,Integer.MAX_VALUE};
 		}
 
 		// check load w.r.t capacity
 		if (loadConstraint) {
 			double loadVH = 0;
-			if(vt != null) loadVH = vt.load;
+			//if(vt != null) loadVH = vt.load;
 			if (load + loadVH > vh.getWeight())
-				return Integer.MAX_VALUE;
+				return new double[]{1,Integer.MAX_VALUE};
 		}
 
 		ArrayList<Point> lst_pickup_0 = null;
-		if (vt != null)
-			lst_pickup_0 = vt.getPickupSeqPoints();
-		ArrayList<Point> lst_delivery_0 = null;
-		if (vt != null)
-			lst_delivery_0 = vt.getDeliverySeqPoints();
+		//if (vt != null)
+		//	lst_pickup_0 = vt.getPickupSeqPoints();
+		//ArrayList<Point> lst_delivery_0 = null;
+		//if (vt != null)
+		//	lst_delivery_0 = vt.getDeliverySeqPoints();
 
 		double value = cost.getValue();
 		// System.out.println(name() + "::evaluateMoveTrip, vt1 = " +
@@ -2243,29 +2254,24 @@ public class PickupDeliverySolver {
 		// and re-insert into trip vt2
 		// satisfying constraint
 		double delta = Integer.MAX_VALUE;
-		if (lst_pickup.size() == 0)
-			return delta;
 		
-		
+		boolean retOK = true;
 
 		for (Point x : lst_pickup) {
-			mgr.performRemoveOnePoint(x);
+			boolean ok = mgr.performRemoveOnePoint(x);
+			if(!ok) retOK = false;
 		}
 		for (Point x : lst_delivery) {
-			mgr.performRemoveOnePoint(x);
+			boolean ok = mgr.performRemoveOnePoint(x);
+			if(!ok) retOK = false;
 		}
 
-		if (vt != null)
-			for (Point p : vt.seqPoints) {
-				mgr.performRemoveOnePoint(p);
-			}
+		
 
 		// re-insert into vt2 in an optimal way
 
 		ArrayList<Point> L = new ArrayList<Point>();
-		if (lst_delivery_0 != null)
-			for (Point x : lst_delivery_0)
-				L.add(x);
+		
 
 		for (Point x : lst_delivery)
 			L.add(x);
@@ -2274,14 +2280,7 @@ public class PickupDeliverySolver {
 		// re-insert seq into route
 
 		// start = XR.prev(vt2.seqPoints.get(0));
-		Point start_p = null;
-		Point restore_start_vt = null;
-		
-		if(vt != null && vt.seqPoints.size() > 0){
-			start_p = XR.prev(vt.seqPoints.get(0));
-			restore_start_vt = start_p;
-		}
-		if(start_p == null) start_p = XR.startPoint(k);// vt is null, new VehicleTrip
+		Point start_p = startPoint;
 
 		// System.out.println(name() + "::evaluateMoveTrip, k = " + k +
 		// ", start_p = " + start_p.ID);
@@ -2290,8 +2289,10 @@ public class PickupDeliverySolver {
 			Point pickup = getPickupOfDelivery(delivery);
 			//System.out.println(name() + "::evaluateMoveTrip, delivery = " +
 			//delivery.ID + ", pickup = " + pickup.ID + ", start_p = " + start_p.ID);
-			mgr.performAddOnePoint(pickup, start_p);
-			mgr.performAddOnePoint(delivery, pickup);
+			boolean ok = mgr.performAddOnePoint(pickup, start_p);
+			if(!ok) retOK = false;
+			ok = mgr.performAddOnePoint(delivery, pickup);
+			if(!ok) retOK = false;
 			start_p = pickup;
 		}
 		// System.out.println(name() +
@@ -2350,50 +2351,165 @@ public class PickupDeliverySolver {
 		if (violations == 0)
 			delta = cost.getValue() - value;
 
-		//System.out.println(name() + "::evaluateMoveSequencePoints, new cost = " +
-		//cost.getValue() + ", delta = " + delta + ", restoreVTFirst = " + restoreVTFirst);
-
-		HashSet<Point> S = new HashSet<Point>();
-		for(Point p: lst_pickup) S.add(p);
-		for(Point p: lst_delivery) S.add(p);
+		//System.out.println(name() + "::evaluateMoveSetPointsNewRoute, new cost = " +
+		//cost.getValue() + ", delta = " + delta + " START RECOVER"); 
 		
-		while(S.size() > 0){
-			// find point having minimal index
-			Point sel_p = null;
-			int minIdx = Integer.MAX_VALUE;
-			for(Point p: S){
-				if(mPoint2Sequence.get(p) < minIdx){
-					sel_p = p; minIdx = mPoint2Sequence.get(p);
-				}
-			}
-			if(sel_p != null){
-				S.remove(sel_p);
-				Point pp = mPoint2Prev.get(sel_p);
-				performRemoveOnePoint(XR, sel_p);
-				performAddOnePoint(XR, sel_p, pp);
-			}
+
+		// recover
+		XR.getVRManager().performRemoveAllClientPoints(k1);
+		XR.getVRManager().performRemoveAllClientPoints(k);
+		
+		Point start_point = XR.startPoint(k1);
+		for(Point p: restore_L1){
+			boolean ok = performAddOnePoint(XR, p, start_point);
+			if(!ok) retOK = false;
+			//System.out.println(name() + "::evaluateMoveSetPointsNewRoute, recover, addOnePoint(" + p.ID + "," + start_point.ID + "), ok = " + ok);
+			start_point = p;
 		}
 		
-			if (restore_start_vt != null) {
-				Point start = restore_start_vt;
-				for (int j = 0; j < lst_pickup_0.size(); j++) {
-					Point p = lst_pickup_0.get(j);
-					performRemoveOnePoint(XR, p);
-					//System.out.println(name() + "::evaluateMoveSequencePoints, restore, addOnePoint(p = " + p.ID + "," + start.ID);
-					performAddOnePoint(XR, p, start);
-					start = p;
-				}
-				for (int j = 0; j < lst_delivery_0.size(); j++) {
-					Point d = lst_delivery_0.get(j);
-					performRemoveOnePoint(XR, d);
-					//System.out.println(name() + "::evaluateMoveSequencePoints, restore, addOnePoint(d = " + d.ID + "," + start.ID);
-					performAddOnePoint(XR, d, start);
-					start = d;
-				}
-			}
-		return delta;
+		start_point = XR.startPoint(k);
+		for(Point p: restore_L){
+			boolean ok = performAddOnePoint(XR, p, start_point);
+			if(!ok) retOK = false;
+			//System.out.println(name() + "::evaluateMoveSetPointsNewRoute, recover, addOnePoint(" + p.ID + "," + start_point.ID + "), ok = " + ok);
+			start_point = p;
+		}
+		
+		if(retOK)
+			return new double[]{1,delta};
+		else 
+			return new double[]{-1,delta};
 	}
 
+	public boolean performMoveSetPointsNewRoute(VarRoutesVR XR,
+			ArrayList<Point> lst_pickup, ArrayList<Point> lst_delivery,
+			int k, boolean DIXAVEGAN, boolean loadConstraint) {
+		// move set of delivery points (lst_pickup, lst_delivery) route[k] of XR, at the begining of route[k]
+		// lst_pickup, lst_delivery is not a neccesarily a consecutive sequence of points, just a set
+		
+		Point s = XR.startPoint(k);
+				
+		//if(vt != null)for(Point p: lst_delivery) if(vt.contains(p)) return Integer.MAX_VALUE;
+		if(lst_pickup == null || lst_pickup.size() == 0) return true;
+		
+		/*
+		HashMap<Point, Point> mPoint2Prev = new HashMap<Point, Point>();
+		HashMap<Point, Integer> mPoint2Sequence = new HashMap<Point, Integer>();
+		for(Point p: lst_pickup){
+			mPoint2Prev.put(p, XR.prev(p));
+			mPoint2Sequence.put(p, XR.index(p));
+		}
+		for(Point p: lst_delivery){
+			mPoint2Prev.put(p, XR.prev(p));
+			mPoint2Sequence.put(p, XR.index(p));
+		}
+		*/
+		
+		Point p1 = lst_pickup.get(0);
+		int k1 = XR.route(p1);
+		ArrayList<Point> restore_L1 = XR.getClientPointList(k1);
+		
+		//System.out.println(name() + "::performMoveSetPointsNewRoute, XR = " + XR.toStringShort());
+		//System.out.println(name() + "::performMoveSetPointsNewRoute, lst_pickup = " + toStringListPoints(lst_pickup)
+		//		+ ", lst_delivery = " + toStringListPoints(lst_delivery) 
+		//		+ ", k = " + k + ", s = " + s.ID);
+		
+		// check if t[i] and be moved to route XR.route(k) w.r.t
+		// exclusiveVehicleLocations
+		Point startPoint = s;
+		
+		
+		if(k == k1) return true;// consider only cases where points of lst_pickup and lst_delivery is not on the same route with s
+		
+		Vehicle vh = mPoint2Vehicle.get(s);
+		double load = 0;
+		for (Point p : lst_pickup)
+			load += mPoint2Demand.get(p);
+		
+		for (Point p : lst_pickup) {
+			String lc = mPoint2LocationCode.get(p);
+			if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(lc))
+				return true;
+		}
+		for (Point p : lst_delivery) {
+			String lc = mPoint2LocationCode.get(p);
+			if (mVehicle2NotReachedLocations.get(vh.getCode()).contains(lc))
+				return true;
+		}
+
+		// check load w.r.t capacity
+		if (loadConstraint) {
+			double loadVH = 0;
+			//if(vt != null) loadVH = vt.load;
+			if (load + loadVH > vh.getWeight())
+				return true;
+		}
+
+		ArrayList<Point> lst_pickup_0 = null;
+		//if (vt != null)
+		//	lst_pickup_0 = vt.getPickupSeqPoints();
+		//ArrayList<Point> lst_delivery_0 = null;
+		//if (vt != null)
+		//	lst_delivery_0 = vt.getDeliverySeqPoints();
+
+		double value = cost.getValue();
+		// System.out.println(name() + "::evaluateMoveTrip, vt1 = " +
+		// vt1.seqPointString() + ", vt2 = " + vt2.seqPointString());
+		// System.out.println(name() + "::evaluateMoveTrip, value = " + value);
+		// return the differentiation of total distance if trip vt1 is remove
+		// and re-insert into trip vt2
+		// satisfying constraint
+		
+		boolean retOK = true;
+
+		for (Point x : lst_pickup) {
+			boolean ok = mgr.performRemoveOnePoint(x);
+			if(!ok) retOK = false;
+		}
+		for (Point x : lst_delivery) {
+			boolean ok = mgr.performRemoveOnePoint(x);
+			if(!ok) retOK = false;
+		}
+
+		
+
+		// re-insert into vt2 in an optimal way
+
+		ArrayList<Point> L = new ArrayList<Point>();
+		
+
+		for (Point x : lst_delivery)
+			L.add(x);
+
+		Point[] seq = getBestSequenceGreedy(startPoint, L, DIXAVEGAN);
+		// re-insert seq into route
+
+		// start = XR.prev(vt2.seqPoints.get(0));
+		Point start_p = startPoint;
+
+		// System.out.println(name() + "::evaluateMoveTrip, k = " + k +
+		// ", start_p = " + start_p.ID);
+		for (int i = seq.length - 1; i >= 0; i--) {
+			Point delivery = seq[i];
+			Point pickup = getPickupOfDelivery(delivery);
+			//System.out.println(name() + "::evaluateMoveTrip, delivery = " +
+			//delivery.ID + ", pickup = " + pickup.ID + ", start_p = " + start_p.ID);
+			boolean ok = mgr.performAddOnePoint(pickup, start_p);
+			if(!ok) retOK = false;
+			ok = mgr.performAddOnePoint(delivery, pickup);
+			if(!ok) retOK = false;
+			start_p = pickup;
+		}
+		// System.out.println(name() +
+		// "::evaluateMoveTrip, after re-insert, XR(k) = " +
+		// XR.toStringRoute(k));
+		propagate(XR, k);
+		propagate(XR,k1);
+		
+		return retOK;
+	}
+
+	
 	public void performMoveSequencePoints(VarRoutesVR XR,
 			ArrayList<Point> lst_pickup, ArrayList<Point> lst_delivery,
 			VehicleTrip vt, Point s, boolean DIXAVEGAN, boolean loadConstraint) {
@@ -5046,11 +5162,13 @@ public class PickupDeliverySolver {
 		propagateLoadedItems(XR, k);
 	}
 
-	public void performAddOnePoint(VarRoutesVR XR, Point x, Point y) {
+	public boolean performAddOnePoint(VarRoutesVR XR, Point x, Point y) {
 		int k = XR.route(y);
-		XR.getVRManager().performAddOnePoint(x, y);
+		boolean ok = XR.getVRManager().performAddOnePoint(x, y);
+		if(!ok) return ok;
 		propagateArrivalDepartureTime(XR, k, false);
 		propagateLoadedItems(XR, k);
+		return ok;
 	}
 
 	public boolean performRemoveOnePoint(VarRoutesVR XR, Point x) {
