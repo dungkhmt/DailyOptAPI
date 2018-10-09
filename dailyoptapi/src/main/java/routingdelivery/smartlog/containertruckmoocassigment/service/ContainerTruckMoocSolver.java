@@ -1659,7 +1659,7 @@ public class ContainerTruckMoocSolver {
 			re.deriveFrom(lastElement);
 			re.setTransportContainerRequest(req);
 			re.setLocationCode(req.getLocations()[i].getLocationCode());
-			travelTime=getTravelTime(lastElement, e[2]);
+			travelTime=getTravelTime(lastElement, re);
 			arrivalTime = travelTime + departureTime;
 			if(arrivalTime > DateTimeUtils.dateTime2Int(tci.getLateArrivalTime())) return null;
 			startServiceTime = MAX(arrivalTime,(int)DateTimeUtils.dateTime2Int(tci.getEarlyArrivalTime()));
@@ -1670,15 +1670,15 @@ public class ContainerTruckMoocSolver {
 			lastElement = re;
 		}
 		
-	
+		
 		L.add(e[4]);
-		e[4].deriveFrom(e[3]);
-		DepotMooc depotMooc = findDepotMooc4Deposit(req,e[3],mooc);
+		e[4].deriveFrom(lastElement);
+		DepotMooc depotMooc = findDepotMooc4Deposit(req,lastElement,mooc);
 		//e[6].setDepotMooc(mCode2DepotMooc.get(mooc.getDepotMoocCode()));
 		e[4].setDepotMooc(depotMooc);
 		e[4].setAction(ActionEnum.RELEASE_MOOC_AT_DEPOT);
 		e[4].setMooc(null);
-		travelTime = getTravelTime(e[3], e[4]);
+		travelTime = getTravelTime(lastElement, e[4]);
 		arrivalTime = departureTime + travelTime;
 		startServiceTime = arrivalTime;
 		duration = e[4].getDepotMooc().getDeliveryMoocDuration();
@@ -2571,7 +2571,7 @@ public class ContainerTruckMoocSolver {
 			startServiceTime = MAX(arrivalTime,
 					(int) DateTimeUtils.dateTime2Int(pwi
 							.getEarlyDateTimeLoadAtWarehouse()));
-			distance = combo.extraDistance + getDistance(lastElement, e[3]);
+			distance = combo.extraDistance + getDistance(lastElement, re[idx]);
 			int finishedServiceTime = startServiceTime + pwi.getDetachEmptyMoocContainerDuration();// req.getLoadDuration();
 			//duration = 0;
 			departureTime = finishedServiceTime;//startServiceTime + duration;
@@ -2602,12 +2602,12 @@ public class ContainerTruckMoocSolver {
 		
 
 		L.add(e[5]);
-		e[5].deriveFrom(e[4]);
+		e[5].deriveFrom(lastElement);
 		e[5].setPort(mCode2Port.get(req.getPortCode()));
 		e[5].setAction(ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT);
 		e[5].setContainer(null);
 		e[5].setExportRequest(null);
-		travelTime = getTravelTime(e[4], e[5]);
+		travelTime = getTravelTime(lastElement, e[5]);
 		arrivalTime = departureTime + travelTime;
 		startServiceTime = arrivalTime;
 		duration = req.getUnloadDuration();
@@ -4188,8 +4188,14 @@ public class ContainerTruckMoocSolver {
 
 	public void propagateDistance(TruckRoute tr) {
 		RouteElement[] e = tr.getNodes();
+		//System.out.println(name() + "::propagateDistance, nodes.sz = "+ e.length);
+		//for(int i = 0; i < e.length; i++)
+		//	System.out.println(name() + "::propagateDistance, e[" + i + "] = " + e[i].getLocationCode());
+		
 		e[0].setDistance(0);
 		for (int i = 1; i < e.length; i++) {
+			//System.out.println(name() + "::propagateDistance, e[" + (i-1) + "] = " + e[i-1].getLocationCode() + 
+			//		", e[" + i + "] = " + e[i].getLocationCode());
 			e[i].setDistance(e[i - 1].getDistance()
 					+ getDistance(e[i - 1], e[i]));
 		}

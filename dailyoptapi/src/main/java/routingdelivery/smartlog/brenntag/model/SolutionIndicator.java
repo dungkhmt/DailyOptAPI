@@ -16,7 +16,38 @@ public class SolutionIndicator {
 	private double shortestRoute;
 	private double rateDelivery;
 	private double rateReturn;
+	private String description;
 	
+	
+	public SolutionIndicator(double distance, int nbInternalTrucks,
+			int nbExternalTrucks, int nbTrips, double internalTruckLoad,
+			double externalTruckLoad, double internalCapacity,
+			double externalCapacity, double longestRoute, double shortestRoute,
+			double rateDelivery, double rateReturn, String description) {
+		super();
+		this.distance = distance;
+		this.nbInternalTrucks = nbInternalTrucks;
+		this.nbExternalTrucks = nbExternalTrucks;
+		this.nbTrips = nbTrips;
+		this.internalTruckLoad = internalTruckLoad;
+		this.externalTruckLoad = externalTruckLoad;
+		this.internalCapacity = internalCapacity;
+		this.externalCapacity = externalCapacity;
+		this.longestRoute = longestRoute;
+		this.shortestRoute = shortestRoute;
+		this.rateDelivery = rateDelivery;
+		this.rateReturn = rateReturn;
+		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public SolutionIndicator(double distance, int nbInternalTrucks,
 			int nbExternalTrucks, int nbTrips, double internalTruckLoad,
 			double externalTruckLoad, double internalCapacity,

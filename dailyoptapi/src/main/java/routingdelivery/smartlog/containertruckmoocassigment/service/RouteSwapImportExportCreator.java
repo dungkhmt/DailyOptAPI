@@ -57,6 +57,9 @@ public class RouteSwapImportExportCreator {
 		return true;
 	}
 
+	public String name(){
+		return "RouteSwapImportExportCreator";
+	}
 	public TruckRouteInfo4Request createSwapImportExport(Truck truck,
 			Mooc mooc, ImportContainerRequest ir, ExportContainerRequest er) {
 		// try to create route with truck-mooc serving ir and then er
@@ -152,6 +155,8 @@ public class RouteSwapImportExportCreator {
 		RouteElement le = e2;
 		for(int i = 0; i < ni; i++){
 			DeliveryWarehouseInfo dwi = ir.getDeliveryWarehouses()[sol.seq[i]];
+			//System.out.println(name() + "::createSwapImportExport, seq[" + i + "] = " + sol.seq[i] + ", dwi = " + dwi.getWareHouseCode());
+			
 			idx++;
 			e[idx] = new RouteElement();
 			L.add(e[idx]);
@@ -190,6 +195,7 @@ public class RouteSwapImportExportCreator {
 		
 		for(int i = 0; i < ne; i++){
 			PickupWarehouseInfo pwi = er.getPickupWarehouses()[sol.seq[i + ni]];
+			//System.out.println(name() + "::createSwapImportExport, seq[" + (i+ni) + "] = " + sol.seq[i+ni] + ", pwi = " + pwi.getWareHouseCode());
 			idx++;
 			e[idx] = new RouteElement();
 			L.add(e[idx]);
@@ -227,6 +233,10 @@ public class RouteSwapImportExportCreator {
 			le = e[idx];
 		}
 		
+		//System.out.println(name() + "::createSwapImportExport, L.sz = " + L.size());
+		//for(int i = 0; i < L.size(); i++){
+		//	System.out.println(name() + "::createSwapImportExport, L[" + i + "] = " + L.get(i).getLocationCode());
+		//}
 		
 		
 
@@ -287,9 +297,14 @@ public class RouteSwapImportExportCreator {
 		tri.setLastDepotTruck(truck, depotTruck);
 		tri.setLastTimeTruck(truck, departureTime);
 		
+		//System.out.println(name() + "::createSwapImportExport, L.sz = " + L.size());
+		//for(int i = 0; i < L.size(); i++){
+		//	System.out.println(name() + "::createSwapImportExport, L[" + i + "] = " + L.get(i).getLocationCode());
+		//}
+		
 		TruckRoute r = new TruckRoute();
 		RouteElement[] lst_e = new RouteElement[L.size()];
-		for (int i = 0; i < e.length; i++)
+		for (int i = 0; i < L.size(); i++)
 			lst_e[i] = L.get(i);
 		r.setNodes(lst_e);
 		r.setTruck(truck);

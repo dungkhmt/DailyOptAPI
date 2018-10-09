@@ -231,7 +231,7 @@ public class RouteTangboWarehouseExport {
 		int[] seq = ss.seq;
 		RouteElement[] re = new RouteElement[2 * seq.length];
 		int idx = -1;
-		for (int i = 0; i < re.length; i++) {
+		for (int i = 0; i < seq.length; i++) {
 			idx++;
 			PickupWarehouseInfo pwi = er.getPickupWarehouses()[seq[i]];
 			re[idx] = new RouteElement();

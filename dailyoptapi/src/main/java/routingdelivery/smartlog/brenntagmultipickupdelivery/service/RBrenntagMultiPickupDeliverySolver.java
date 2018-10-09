@@ -667,7 +667,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				break;// do not have external vehicle ->not need LOOP
 		}
 
-		logTripsAfterMergingOrderAtLocations();
+		//logTripsAfterMergingOrderAtLocations();
 
 		inputIndicator = analyzeInput();
 
@@ -720,6 +720,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		reassignVehiclePrioritizeInternalVehicles(XR);
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution solution0 = buildSolution(XR);
+		solution0.getStatistic().getIndicator().setDescription("Khởi tạo các chuyến đi trực tiếp, chưa gom điểm giao");
 		solutionCollection.add(solution0, input.getParams());
 
 		if (CHECK_AND_LOG) {
@@ -861,6 +862,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				// reassignExternalVehicleOptimizeLoad(XR);
 
 				PickupDeliverySolution solution04 = buildSolution(XR);
+				solution04.getStatistic().getIndicator().setDescription("Gom điểm giao, tối ưu KM cho các xe nhà, sau đó gán lại các đơn hàng từ xe ngoài về cho xe nhà");
 				reassignVehicleOptimizeLoadExternalVehicles(solution04);
 				solutionCollection.add(solution04, input.getParams());
 
@@ -881,6 +883,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				hasChanged = hasChanged || ok31;
 				reassignExternalVehicleOptimizeLoad(XR);
 				PickupDeliverySolution solution05 = buildSolution(XR);
+				solution05.getStatistic().getIndicator().setDescription("Tiếp tục thử chuyển các đơn hàng từ xe thầu ngoài về xe nhà chưa được sử dụng, "
+						+ "chấp nhận chia lẻ đơn cùng điểm giao");
 				solutionCollection.add(solution05, input.getParams());
 
 				log(name()
@@ -952,6 +956,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		}
 
 		PickupDeliverySolution solution1 = buildSolution(XR);
+		solution1.getStatistic().getIndicator().setDescription("Tối ưu tiếp số KM, có thể không ưu tiên sử dụng xe nhà trước");
 		reassignVehicleOptimizeLoadExternalVehicles(solution1);
 		solutionCollection.add(solution1, input.getParams());
 
@@ -1382,6 +1387,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		boolean ok21 = hillClimbingNewVehicleOptimizeDistanceExternalVehicle(true);
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution sol21 = buildSolution(XR);
+		sol21.getStatistic().getIndicator().setDescription("Nới lỏng giới hạn về tải trọng và thời hạn giao hàng tại điểm giao. "
+				+ "Tiếp tục gom thêm các điểm giao để tối ưu thêm số KM của xe nhà, dồn đơn hàng xe thầu ngoài về cho xe nhà");
 		solutionCollection.add(sol21, input.getParams());
 		sol21.setDescription(sol21.getDescription() + " EXTEND");
 
@@ -1395,6 +1402,8 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution sol4 = buildSolution(XR);
 		solutionCollection.add(sol4, input.getParams());
+		sol4.getStatistic().getIndicator().setDescription("Nới lòng giới hạn về tải trọng và thời hạn giao hàng tại điểm giao. "
+				+ "Tối ưu số KM một cách tổng thể, có thể không ưu tiên sử dụng xe nhà trước");
 		sol4.setDescription(sol4.getDescription() + " EXTEND");
 	}
 
