@@ -238,7 +238,8 @@ public class TestAPI {
 
 		// return solver.compute(input);
 		// return solver.computeNew(input);
-		return solver.computeSequenceRoute(input);
+		//return solver.computeSequenceRoute(input);
+		return solver.computeSequenceRouteIgnoreConstraints(input);
 	}
 
 	@CrossOrigin

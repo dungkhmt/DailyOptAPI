@@ -3,6 +3,7 @@ package routingdelivery.smartlog.containertruckmoocassigment.model;
 public class Warehouse {
 	private String code;
 	private String locationCode;
+	
 	public String getCode() {
 		return code;
 	}

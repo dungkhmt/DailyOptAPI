@@ -7640,7 +7640,7 @@ public class PickupDeliverySolver {
 				// double tripDistance = 0;
 				for (Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR
 						.next(p)) {
-					int ip = mPoint2Index.get(p);
+					//int ip = mPoint2Index.get(p);
 					RoutingElement e = null;
 					if (p == XR.startPoint(k)) {
 						// depot
