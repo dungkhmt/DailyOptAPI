@@ -57,6 +57,9 @@ public class SolutionCollection {
 	public void remove(int i){
 		solutions.remove(i);
 	}
+	public void clear(){
+		solutions.clear();
+	}
 	public PickupDeliverySolution get(int i){
 		return solutions.get(i);
 	}

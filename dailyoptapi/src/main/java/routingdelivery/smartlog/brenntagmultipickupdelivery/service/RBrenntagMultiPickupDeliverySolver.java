@@ -463,7 +463,13 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			bkReq[i].setItems(I);
 		}
 		solutionCollection = new SolutionCollection(10);
+		
+		int initRemainItemRequests = computeRemainItemOnRequest();
+		System.out.println(name()
+				+ "::computeVehicleSuggestion, initRequests = " + initRemainItemRequests);
 		while (true) {
+			
+			
 			System.out.println(name()
 					+ "::computeVehicleSuggestion, while(true)...");
 
@@ -521,7 +527,9 @@ public class RBrenntagMultiPickupDeliverySolver extends
 				sol.setDescription("OK");
 				System.out
 						.println(name()
-								+ "::computeVehicleSuggestion, input NOT CONSISTENT???");
+								+ "::computeVehicleSuggestion, input NOT CONSISTENT???, inputOK = " + inputOK);
+				solutionCollection.clear();
+				solutionCollection.add(sol, input.getParams());
 				return sol;
 			}
 

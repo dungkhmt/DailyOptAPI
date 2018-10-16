@@ -5,6 +5,7 @@ public class ConfigParams {
 	private String internalVehicleFirst; 
 	private int extendLateDelivery;// thoi gian toi da co the noi rong them cho thoi gian muon nhat giao hang
 	private int extendCapacity;// tai trong toi da co the noi rong them
+	private String districtBased;// Y neu cac diem giao cung 1 khu vuc thi uu tien gom voi nhau truoc
 	private int timeLimit;// in minute
 	
 	
@@ -17,6 +18,26 @@ public class ConfigParams {
 		this.extendLateDelivery = extendLateDelivery;
 		this.extendCapacity = extendCapacity;
 		this.timeLimit = timeLimit;
+	}
+	
+	public ConfigParams(String intCity, String internalVehicleFirst,
+			int extendLateDelivery, int extendCapacity, String districtBased,
+			int timeLimit) {
+		super();
+		this.intCity = intCity;
+		this.internalVehicleFirst = internalVehicleFirst;
+		this.extendLateDelivery = extendLateDelivery;
+		this.extendCapacity = extendCapacity;
+		this.districtBased = districtBased;
+		this.timeLimit = timeLimit;
+	}
+
+	public String getDistrictBased() {
+		return districtBased;
+	}
+
+	public void setDistrictBased(String districtBased) {
+		this.districtBased = districtBased;
 	}
 
 	public int getExtendCapacity() {

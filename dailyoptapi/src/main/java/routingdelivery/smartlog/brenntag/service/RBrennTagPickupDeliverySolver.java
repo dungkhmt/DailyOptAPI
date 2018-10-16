@@ -270,7 +270,7 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 		if(input.getVehicles() == null || input.getVehicles().length == 0)
 			inputOK = "Không có xe nào được thiết lập. ";
 		if(input.getRequests() == null || input.getRequests().length == 0)
-			inputOK = inputOK + "Không có đơn hàng nào được thiết lập. ";
+			inputOK = "Không có đơn hàng nào được thiết lập. ";
 		
 		if (!inputOK.equals("OK")) {
 			PickupDeliverySolution sol = new PickupDeliverySolution();
@@ -279,7 +279,7 @@ public class RBrennTagPickupDeliverySolver extends BrenntagPickupDeliverySolver 
 			sol.setDescription("OK");
 			System.out
 					.println(name()
-							+ "::computeVehicleSuggestion, input NOT CONSISTENT???");
+							+ "::computeVehicleSuggestion, input NOT CONSISTENT???, inputOK = " + inputOK);
 			return sol;
 		}
 		

@@ -2,7 +2,7 @@ package routingdelivery.model;
 
 public class PickupDeliveryMultiSolutions {
 	private PickupDeliverySolution[] solutions;
-
+	
 	public PickupDeliverySolution[] getSolutions() {
 		return solutions;
 	}
