@@ -57,6 +57,7 @@ import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.INe
 import localsearch.domainspecific.vehiclerouting.vrp.search.GenericLocalSearch;
 import localsearch.domainspecific.vehiclerouting.vrp.search.Neighborhood;
 import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.LatLng;
+import routingdelivery.model.DateTimePeriod;
 import routingdelivery.model.DistanceElement;
 import routingdelivery.model.Item;
 import routingdelivery.model.PickupDeliveryInput;
@@ -72,6 +73,7 @@ import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
 import routingdelivery.smartlog.brenntag.model.ExclusiveItem;
 import routingdelivery.smartlog.brenntag.model.ExclusiveVehicleLocation;
 import routingdelivery.smartlog.brenntag.model.InputIndicator;
+import routingdelivery.smartlog.brenntag.model.LocationConfig;
 import routingdelivery.smartlog.brenntag.model.ModelRoute;
 import routingdelivery.smartlog.brenntag.model.SolutionIndicator;
 import routingdelivery.smartlog.brenntag.model.VehicleTrip;
@@ -140,7 +142,8 @@ public class PickupDeliverySolver {
 
 	public HashMap<String, String> mLocation2Type;
 	public HashMap<String, ArrayList<Item>> mLocation2Items;
-
+	public HashMap<String, LocationConfig> mLocationCode2Config;
+		
 	public HashMap<Point, Integer> mPickupPoint2PickupIndex;
 	public HashMap<Point, Integer> mDeliveryPoint2DeliveryIndex;
 
@@ -4944,6 +4947,17 @@ public class PickupDeliverySolver {
 		return "PickupDeliverySolver";
 	}
 
+	public int adaptTimeSubjectToInteruption(int startTime, LocationConfig config){
+		if(config == null) return startTime;
+		if(config.getInterupPeriods() == null | config.getInterupPeriods().length == 0) return startTime;
+		for(int i = 0;i < config.getInterupPeriods().length; i++){
+			DateTimePeriod dtp = config.getInterupPeriods()[i];
+			int s = (int)DateTimeUtils.dateTime2Int(dtp.getStart());
+			int e = (int)DateTimeUtils.dateTime2Int(dtp.getEnd());
+			if(startTime >= s && startTime <= e) startTime = e;
+		}
+		return startTime;
+	}
 	public void propagateArrivalDepartureTime(int k, boolean DEBUG) {
 
 		// for(int k = 1; k <= XR.getNbRoutes(); k++){
@@ -5019,11 +5033,18 @@ public class PickupDeliverySolver {
 			mPoint2ArrivalTime.put(p, startTime);
 			
 			String lc = mPoint2LocationCode.get(p);
-			
+			LocationConfig config = mLocationCode2Config.get(lc);
 			
 			if(startTime < earliestAllowedArrivalTime.get(p))
 				startTime = earliestAllowedArrivalTime.get(p);
 			
+			startTime = adaptTimeSubjectToInteruption(startTime, config);
+			if(config != null){
+				log(name() + "::propagateArrivalDepartureTime, locationCode " + lc + " has Config "
+						+ ", startTime = " + DateTimeUtils.unixTimeStamp2DateTime(startTime));
+			}else{
+				log(name() + "::propagateArrivalDepartureTime, locationCode " + lc + " no Config ");
+			}
 			
 			int departureTime = startTime + duration;
 			
@@ -5249,7 +5270,7 @@ public class PickupDeliverySolver {
 				// + duration);
 			}
 
-			mPoint2ArrivalTime.put(p, startTime);
+			//mPoint2ArrivalTime.put(p, startTime);
 			
 			//if(vh.getCode().equals(debugVehicleCode)){
 			//	String lc = mPoint2LocationCode.get(p);
@@ -5257,8 +5278,21 @@ public class PickupDeliverySolver {
 			//	DateTimeUtils.unixTimeStamp2DateTime(mPoint2ArrivalTime.get(p)));
 			//}
 
+			String lc = mPoint2LocationCode.get(p);
+			LocationConfig config = mLocationCode2Config.get(lc);
+			
 			if(startTime < earliestAllowedArrivalTime.get(p))
 				startTime = earliestAllowedArrivalTime.get(p);
+			
+			startTime = adaptTimeSubjectToInteruption(startTime, config);
+			//if(config != null){
+			//	log(name() + "::propagateArrivalDepartureTime, locationCode " + lc + " has Config "
+			//			+ ", startTime = " + DateTimeUtils.unixTimeStamp2DateTime(startTime));
+			//}else{
+			//	log(name() + "::propagateArrivalDepartureTime, locationCode " + lc + " no Config ");
+			//}
+			
+			mPoint2ArrivalTime.put(p, startTime);
 			
 			int departureTime = startTime + duration;
 

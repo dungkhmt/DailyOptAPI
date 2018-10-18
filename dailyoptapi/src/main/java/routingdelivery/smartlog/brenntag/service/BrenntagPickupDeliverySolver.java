@@ -35,6 +35,7 @@ import routingdelivery.smartlog.brenntag.model.ExclusiveItem;
 import routingdelivery.smartlog.brenntag.model.ExclusiveVehicleLocation;
 import routingdelivery.smartlog.brenntag.model.GreedyMatchingVehicleTrip;
 import routingdelivery.smartlog.brenntag.model.InputIndicator;
+import routingdelivery.smartlog.brenntag.model.LocationConfig;
 import routingdelivery.smartlog.brenntag.model.ModelRoute;
 import routingdelivery.smartlog.brenntag.model.MoveMergeTrip;
 import routingdelivery.smartlog.brenntag.model.PairInt;
@@ -4289,6 +4290,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		mItemIndex2RequestIndex = new HashMap<Integer, Integer>();
 		mItemCode2Index = new HashMap<String, Integer>();
 		mLocation2Items = new HashMap<String, ArrayList<Item>>();
+		mLocationCode2Config = new HashMap<String, LocationConfig>();
 		
 		items = new ArrayList<Item>();
 		mItem2Index = new HashMap<Item, Integer>();
@@ -4380,6 +4382,12 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			nbVehicles += externalVehicles.length;
 		}
 
+		if(input.getLocationConfigs() != null && input.getLocationConfigs().length > 0){
+			for(int i = 0; i < input.getLocationConfigs().length; i++){
+				LocationConfig lc = input.getLocationConfigs()[i];
+				mLocationCode2Config.put(lc.getLocationCode(), lc);
+			}
+		}
 	}
 
 	public void initPoints() {

@@ -13,8 +13,38 @@ public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
 	private Vehicle[] externalVehicles;// xe thau ngoai
 	private Vehicle[] vehicleCategories;
 	private ExclusiveVehicleLocation[] exclusiveVehicleCategoryLocations;
+	private LocationConfig[] locationConfigs;
 	
 	
+	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+			Vehicle[] vehicles, DistanceElement[] distances,
+			ConfigParams params, DistanceElement[] travelTime,
+			ExclusiveItem[] exclusiveItemPairs,
+			ExclusiveVehicleLocation[] exclusiveVehicleLocations,
+			Vehicle[] externalVehicles, Vehicle[] vehicleCategories,
+			ExclusiveVehicleLocation[] exclusiveVehicleCategoryLocations,
+			LocationConfig[] locationConfigs) {
+		super(requests, vehicles, distances, params);
+		this.travelTime = travelTime;
+		this.exclusiveItemPairs = exclusiveItemPairs;
+		this.exclusiveVehicleLocations = exclusiveVehicleLocations;
+		this.externalVehicles = externalVehicles;
+		this.vehicleCategories = vehicleCategories;
+		this.exclusiveVehicleCategoryLocations = exclusiveVehicleCategoryLocations;
+		this.locationConfigs = locationConfigs;
+	}
+
+
+	public LocationConfig[] getLocationConfigs() {
+		return locationConfigs;
+	}
+
+
+	public void setLocationConfigs(LocationConfig[] locationConfigs) {
+		this.locationConfigs = locationConfigs;
+	}
+
+
 	public boolean findVehicleLocationConflict(String vehicleCode, String locationCode){
 		for(int i = 0; i < exclusiveVehicleLocations.length; i++){
 			if(exclusiveVehicleLocations[i].getVehicleCode().equals(vehicleCode)
