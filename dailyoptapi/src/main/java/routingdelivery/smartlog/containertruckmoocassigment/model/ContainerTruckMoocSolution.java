@@ -5,12 +5,101 @@ public class ContainerTruckMoocSolution {
 	private ExportContainerRequest[] unScheduledExportRequests;
 	private ImportContainerRequest[] unScheduledImportRequests;
 	private WarehouseContainerTransportRequest[] unScheduledWarehouseRequests;
+	private ExportLadenRequests[] unScheduledExportLadenRequests;
+	private ExportEmptyRequests[] unScheduledExportEmptyRequests;
+	private ImportLadenRequests[] unScheduledImportLadenRequests;
+	private ImportEmptyRequests[] unScheduledImportEmptyRequests;
 	
 	private StatisticInformation statisticInformation;
 	private String description;
 
 	
 	
+
+	public ContainerTruckMoocSolution(TruckRouteList[] truckRoutes,
+			ExportContainerRequest[] unScheduledExportRequests,
+			ImportContainerRequest[] unScheduledImportRequests,
+			WarehouseContainerTransportRequest[] unScheduledWarehouseRequests,
+			ExportLadenRequests[] unScheduledExportLadenRequests,
+			ExportEmptyRequests[] unScheduledExportEmptyRequests,
+			ImportLadenRequests[] unScheduledImportLadenRequests,
+			ImportEmptyRequests[] unScheduledImportEmptyRequests,
+			StatisticInformation statisticInformation, String description) {
+		super();
+		this.truckRoutes = truckRoutes;
+		this.unScheduledExportRequests = unScheduledExportRequests;
+		this.unScheduledImportRequests = unScheduledImportRequests;
+		this.unScheduledWarehouseRequests = unScheduledWarehouseRequests;
+		this.unScheduledExportLadenRequests = unScheduledExportLadenRequests;
+		this.unScheduledExportEmptyRequests = unScheduledExportEmptyRequests;
+		this.unScheduledImportLadenRequests = unScheduledImportLadenRequests;
+		this.unScheduledImportEmptyRequests = unScheduledImportEmptyRequests;
+		this.statisticInformation = statisticInformation;
+		this.description = description;
+	}
+
+
+
+
+	public ExportLadenRequests[] getUnScheduledExportLadenRequests() {
+		return unScheduledExportLadenRequests;
+	}
+
+
+
+
+	public void setUnScheduledExportLadenRequests(
+			ExportLadenRequests[] unScheduledExportLadenRequests) {
+		this.unScheduledExportLadenRequests = unScheduledExportLadenRequests;
+	}
+
+
+
+
+	public ExportEmptyRequests[] getUnScheduledExportEmptyRequests() {
+		return unScheduledExportEmptyRequests;
+	}
+
+
+
+
+	public void setUnScheduledExportEmptyRequests(
+			ExportEmptyRequests[] unScheduledExportEmptyRequests) {
+		this.unScheduledExportEmptyRequests = unScheduledExportEmptyRequests;
+	}
+
+
+
+
+	public ImportLadenRequests[] getUnScheduledImportLadenRequests() {
+		return unScheduledImportLadenRequests;
+	}
+
+
+
+
+	public void setUnScheduledImportLadenRequests(
+			ImportLadenRequests[] unScheduledImportLadenRequests) {
+		this.unScheduledImportLadenRequests = unScheduledImportLadenRequests;
+	}
+
+
+
+
+	public ImportEmptyRequests[] getUnScheduledImportEmptyRequests() {
+		return unScheduledImportEmptyRequests;
+	}
+
+
+
+
+	public void setUnScheduledImportEmptyRequests(
+			ImportEmptyRequests[] unScheduledImportEmptyRequests) {
+		this.unScheduledImportEmptyRequests = unScheduledImportEmptyRequests;
+	}
+
+
+
 
 	public ContainerTruckMoocSolution(TruckRouteList[] truckRoutes,
 			ExportContainerRequest[] unScheduledExportRequests,

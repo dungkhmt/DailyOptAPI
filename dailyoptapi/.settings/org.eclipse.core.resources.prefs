@@ -3,4 +3,5 @@ encoding//src/main/java/routingdelivery/service/PickupDeliverySolver.java=UTF-8
 encoding//src/main/java/routingdelivery/smartlog/brenntag/service/BrennTagRouteSolverForOneVehicle.java=UTF-8
 encoding//src/main/java/routingdelivery/smartlog/brenntag/service/BrenntagPickupDeliverySolver.java=UTF-8
 encoding//src/main/java/routingdelivery/smartlog/brenntag/service/RBrennTagPickupDeliverySolver.java=UTF-8
+encoding//src/main/java/routingdelivery/smartlog/brenntagmultipickupdelivery/service/DistrictBasedRBrenntagMultiPickupDeliverySolver.java=UTF-8
 encoding//src/main/java/routingdelivery/smartlog/brenntagmultipickupdelivery/service/RBrenntagMultiPickupDeliverySolver.java=UTF-8

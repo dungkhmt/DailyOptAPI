@@ -43,9 +43,14 @@ public class RBrenntagMultiPickupDeliverySolver extends
 	public RBrenntagMultiPickupDeliverySolver() {
 		startExecutionTime = System.currentTimeMillis();
 		timeLimitExpired = false;
-
 	}
-
+	public RBrenntagMultiPickupDeliverySolver(long startExecutionTime) {
+		this.startExecutionTime = startExecutionTime;
+		timeLimitExpired = false;
+	}
+	public long getStartExecutionTime(){
+		return this.startExecutionTime;
+	}
 	public PickupDeliverySolution[] collectSolutions() {
 		PickupDeliverySolution[] s = new PickupDeliverySolution[solutionCollection
 				.size()];
@@ -308,7 +313,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 			}
 
 	}
-
+	
 	public PickupDeliverySolution computeVehicleSuggestion(
 			BrennTagPickupDeliveryInput input) {
 		this.input = input;
@@ -464,6 +469,7 @@ public class RBrenntagMultiPickupDeliverySolver extends
 		}
 		solutionCollection = new SolutionCollection(10);
 		
+		//initDistrictLocations();
 		int initRemainItemRequests = computeRemainItemOnRequest();
 		System.out.println(name()
 				+ "::computeVehicleSuggestion, initRequests = " + initRemainItemRequests);

@@ -61,9 +61,9 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 	public HashMap<Integer, String> mVehicle2OriginStartWoringTime;
 	public HashMap<Integer, Integer> mPickupIndex2ScheduledVehicleIndex;
 
-	ArrayList<String> distinct_pickupLocationCodes = new ArrayList<String>();
-	ArrayList<String> distinct_deliveryLocationCodes = new ArrayList<String>();
-	ArrayList<HashSet<Integer>> distinct_request_indices = new ArrayList<HashSet<Integer>>();
+	public ArrayList<String> distinct_pickupLocationCodes = new ArrayList<String>();
+	public ArrayList<String> distinct_deliveryLocationCodes = new ArrayList<String>();
+	public ArrayList<HashSet<Integer>> distinct_request_indices = new ArrayList<HashSet<Integer>>();
 
 	public HashSet<Integer> unScheduledPointIndices;
 
@@ -4021,6 +4021,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 			}
 		}
 
+		
 		// process intCityLocations FIRST
 		for (int i : intCityLocationIndex) {
 			if (input.getParams().getInternalVehicleFirst().equals("Y")) {

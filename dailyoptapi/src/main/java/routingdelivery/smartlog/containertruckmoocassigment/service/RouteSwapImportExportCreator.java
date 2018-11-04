@@ -131,10 +131,12 @@ public class RouteSwapImportExportCreator {
 				+ solver.getDistance(combo.lastLocationCode,
 						e2.getLocationCode());
 
-		if (arrivalTime > DateTimeUtils.dateTime2Int(ir
+		if(ir.getLateDateTimePickupAtPort() != null){
+			if (arrivalTime > DateTimeUtils.dateTime2Int(ir
 				.getLateDateTimePickupAtPort()))
-			return null;
-
+				return null;
+		}
+		
 		serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
 				.dateTime2Int(ir.getEarlyDateTimePickupAtPort()));
 		duration = ir.getLoadDuration();

@@ -19,12 +19,20 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.DoubleImportRo
 import routingdelivery.smartlog.containertruckmoocassigment.model.EmptyContainerFromDepotRequest;
 import routingdelivery.smartlog.containertruckmoocassigment.model.EmptyContainerToDepotRequest;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ExportContainerRequest;
+import routingdelivery.smartlog.containertruckmoocassigment.model.ExportEmptyRequests;
+import routingdelivery.smartlog.containertruckmoocassigment.model.ExportLadenRequests;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ImportContainerRequest;
+import routingdelivery.smartlog.containertruckmoocassigment.model.ImportEmptyRequests;
+import routingdelivery.smartlog.containertruckmoocassigment.model.ImportLadenRequests;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Individual2ImportRoutesComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualEmptyContainerFromDepotRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualEmptyContainerToDepotRouteComposer;
+import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualExportEmptyRouteComposer;
+import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualExportLadenRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualExportRouteComposer;
+import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualImportEmptyRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualImportExportRoutesComposer;
+import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualImportLadenRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualImportRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualTransportContainerRouteComposer;
 import routingdelivery.smartlog.containertruckmoocassigment.model.IndividualWarehouseExportRoutesComposer;
@@ -68,13 +76,33 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 	EmptyContainerFromDepotRequest[] emptyContainerFromDepotReq;
 	EmptyContainerToDepotRequest[] emptyContainerToDepotReq;
 	TransportContainerRequest[] transportContainerReq;
-
+	ExportLadenRequests[] exLadenReq;
+	ExportEmptyRequests[] exEmptyReq;
+	ImportLadenRequests[] imLadenReq;
+	ImportEmptyRequests[] imEmptyReq;
+	
+	int nbExReqs;
+	int nbImReqs;
+	int nbWhReqs;
+	int nbEmptyContainerFromDepotReqs;
+	int nbEmptyContainerToDepotReqs;
+	int nbTransportContainerReqs;
+	int nbExLadenReqs;
+	int nbExEmptyReqs;
+	int nbImLadenReqs;
+	int nbImEmptyReqs;
+	
 	boolean[] exReqScheduled;
 	boolean[] imReqScheduled;
 	boolean[] whReqScheduled;
 	boolean[] emptyContainerFromDepotReqScheduled;
 	boolean[] emptyContainerToDepotReqScheduled;
 	boolean[] transportContainerReqScheduled;
+	boolean[] imLadenReqScheduled;
+	boolean[] imEmptyReqScheduled;
+	boolean[] exLadenReqScheduled;
+	boolean[] exEmptyReqScheduled;
+	
 
 	HashMap<ExportContainerRequest, Integer> mExReq2Index;
 	HashMap<ImportContainerRequest, Integer> mImReq2Index;
@@ -82,7 +110,11 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 	HashMap<EmptyContainerFromDepotRequest, Integer> mEmptyContainerFromDepotReq2Index;
 	HashMap<EmptyContainerToDepotRequest, Integer> mEmptyContainerToDepotReq2Index;
 	HashMap<TransportContainerRequest, Integer> mTransportContainerReq2Index;
-
+	HashMap<ImportLadenRequests, Integer> mImportLadenRequest2Index;
+	HashMap<ImportEmptyRequests, Integer> mImportEmptyRequest2Index;
+	HashMap<ExportLadenRequests, Integer> mExportLadenRequest2Index;
+	HashMap<ExportEmptyRequests, Integer> mExportEmptyRequest2Index;
+	
 	public String name() {
 		return "InitGreedyImproveSpecialOperatorSolver";
 	}
@@ -652,6 +684,147 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		}
 
 	}
+	public void exploreDirectRouteImportLadenRequest(CandidateRouteComposer candidateRouteComposer){
+		double minDistance = Integer.MAX_VALUE;
+		TruckRoute sel_tr = null;
+		TruckRouteInfo4Request sel_tri = null;
+		ImportLadenRequests sel_req = null;
+		for(int i = 0; i < imLadenReq.length; i++){
+			if(imLadenReqScheduled[i]) continue;
+			
+			for(int j = 0; j < trucks.length; j++){
+				for(int k = 0; k < moocs.length; k++){
+					backup();
+					TruckRouteInfo4Request tri = createRouteForImportLadenRequest(imLadenReq[i], trucks[j], moocs[k]);
+					if (tri != null) {
+						TruckRoute tr = tri.route;
+						double dis = tr.getDistance()
+								- tr.getReducedDistance();
+						if (dis < minDistance) {
+							minDistance = dis;
+							sel_tr = tr;
+							sel_tri = tri;
+							sel_req = imLadenReq[i];
+						}
+					}
+					restore();
+				}
+			}
+		}
+		
+		if (sel_tr != null) {
+			IndividualImportLadenRouteComposer icp = new IndividualImportLadenRouteComposer(
+					this, sel_tr, sel_req, sel_tri, sel_tr.getDistance()
+							- sel_tr.getReducedDistance());
+			candidateRouteComposer.add(icp);
+		}
+	}
+	public void exploreDirectRouteImportEmptyRequest(CandidateRouteComposer candidateRouteComposer){
+		double minDistance = Integer.MAX_VALUE;
+		TruckRoute sel_tr = null;
+		TruckRouteInfo4Request sel_tri = null;
+		ImportEmptyRequests sel_req = null;
+		for(int i = 0; i < imEmptyReq.length; i++){
+			if(imEmptyReqScheduled[i]) continue;
+			
+			for(int j = 0; j < trucks.length; j++){
+				for(int k = 0; k < moocs.length; k++){
+					backup();
+					TruckRouteInfo4Request tri = createRouteForImportEmptyRequest(imEmptyReq[i], trucks[j], moocs[k]);
+					if (tri != null) {
+						TruckRoute tr = tri.route;
+						double dis = tr.getDistance()
+								- tr.getReducedDistance();
+						if (dis < minDistance) {
+							minDistance = dis;
+							sel_tr = tr;
+							sel_tri = tri;
+							sel_req = imEmptyReq[i];
+						}
+					}
+					restore();
+				}
+			}
+		}
+		
+		if (sel_tr != null) {
+			IndividualImportEmptyRouteComposer icp = new IndividualImportEmptyRouteComposer(
+					this, sel_tr, sel_req, sel_tri, sel_tr.getDistance()
+							- sel_tr.getReducedDistance());
+			candidateRouteComposer.add(icp);
+		}
+	}
+	public void exploreDirectRouteExportEmptyRequest(CandidateRouteComposer candidateRouteComposer){
+		double minDistance = Integer.MAX_VALUE;
+		TruckRoute sel_tr = null;
+		TruckRouteInfo4Request sel_tri = null;
+		ExportEmptyRequests sel_req = null;
+		for(int i = 0; i < exEmptyReq.length; i++){
+			if(exEmptyReqScheduled[i]) continue;
+			
+			for(int j = 0; j < trucks.length; j++){
+				for(int k = 0; k < moocs.length; k++){
+					backup();
+					TruckRouteInfo4Request tri = createRouteForExportEmptyRequest(exEmptyReq[i], trucks[j], moocs[k]);
+					if (tri != null) {
+						TruckRoute tr = tri.route;
+						double dis = tr.getDistance()
+								- tr.getReducedDistance();
+						if (dis < minDistance) {
+							minDistance = dis;
+							sel_tr = tr;
+							sel_tri = tri;
+							sel_req = exEmptyReq[i];
+						}
+					}
+					restore();
+				}
+			}
+		}
+		
+		if (sel_tr != null) {
+			IndividualExportEmptyRouteComposer icp = new IndividualExportEmptyRouteComposer(
+					this, sel_tr, sel_req, sel_tri, sel_tr.getDistance()
+							- sel_tr.getReducedDistance());
+			candidateRouteComposer.add(icp);
+		}
+	}
+
+	public void exploreDirectRouteExportLadenRequest(CandidateRouteComposer candidateRouteComposer){
+		double minDistance = Integer.MAX_VALUE;
+		TruckRoute sel_tr = null;
+		TruckRouteInfo4Request sel_tri = null;
+		ExportLadenRequests sel_req = null;
+		for(int i = 0; i < exLadenReq.length; i++){
+			if(exLadenReqScheduled[i]) continue;
+			
+			for(int j = 0; j < trucks.length; j++){
+				for(int k = 0; k < moocs.length; k++){
+					backup();
+					TruckRouteInfo4Request tri = createRouteForExportLadenRequest(exLadenReq[i], trucks[j], moocs[k]);
+					if (tri != null) {
+						TruckRoute tr = tri.route;
+						double dis = tr.getDistance()
+								- tr.getReducedDistance();
+						if (dis < minDistance) {
+							minDistance = dis;
+							sel_tr = tr;
+							sel_tri = tri;
+							sel_req = exLadenReq[i];
+						}
+					}
+					restore();
+				}
+			}
+		}
+		
+		if (sel_tr != null) {
+			IndividualExportLadenRouteComposer icp = new IndividualExportLadenRouteComposer(
+					this, sel_tr, sel_req, sel_tri, sel_tr.getDistance()
+							- sel_tr.getReducedDistance());
+			candidateRouteComposer.add(icp);
+		}
+	}
 
 	public void exploreDirectRouteEmptyContainerFromDepotRequest(
 			CandidateRouteComposer candidateRouteComposer) {
@@ -944,6 +1117,30 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		int idx = mWhReq2Index.get(whR);
 		whReqScheduled[idx] = true;
 	}
+	public void markServed(ImportLadenRequests req){
+		if(mImportLadenRequest2Index.get(req) == null)
+			return;
+		int idx = mImportLadenRequest2Index.get(req);
+		imLadenReqScheduled[idx] = true;
+	}
+	public void markServed(ImportEmptyRequests req){
+		if(mImportEmptyRequest2Index.get(req) == null)
+			return;
+		int idx = mImportEmptyRequest2Index.get(req);
+		imEmptyReqScheduled[idx] = true;
+	}
+	public void markServed(ExportLadenRequests req){
+		if(mExportLadenRequest2Index.get(req) == null)
+			return;
+		int idx = mExportLadenRequest2Index.get(req);
+		exLadenReqScheduled[idx] = true;
+	}
+	public void markServed(ExportEmptyRequests req){
+		if(mExportEmptyRequest2Index.get(req) == null)
+			return;
+		int idx = mExportEmptyRequest2Index.get(req);
+		exEmptyReqScheduled[idx] = true;
+	}
 
 	public void addRoute(TruckRoute tr, int lastIndex) {
 		Truck truck = tr.getTruck();
@@ -1027,6 +1224,9 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 	public ContainerTruckMoocSolution solve(ContainerTruckMoocInput input) {
 		this.input = input;
 
+		InputAnalyzer IA = new InputAnalyzer();
+		IA.standardize(input);
+		
 		initLog();
 		modifyContainerCode();
 		mapData();
@@ -1047,57 +1247,112 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		trucks = input.getTrucks();
 		moocs = input.getMoocs();
 		containers = input.getContainers();
+		
+		nbExReqs = 0;
+		nbImReqs = 0;
+		nbWhReqs = 0;
+		nbEmptyContainerFromDepotReqs = 0;
+		nbEmptyContainerToDepotReqs = 0;
+		nbTransportContainerReqs = 0;
+		nbExLadenReqs = 0;
+		nbExEmptyReqs = 0;
+		nbImEmptyReqs = 0;
+		nbImLadenReqs = 0;
+		
 		exReq = getSortedExportRequests();
 		imReq = getSortedImportRequests();
 		whReq = getSortedWarehouseTransportRequests();
 		emptyContainerFromDepotReq = getSortedEmptyContainerFromDepotRequests();
 		emptyContainerToDepotReq = getSortedEmptyContainerToDepotRequests();
 		transportContainerReq = getSortedTransportContainerRequests();
-
-		exReqScheduled = new boolean[exReq.length];
-		imReqScheduled = new boolean[imReq.length];
-		whReqScheduled = new boolean[whReq.length];
-		emptyContainerFromDepotReqScheduled = new boolean[emptyContainerFromDepotReq.length];
-		emptyContainerToDepotReqScheduled = new boolean[emptyContainerToDepotReq.length];
-		transportContainerReqScheduled = new boolean[transportContainerReq.length];
-
-		for (int i = 0; i < exReqScheduled.length; i++)
+		exLadenReq = getSortedExportLadenRequests();
+		exEmptyReq = getSortedExportEmptyRequests();
+		imLadenReq = getSortedImportLadenRequests();
+		imEmptyReq = getSortedImportEmptyRequests();
+		
+		if(exReq != null) nbExReqs = exReq.length;
+		if(imReq != null) nbImReqs = imReq.length;
+		if(whReq != null) nbWhReqs = whReq.length;
+		if(emptyContainerFromDepotReq != null) nbEmptyContainerFromDepotReqs = emptyContainerFromDepotReq.length;
+		if(emptyContainerToDepotReq != null) nbEmptyContainerToDepotReqs = emptyContainerToDepotReq.length;
+		if(transportContainerReq != null) nbTransportContainerReqs = transportContainerReq.length;
+		if(exLadenReq != null) nbExLadenReqs = exLadenReq.length;
+		if(exEmptyReq != null) nbExEmptyReqs = exEmptyReq.length;
+		if(imLadenReq != null) nbImLadenReqs = imLadenReq.length;
+		if(imEmptyReq != null) nbImEmptyReqs = imEmptyReq.length;
+		
+		exReqScheduled = new boolean[nbExReqs];
+		imReqScheduled = new boolean[nbImReqs];
+		whReqScheduled = new boolean[nbWhReqs];
+		emptyContainerFromDepotReqScheduled = new boolean[nbEmptyContainerFromDepotReqs];
+		emptyContainerToDepotReqScheduled = new boolean[nbEmptyContainerToDepotReqs];
+		transportContainerReqScheduled = new boolean[nbTransportContainerReqs];
+		exLadenReqScheduled = new boolean[nbExLadenReqs];
+		exEmptyReqScheduled = new boolean[nbExEmptyReqs];
+		imLadenReqScheduled = new boolean[nbImLadenReqs];
+		imEmptyReqScheduled = new boolean[nbImEmptyReqs];
+		
+		
+		for (int i = 0; i < nbExReqs; i++)
 			exReqScheduled[i] = false;
-		for (int i = 0; i < imReqScheduled.length; i++)
+		for (int i = 0; i < nbImReqs; i++)
 			imReqScheduled[i] = false;
-		for (int i = 0; i < whReqScheduled.length; i++)
+		for (int i = 0; i < nbWhReqs; i++)
 			whReqScheduled[i] = false;
-		for (int i = 0; i < emptyContainerFromDepotReqScheduled.length; i++)
+		for (int i = 0; i < nbEmptyContainerFromDepotReqs; i++)
 			emptyContainerFromDepotReqScheduled[i] = false;
-		for (int i = 0; i < emptyContainerToDepotReqScheduled.length; i++)
+		for (int i = 0; i < nbEmptyContainerToDepotReqs; i++)
 			emptyContainerToDepotReqScheduled[i] = false;
-		for (int i = 0; i < transportContainerReqScheduled.length; i++)
+		for (int i = 0; i < nbTransportContainerReqs; i++)
 			transportContainerReqScheduled[i] = false;
-
+		for(int i = 0; i < nbExLadenReqs; i++)
+			exLadenReqScheduled[i] = false;
+		for(int i = 0; i < nbExEmptyReqs; i++)
+			exEmptyReqScheduled[i] = false;
+		for(int i = 0; i < nbImLadenReqs; i++)
+			imLadenReqScheduled[i] = false;
+		for(int i = 0; i < nbImEmptyReqs; i++)
+			imEmptyReqScheduled[i] = false;
+		
+		
 		mExReq2Index = new HashMap<ExportContainerRequest, Integer>();
 		mImReq2Index = new HashMap<ImportContainerRequest, Integer>();
 		mWhReq2Index = new HashMap<WarehouseContainerTransportRequest, Integer>();
 		mEmptyContainerFromDepotReq2Index = new HashMap<EmptyContainerFromDepotRequest, Integer>();
 		mEmptyContainerToDepotReq2Index = new HashMap<EmptyContainerToDepotRequest, Integer>();
 		mTransportContainerReq2Index = new HashMap<TransportContainerRequest, Integer>();
-
-		for (int i = 0; i < exReq.length; i++) {
+		mExportLadenRequest2Index = new HashMap<ExportLadenRequests, Integer>();
+		mExportEmptyRequest2Index = new HashMap<ExportEmptyRequests, Integer>();
+		mImportLadenRequest2Index = new HashMap<ImportLadenRequests, Integer>();
+		mImportEmptyRequest2Index = new HashMap<ImportEmptyRequests, Integer>();
+		
+		
+		for (int i = 0; i < nbExReqs; i++) {
 			mExReq2Index.put(exReq[i], i);
 		}
-		for (int i = 0; i < imReq.length; i++) {
+		for (int i = 0; i < nbImReqs; i++) {
 			mImReq2Index.put(imReq[i], i);
 		}
-		for (int i = 0; i < whReq.length; i++) {
+		for (int i = 0; i < nbWhReqs; i++) {
 			mWhReq2Index.put(whReq[i], i);
 		}
-		for (int i = 0; i < emptyContainerFromDepotReq.length; i++)
+		for (int i = 0; i < nbEmptyContainerFromDepotReqs; i++)
 			mEmptyContainerFromDepotReq2Index.put(
 					emptyContainerFromDepotReq[i], i);
-		for (int i = 0; i < emptyContainerToDepotReq.length; i++)
+		for (int i = 0; i < nbEmptyContainerToDepotReqs; i++)
 			mEmptyContainerToDepotReq2Index.put(emptyContainerToDepotReq[i], i);
-		for (int i = 0; i < transportContainerReq.length; i++)
+		for (int i = 0; i < nbTransportContainerReqs; i++)
 			mTransportContainerReq2Index.put(transportContainerReq[i], i);
-
+		for(int i = 0; i < nbExLadenReqs; i++)
+			mExportLadenRequest2Index.put(exLadenReq[i], i);
+		for(int i = 0; i < nbExEmptyReqs; i++)
+			mExportEmptyRequest2Index.put(exEmptyReq[i], i);
+		for(int i = 0; i < nbImLadenReqs; i++)
+			mImportLadenRequest2Index.put(imLadenReq[i], i);
+		for(int i = 0; i < nbImEmptyReqs; i++)
+			mImportEmptyRequest2Index.put(imEmptyReq[i], i);
+		
+		
 		cand_sol = new CandidateSolution();
 
 		CandidateRouteComposer candidate_routes = new CandidateRouteComposer();
@@ -1106,19 +1361,25 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			candidate_routes.clear();
 
 			//exploreDoubleImport(candidate_routes);
-			exploreSwapImportExport(candidate_routes);
-			exploreKepLech(candidate_routes);
-			exploreTangBo(candidate_routes);
+			
+			//exploreSwapImportExport(candidate_routes);
+			//exploreKepLech(candidate_routes);
+			//exploreTangBo(candidate_routes);
 			System.out.println(name()
 					+ "::solve, special operators, candidates_routes.sz = "
 					+ candidate_routes.size());
 			if (candidate_routes.size() == 0) {
-				exploreDirectRouteExport(candidate_routes);
-				exploreDirectRouteImport(candidate_routes);
-				exploreDirectRouteWarehouseWarehouse(candidate_routes);
-				exploreDirectRouteEmptyContainerFromDepotRequest(candidate_routes);
-				exploreDirectRouteEmptyContainerToDepotRequest(candidate_routes);
-				exploreDirectRouteTransportContainerRequest(candidate_routes);
+				//exploreDirectRouteExport(candidate_routes);
+				//exploreDirectRouteImport(candidate_routes);
+				//exploreDirectRouteWarehouseWarehouse(candidate_routes);
+				//exploreDirectRouteEmptyContainerFromDepotRequest(candidate_routes);
+				//exploreDirectRouteEmptyContainerToDepotRequest(candidate_routes);
+				//exploreDirectRouteTransportContainerRequest(candidate_routes);
+				exploreDirectRouteImportLadenRequest(candidate_routes);
+				exploreDirectRouteImportEmptyRequest(candidate_routes);
+				exploreDirectRouteExportLadenRequest(candidate_routes);
+				exploreDirectRouteExportEmptyRequest(candidate_routes);
+				
 				
 				System.out.println(name()
 						+ "::solve, direct operators, candidates_routes.sz = "
@@ -1168,25 +1429,53 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		ArrayList<ExportContainerRequest> lstUExReq = new ArrayList<ExportContainerRequest>();
 		ArrayList<ImportContainerRequest> lstUImReq = new ArrayList<ImportContainerRequest>();
 		ArrayList<WarehouseContainerTransportRequest> lstUWhReq = new ArrayList<WarehouseContainerTransportRequest>();
-
-		for (int i = 0; i < exReqScheduled.length; i++)
+		ArrayList<ExportLadenRequests> lstUExLadenReq = new ArrayList<ExportLadenRequests>();
+		ArrayList<ExportEmptyRequests> lstUExEmptyReq = new ArrayList<ExportEmptyRequests>();
+		ArrayList<ImportLadenRequests> lstUImLadenReq = new ArrayList<ImportLadenRequests>();
+		ArrayList<ImportEmptyRequests> lstUImEmptyReq = new ArrayList<ImportEmptyRequests>();
+		
+		
+		//for (int i = 0; i < exReqScheduled.length; i++)
+		for (int i = 0; i < nbExReqs; i++)
 			if (exReqScheduled[i] == false)
 				lstUExReq.add(exReq[i]);
 
-		for (int i = 0; i < imReqScheduled.length; i++)
+		//for (int i = 0; i < imReqScheduled.length; i++)
+		for (int i = 0; i < nbImReqs; i++)
 			if (imReqScheduled[i] == false)
 				lstUImReq.add(imReq[i]);
 
-		for (int i = 0; i < whReqScheduled.length; i++)
+		//for (int i = 0; i < whReqScheduled.length; i++)
+		for (int i = 0; i < nbWhReqs; i++)
 			if (whReqScheduled[i] == false)
 				lstUWhReq.add(whReq[i]);
 
+		for(int i = 0; i < nbExLadenReqs; i++)
+			if(exLadenReqScheduled[i] == false)
+				lstUExLadenReq.add(exLadenReq[i]);
+		for(int i = 0; i < nbExEmptyReqs; i++)
+			if(exEmptyReqScheduled[i] == false)
+				lstUExEmptyReq.add(exEmptyReq[i]);
+		for(int i = 0; i < nbImLadenReqs; i++)
+			if(imLadenReqScheduled[i] == false)
+				lstUImLadenReq.add(imLadenReq[i]);
+		for(int i = 0; i < nbImEmptyReqs; i++)
+			if(imEmptyReqScheduled[i] == false)
+				lstUImEmptyReq.add(imEmptyReq[i]);
+		
+		
+		
 		ExportContainerRequest[] unScheduledExportRequests = new ExportContainerRequest[lstUExReq
 				.size()];
 		ImportContainerRequest[] unScheduledImportRequests = new ImportContainerRequest[lstUImReq
 				.size()];
 		WarehouseContainerTransportRequest[] unScheduledWarehouseRequests = new WarehouseContainerTransportRequest[lstUWhReq
 				.size()];
+		ExportLadenRequests[] unScheduledExportLadenRequests = new ExportLadenRequests[lstUExLadenReq.size()];
+		ExportEmptyRequests[] unScheduledExportEmptyRequests = new ExportEmptyRequests[lstUExEmptyReq.size()];
+		ImportLadenRequests[] unScheduledImportLadenRequests = new ImportLadenRequests[lstUImLadenReq.size()];
+		ImportEmptyRequests[] unScheduledImportEmptyRequests = new ImportEmptyRequests[lstUImEmptyReq.size()];
+		
 		for (int i = 0; i < lstUExReq.size(); i++)
 			unScheduledExportRequests[i] = lstUExReq.get(i);
 		for (int i = 0; i < lstUImReq.size(); i++)
@@ -1194,11 +1483,22 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		for (int i = 0; i < lstUWhReq.size(); i++)
 			unScheduledWarehouseRequests[i] = lstUWhReq.get(i);
 
+		for(int i = 0; i < lstUExLadenReq.size(); i++)
+			unScheduledExportLadenRequests[i] = lstUExLadenReq.get(i);
+		for(int i = 0; i < lstUExEmptyReq.size(); i++)
+			unScheduledExportEmptyRequests[i] = lstUExEmptyReq.get(i);
+		for(int i = 0; i < lstUImLadenReq.size(); i++)
+			unScheduledImportLadenRequests[i] = lstUImLadenReq.get(i);
+		for(int i = 0; i < lstUImEmptyReq.size(); i++)
+			unScheduledImportEmptyRequests[i] = lstUImEmptyReq.get(i);
+		
+		
 		// ContainerTruckMoocSolution sol = new ContainerTruckMoocSolution(TR,
 		// infos, "OK");
 		ContainerTruckMoocSolution sol = new ContainerTruckMoocSolution(TR,
 				unScheduledExportRequests, unScheduledImportRequests,
-				unScheduledWarehouseRequests, infos, "OK");
+				unScheduledWarehouseRequests, unScheduledExportLadenRequests, unScheduledExportEmptyRequests,
+				unScheduledImportLadenRequests, unScheduledImportEmptyRequests, infos, "OK");
 
 		finalizeLog();
 		return sol;

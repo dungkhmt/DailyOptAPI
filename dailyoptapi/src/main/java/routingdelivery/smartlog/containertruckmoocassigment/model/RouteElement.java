@@ -20,7 +20,75 @@ public class RouteElement {
 	private EmptyContainerFromDepotRequest emptyContainerFromDepotRequest;
 	private EmptyContainerToDepotRequest emptyContainerToDepotRequest;
 	private TransportContainerRequest transportContainerRequest;
+	private ExportLadenRequests exportLadenRequest;
+	private ExportEmptyRequests exportEmptyRequest;
+	private ImportLadenRequests importLadenRequest;
+	private ImportEmptyRequests importEmptyRequest;
 	
+	
+	public RouteElement(DepotTruck depotTruck, DepotMooc depotMooc,
+			DepotContainer depotContainer, Warehouse warehouse, Port port,
+			Mooc mooc, Container container, Truck truck, String locationCode,
+			String action, ExportContainerRequest exportRequest,
+			ImportContainerRequest importRequest,
+			WarehouseContainerTransportRequest warehouseRequest,
+			EmptyContainerFromDepotRequest emptyContainerFromDepotRequest,
+			EmptyContainerToDepotRequest emptyContainerToDepotRequest,
+			TransportContainerRequest transportContainerRequest,
+			ExportLadenRequests exportLadenRequest,
+			ExportEmptyRequests exportEmptyRequest,
+			ImportLadenRequests importLadenRequest,
+			ImportEmptyRequests importEmptyRequest, String arrivalTime,
+			String departureTime, double distance) {
+		super();
+		this.depotTruck = depotTruck;
+		this.depotMooc = depotMooc;
+		this.depotContainer = depotContainer;
+		this.warehouse = warehouse;
+		this.port = port;
+		this.mooc = mooc;
+		this.container = container;
+		this.truck = truck;
+		this.locationCode = locationCode;
+		this.action = action;
+		this.exportRequest = exportRequest;
+		this.importRequest = importRequest;
+		this.warehouseRequest = warehouseRequest;
+		this.emptyContainerFromDepotRequest = emptyContainerFromDepotRequest;
+		this.emptyContainerToDepotRequest = emptyContainerToDepotRequest;
+		this.transportContainerRequest = transportContainerRequest;
+		this.exportLadenRequest = exportLadenRequest;
+		this.exportEmptyRequest = exportEmptyRequest;
+		this.importLadenRequest = importLadenRequest;
+		this.importEmptyRequest = importEmptyRequest;
+		this.arrivalTime = arrivalTime;
+		this.departureTime = departureTime;
+		this.distance = distance;
+	}
+	public ExportLadenRequests getExportLadenRequest() {
+		return exportLadenRequest;
+	}
+	public void setExportLadenRequest(ExportLadenRequests exportLadenRequest) {
+		this.exportLadenRequest = exportLadenRequest;
+	}
+	public ExportEmptyRequests getExportEmptyRequest() {
+		return exportEmptyRequest;
+	}
+	public void setExportEmptyRequest(ExportEmptyRequests exportEmptyRequest) {
+		this.exportEmptyRequest = exportEmptyRequest;
+	}
+	public ImportLadenRequests getImportLadenRequest() {
+		return importLadenRequest;
+	}
+	public void setImportLadenRequest(ImportLadenRequests importLadenRequest) {
+		this.importLadenRequest = importLadenRequest;
+	}
+	public ImportEmptyRequests getImportEmptyRequest() {
+		return importEmptyRequest;
+	}
+	public void setImportEmptyRequest(ImportEmptyRequests importEmptyRequest) {
+		this.importEmptyRequest = importEmptyRequest;
+	}
 	public EmptyContainerFromDepotRequest getEmptyContainerFromDepotRequest() {
 		return emptyContainerFromDepotRequest;
 	}

@@ -32,6 +32,7 @@ import routingdelivery.service.PickupDeliverySolver;
 import routingdelivery.smartlog.brenntag.model.BrennTagPickupDeliveryInput;
 import routingdelivery.smartlog.brenntag.service.BrenntagPickupDeliverySolver;
 import routingdelivery.smartlog.brenntag.service.RBrennTagPickupDeliverySolver;
+import routingdelivery.smartlog.brenntagmultipickupdelivery.service.DistrictBasedRBrenntagMultiPickupDeliverySolver;
 import routingdelivery.smartlog.brenntagmultipickupdelivery.service.RBrenntagMultiPickupDeliverySolver;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocInput;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocSolution;
@@ -310,18 +311,73 @@ public class TestAPI {
 		// PickupDeliverySolver solver = new PickupDeliverySolver();
 		// BrenntagPickupDeliverySolver solver = new
 		// BrenntagPickupDeliverySolver();
-		RBrenntagMultiPickupDeliverySolver solver = new RBrenntagMultiPickupDeliverySolver();
-
+		
+		//RBrenntagMultiPickupDeliverySolver solver = new RBrenntagMultiPickupDeliverySolver();
+		
+		
+		
 		// return solver.compute(input);
 		// return solver.computeNew(input);
 		
 		//if(true)return solver.computeVehicleSuggestion(input);
 		
-		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		
+		//solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
 		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		
+		PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions();
+		long startExecutionTime = System.currentTimeMillis();
 		
 		if(input.getParams().getTimeLimit() == 0)
 			input.getParams().setTimeLimit(10);
+		
+		if(input.getParams().getDistrictBased().equals("Y")){
+			PickupDeliveryRequest[] req = input.cloneRequests();
+			DistrictBasedRBrenntagMultiPickupDeliverySolver dsolver = 
+					new DistrictBasedRBrenntagMultiPickupDeliverySolver(startExecutionTime);
+			
+			dsolver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+			//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+
+			if(input.getParams().getInternalVehicleFirst() != null && 
+					input.getParams().getInternalVehicleFirst().equals("Y")){
+				Vehicle[] externalVehicles = input.getExternalVehicles();
+				Vehicle[] vehicleCategory = input.getVehicleCategories();
+				PickupDeliveryRequest[] dreq = input.cloneRequests();
+				input.setVehicleCategories(null);
+				input.setExternalVehicles(null);
+				PickupDeliverySolution s = dsolver.computeVehicleSuggestion(input);
+				if(s.getDescription().equals("OK")){
+					PickupDeliverySolution[] solutions = dsolver.collectSolutions();
+					ms.addSolutions(solutions);
+					//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+					//return ms;
+				}
+				else{// try to use external vehicles
+					input.setExternalVehicles(externalVehicles);
+					input.setVehicleCategories(vehicleCategory);
+					input.setRequests(dreq);
+					//PickupDeliveryRequest[] req1 = input.cloneRequests();
+					PickupDeliverySolution sol = dsolver.computeVehicleSuggestion(input);
+					PickupDeliverySolution[] solutions = dsolver.collectSolutions();
+					ms.addSolutions(solutions);
+					//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+					//return ms;
+				}
+			}else{
+				PickupDeliverySolution sol = dsolver.computeVehicleSuggestion(input);
+				PickupDeliverySolution[] solutions = dsolver.collectSolutions();
+				ms.addSolutions(solutions);
+				//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+				//return ms;
+			}
+
+		}
+		
+		
+		RBrenntagMultiPickupDeliverySolver solver = new RBrenntagMultiPickupDeliverySolver(startExecutionTime);
+		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
 		
 		if(input.getParams().getInternalVehicleFirst() != null && 
 				input.getParams().getInternalVehicleFirst().equals("Y")){
@@ -333,8 +389,9 @@ public class TestAPI {
 			PickupDeliverySolution s = solver.computeVehicleSuggestion(input);
 			if(s.getDescription().equals("OK")){
 				PickupDeliverySolution[] solutions = solver.collectSolutions();
-				PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
-				return ms;
+				ms.addSolutions(solutions);
+				//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+				//return ms;
 			}
 			else{// try to use external vehicles
 				input.setExternalVehicles(externalVehicles);
@@ -343,11 +400,9 @@ public class TestAPI {
 				PickupDeliveryRequest[] req1 = input.cloneRequests();
 				PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
 				PickupDeliverySolution[] solutions = solver.collectSolutions();
-				//for(int i = 0; i < solutions.length; i++){
-				//	solutions[i].setDescription(solutions[i].getDescription() + " ORIGINAL");
-				//}
-				PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
-				return ms;
+				ms.addSolutions(solutions);
+				//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+				//return ms;
 				/*
 				if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
 					return ms;
@@ -389,8 +444,9 @@ public class TestAPI {
 		}else{
 			PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
 			PickupDeliverySolution[] solutions = solver.collectSolutions();
-			PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
-			return ms;
+			ms.addSolutions(solutions);
+			//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+			//return ms;
 			/*
 			if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
 				return ms;
@@ -414,6 +470,8 @@ public class TestAPI {
 			return ms;
 			*/
 		}
+		
+		return ms;
 		//return solver.computeVehicleSuggestion(input);
 	}
 

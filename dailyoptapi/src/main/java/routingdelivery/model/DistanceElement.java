@@ -4,6 +4,23 @@ public class DistanceElement {
 	private String srcCode;
 	private String destCode;
 	private double distance;
+	private double travelTime;
+	
+	
+	public DistanceElement(String srcCode, String destCode, double distance,
+			double travelTime) {
+		super();
+		this.srcCode = srcCode;
+		this.destCode = destCode;
+		this.distance = distance;
+		this.travelTime = travelTime;
+	}
+	public double getTravelTime() {
+		return travelTime;
+	}
+	public void setTravelTime(double travelTime) {
+		this.travelTime = travelTime;
+	}
 	public String getSrcCode() {
 		return srcCode;
 	}
