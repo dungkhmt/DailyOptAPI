@@ -3422,7 +3422,13 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				+ mLocation2Type.get(deliveryLocationCode)
 				+ ", nbInternalvehicle = " + len1 + ", nbExternalVehicle = "
 				+ len2 + ", nbItems = " + a_items.size());
-
+		System.out.println(name() + "::processMergeOrderItemsFTLInternalVehicleFIRST("
+				+ pickuplocationCode + "," + deliveryLocationCode
+				+ ", RI.sz = " + RI.size() + ") location-type "
+				+ mLocation2Type.get(deliveryLocationCode)
+				+ ", nbInternalvehicle = " + len1 + ", nbExternalVehicle = "
+				+ len2 + ", nbItems = " + a_items.size());
+		
 		int lastRemainItems = a_items.size();
 		while (true) {
 			if(a_items.size() == 0) break;
@@ -3464,7 +3470,10 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				double minW = Integer.MAX_VALUE;
 				for (Trip t : T) {
 					int vh_idx = t.start.vehicleIndex;
-					matchTrips[vh_idx][clusterItems.size() - 1] = t;
+					System.out.println(name() + "::processMergeOrderItemsFTLInternalVehicleFIRSTNEW, vh_idx = "  + vh_idx + 
+							", clusterItems.sz = " + clusterItems.size());
+					
+					//matchTrips[vh_idx][clusterItems.size() - 1] = t;
 
 					Vehicle vh = getVehicle(vh_idx);
 
@@ -4292,7 +4301,6 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		mItemCode2Index = new HashMap<String, Integer>();
 		mLocation2Items = new HashMap<String, ArrayList<Item>>();
 		mLocationCode2Config = new HashMap<String, LocationConfig>();
-		
 		items = new ArrayList<Item>();
 		mItem2Index = new HashMap<Item, Integer>();
 		if (requests != null)

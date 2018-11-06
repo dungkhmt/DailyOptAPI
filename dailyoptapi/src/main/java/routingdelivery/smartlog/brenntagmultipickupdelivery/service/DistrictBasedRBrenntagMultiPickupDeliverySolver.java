@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.LogRecord;
 
+import localsearch.domainspecific.vehiclerouting.vrp.VarRoutesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.Point;
 import routingdelivery.model.Item;
 import routingdelivery.model.PickupDeliveryRequest;
@@ -523,6 +524,7 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 			}
 
 			initMapData();
+			initDistrictLocations();
 			initItemVehicleConflicts();
 			// initDistanceTravelTime();
 
@@ -854,7 +856,7 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 						.getStatistic()
 						.getIndicator()
 						.setDescription(
-								"Gom Ä‘iá»ƒm giao, tá»‘i Æ°u KM cho cÃ¡c xe nhÃ , sau Ä‘Ã³ gÃ¡n láº¡i cÃ¡c Ä‘Æ¡n hÃ ng tá»« xe ngoÃ i vá»� cho xe nhÃ ");
+								"Gom điểm giao, tối ưu số KM cho xe nhà , sau đó gán lại các đơn từ xe ngoài cho xe nhà ");
 				reassignVehicleOptimizeLoadExternalVehicles(solution04);
 				solutionCollection.add(solution04, input.getParams());
 
@@ -879,8 +881,8 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 						.getStatistic()
 						.getIndicator()
 						.setDescription(
-								"Tiáº¿p tá»¥c thá»­ chuyá»ƒn cÃ¡c Ä‘Æ¡n hÃ ng tá»« xe tháº§u ngoÃ i vá»� xe nhÃ  chÆ°a Ä‘Æ°á»£c sá»­ dá»¥ng, "
-										+ "cháº¥p nháº­n chia láº» Ä‘Æ¡n cÃ¹ng Ä‘iá»ƒm giao");
+								"Tiếp tục thử chuyển các đơn hàng từ xe thầu ngoài về xe nhà chưa được sử dụng, "
+						+ "chấp nhận chia lẻ đơn cùng điểm giao");
 				solutionCollection.add(solution05, input.getParams());
 
 				log(name()
@@ -956,7 +958,7 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 				.getStatistic()
 				.getIndicator()
 				.setDescription(
-						"Tá»‘i Æ°u tiáº¿p sá»‘ KM, cÃ³ thá»ƒ khÃ´ng Æ°u tiÃªn sá»­ dá»¥ng xe nhÃ  trÆ°á»›c");
+						"Tối ưu tiếp số KM, có thể không ưu tiên sử dụng xe nhà trước");
 		reassignVehicleOptimizeLoadExternalVehicles(solution1);
 		solutionCollection.add(solution1, input.getParams());
 
@@ -2144,6 +2146,9 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 							VehicleTrip tj = VTC.mVehicle2Trips.get(vj).get(j);
 							Point s = tj.getLastPickupPoint();
 
+							// move lst_pickup, lst_delivery to tj
+							if(!sameDistrict(lst_delivery, tj.seqPoints)) continue;
+							
 							double delta = evaluateMoveSequencePoints(XR,
 									lst_pickup, lst_delivery, tj, s, DIXAVEGAN,
 									loadConstraint);
@@ -2409,7 +2414,9 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 								s_lst_delivery.add(sDelivery[jj]);
 							ArrayList<Point> s_lst_pickup = createPickupListOfDelivery(s_lst_delivery);
 							double load = computeLoad(s_lst_pickup);
-
+							
+							if(!sameDistrict(XR,s_lst_delivery, r_index)) continue;
+							
 							double[] eval = evaluateMoveSetPointsNewRoute(XR,
 									s_lst_pickup, s_lst_delivery, r_index,
 									DIXAVEGAN, loadConstraint);
@@ -2808,21 +2815,39 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 		logTrips(XR);
 		return hasChanged;
 	}
-
+	public boolean sameDistrict(ArrayList<Point> L, Point p){
+		if(mPoint2Type.get(p).equals("D")){
+			for(Point q: L)if(mPoint2Type.get(q).equals("D")){
+				if(!sameDistrict(p, q)) return false;
+			}
+		}
+		return true;
+	}
+	public boolean sameDistrict(VarRoutesVR XR, ArrayList<Point> L, int k){
+		for(Point p: L){
+			if(!mPoint2Type.get(p).equals("D")) continue;
+			for(Point q = XR.startPoint(k); q != XR.endPoint(k); q = XR.next(q)){
+				if(!mPoint2Type.get(q).equals("D")) continue;
+				if(!sameDistrict(p, q)) return false;
+			}
+		}
+		return true;
+	}
 	public boolean sameDistrict(ArrayList<Point> L1, ArrayList<Point> L2){
 		if(L1 == null || L2 == null || L1.size() == 0 || L2.size() == 0) return false;
 		VehicleTrip t;
-		for(Point p: L1){
-			String lp = mPoint2LocationCode.get(p);
-			String districtCodeP = null;
-			if(lp != null) districtCodeP = mLocationCode2DistrictCode.get(lp);
-			for(Point q: L2){
-				String lq = mPoint2LocationCode.get(q);
-				String districtCodeQ = null;
-				if(lq != null) districtCodeQ = mLocationCode2DistrictCode.get(lq);
+		for(Point p: L1)if(mPoint2Type.get(p).equals("D")){
+			//String lp = mPoint2LocationCode.get(p);
+			//String districtCodeP = null;
+			//if(lp != null) districtCodeP = mLocationCode2DistrictCode.get(lp);
+			for(Point q: L2)if(mPoint2Type.get(q).equals("D")){
+				if(!sameDistrict(p, q)) return false;
+				//String lq = mPoint2LocationCode.get(q);
+				//String districtCodeQ = null;
+				//if(lq != null) districtCodeQ = mLocationCode2DistrictCode.get(lq);
 				
-				if(districtCodeP == null || districtCodeQ == null) return false;
-				if(!districtCodeP.equals(districtCodeQ)) return false;
+				//if(districtCodeP == null || districtCodeQ == null) return false;
+				//if(!districtCodeP.equals(districtCodeQ)) return false;
 			}
 		}
 		return true;
@@ -2830,7 +2855,36 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 	public boolean sameDistrict(VehicleTrip t1, VehicleTrip t2){
 		return sameDistrict(t1.seqPoints, t2.seqPoints);
 	}
+	public boolean sameDistrict(VarRoutesVR XR, int k1, int k2){
+		// return true if two routes k1, k2 are in the same disttrict
+		for(Point p = XR.startPoint(k1); p != XR.endPoint(k1); p = XR.next(p)){
+			if(!mPoint2Type.get(p).equals("D")) continue;
+			//String lp = mPoint2LocationCode.get(p);
+			//String dp = null;
+			//if(lp != null) dp = mLocationCode2DistrictCode.get(lp);
+			for(Point q = XR.startPoint(k2); q != XR.endPoint(k2); q = XR.next(q)){
+				if(!mPoint2Type.get(q).equals("D")) continue;
+				if(!sameDistrict(p, q)) return false;
+				//String lq = mPoint2LocationCode.get(q);
+				//String dq = null;
+				//if(lq != null) dq = mLocationCode2DistrictCode.get(lq);
+				//if(dp != null && dq != null && !dp.equals(dq)) return false;
+			}
+		}
+		return true;
+	}
+	public boolean sameDistrict(Point p, Point q){
+		String lp = mPoint2LocationCode.get(p);
+		String dp = null;
+		if(lp != null) dp = mLocationCode2DistrictCode.get(lp);
+		String lq = mPoint2LocationCode.get(q);
+		String dq = null;
+		if(lq != null) dq = mLocationCode2DistrictCode.get(lq);
+		if(dp != null && dq != null && dp.equals(dq)) return true;
+		
+		return false;
 	
+	}
 	public boolean hillClimbingMerge4EachVehicle(boolean loadConstraint) {
 		log(name() + "::hillClimbingMerge4EachVehicle START XR = "
 				+ toStringShort(XR) + ", START-COST = " + cost.getValue());
@@ -3156,6 +3210,10 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 						// + toStringListPoints(lst_pickup) + ","
 						// + toStringListPoints(lst_delivery) + ", t[j] = " +
 						// t[j].seqPointString() + ", s = " + s.ID + ")");
+						
+						// move sequence lst_pickup, lst_delivery from t[i] to t[j]
+						if(!sameDistrict(lst_delivery,t[j].seqPoints)) continue;
+						
 						double old_cost = cost.getValue();
 						double delta = evaluateMoveSequencePoints(XR,
 								lst_pickup, lst_delivery, t[j], s, DIXAVEGAN,
@@ -3529,7 +3587,10 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 						Vehicle vk = mPoint2Vehicle.get(startPoint);
 						if (isInternalVehicle(vk))
 							continue;
-
+						
+						if(!sameDistrict(t[i], t[j])) continue;
+						
+						
 						double delta = evaluateMoveTripNewVehicle(XR, t[i],
 								t[j], XR.startPoint(k), DIXAVEGAN,
 								loadConstraint);
@@ -3871,6 +3932,8 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 						if (VTC.mVehicle2Trips.get(vh2).size() < 2)
 							continue;
 
+						if(!sameDistrict(XR, i, j)) continue;
+						
 						for (int i11 = 0; i11 < VTC.mVehicle2Trips.get(vh1)
 								.size(); i11++) {
 							VehicleTrip vt11 = VTC.mVehicle2Trips.get(vh1).get(
@@ -3970,7 +4033,7 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 		int nbVehicles = input.getVehicles().length + len;
 		int nbClusters = distinct_deliveryLocationCodes.size();
 
-		matchTrips = new Trip[nbVehicles][nbClusters];
+		//matchTrips = new Trip[nbVehicles][nbClusters];
 		mCluster2Index = new HashMap<ClusterItems, Integer>();
 		clusterItems = new ArrayList<ClusterItems>();
 

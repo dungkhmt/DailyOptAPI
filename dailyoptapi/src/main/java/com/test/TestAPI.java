@@ -331,8 +331,10 @@ public class TestAPI {
 		if(input.getParams().getTimeLimit() == 0)
 			input.getParams().setTimeLimit(10);
 		
-		if(input.getParams().getDistrictBased().equals("Y")){
-			PickupDeliveryRequest[] req = input.cloneRequests();
+		PickupDeliveryRequest[] origin_req = input.cloneRequests();
+		
+		if(input.getParams().getDistrictBased() != null)if(input.getParams().getDistrictBased().equals("Y")){
+			
 			DistrictBasedRBrenntagMultiPickupDeliverySolver dsolver = 
 					new DistrictBasedRBrenntagMultiPickupDeliverySolver(startExecutionTime);
 			
@@ -371,6 +373,15 @@ public class TestAPI {
 				//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
 				//return ms;
 			}
+			
+			if(ms.getSolutions() != null){
+				for(int ii = 0; ii < ms.getSolutions().length; ii++){
+					PickupDeliverySolution sol = ms.getSolutions()[ii];
+					sol.setDescription(sol.getDescription() + " - " + " GOM THEO KHU VUC");
+				}
+					
+				
+			}
 
 		}
 		
@@ -378,6 +389,8 @@ public class TestAPI {
 		RBrenntagMultiPickupDeliverySolver solver = new RBrenntagMultiPickupDeliverySolver(startExecutionTime);
 		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
 		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		
+		input.setRequests(origin_req);
 		
 		if(input.getParams().getInternalVehicleFirst() != null && 
 				input.getParams().getInternalVehicleFirst().equals("Y")){

@@ -1,12 +1,32 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class Container {
+	
 	private String code;
 	private int weight;
 	private String categoryCode;
 	private String depotContainerCode;
 	private String[] returnDepotCodes;// possible depots when finishing services
+	private boolean importedContainer;
 	
+	
+	public Container(String code, int weight, String categoryCode,
+			String depotContainerCode, String[] returnDepotCodes,
+			boolean importedContainer) {
+		super();
+		this.code = code;
+		this.weight = weight;
+		this.categoryCode = categoryCode;
+		this.depotContainerCode = depotContainerCode;
+		this.returnDepotCodes = returnDepotCodes;
+		this.importedContainer = importedContainer;
+	}
+	public boolean isImportedContainer() {
+		return importedContainer;
+	}
+	public void setImportedContainer(boolean importedContainer) {
+		this.importedContainer = importedContainer;
+	}
 	public Container(String code, int weight, String categoryCode,
 			String depotContainerCode, String[] returnDepotCodes) {
 		super();

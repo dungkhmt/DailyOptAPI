@@ -832,7 +832,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
 		EmptyContainerFromDepotRequest sel_req = null;
-		for (int i = 0; i < emptyContainerFromDepotReq.length; i++) {
+		for (int i = 0; i < nbEmptyContainerFromDepotReqs; i++) {
 			if (emptyContainerFromDepotReqScheduled[i])
 				continue;
 
@@ -876,7 +876,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
 		EmptyContainerToDepotRequest sel_req = null;
-		for (int i = 0; i < emptyContainerToDepotReq.length; i++) {
+		for (int i = 0; i < nbEmptyContainerToDepotReqs; i++) {
 			if (emptyContainerToDepotReqScheduled[i])
 				continue;
 
@@ -917,7 +917,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
 		TransportContainerRequest sel_req = null;
-		for (int i = 0; i < transportContainerReq.length; i++) {
+		for (int i = 0; i < nbTransportContainerReqs; i++) {
 			if (transportContainerReqScheduled[i])
 				continue;
 
@@ -959,15 +959,28 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
 		ExportContainerRequest sel_exReq = null;
-		for (int i = 0; i < exReq.length; i++) {
+		Truck sel_truck = null;
+		Mooc sel_mooc = null;
+		Container sel_container = null;
+		
+		for (int i = 0; i < nbExReqs; i++) {
 			if (exReqScheduled[i])
 				continue;
 
 			for (int j = 0; j < trucks.length; j++) {
 				for (int k = 0; k < moocs.length; k++) {
 					for (int q = 0; q < containers.length; q++) {
-						if (mContainer2LastDepot.get(containers) == null)
+						if (mContainer2LastDepot.get(containers[q]) == null)
 							continue;
+						double d = evaluateExportRoute(exReq[i], trucks[j], moocs[k], containers[q]);
+						if(d < minDistance){
+							minDistance = d;
+							sel_truck = trucks[j];
+							sel_mooc = moocs[k];
+							sel_container = containers[q];
+							sel_exReq = exReq[i];
+						}
+						/*
 						backup();
 						TruckRouteInfo4Request tri = createRouteForExportRequest(
 								exReq[i], trucks[j], moocs[k], containers[q]);
@@ -984,16 +997,31 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 							}
 						}
 						restore();
+						*/
 					}
 				}
 			}
 		}
+		if (sel_truck != null) {
+			sel_tri = createRouteForExportRequest(
+					sel_exReq, sel_truck, sel_mooc, sel_container);
+			if(sel_tri != null){
+				sel_tr = sel_tri.route;
+				IndividualExportRouteComposer icp = new IndividualExportRouteComposer(
+					this, sel_tr, sel_exReq, sel_tri, sel_tr.getDistance()
+							- sel_tr.getReducedDistance());
+			candidateRouteComposer.add(icp);
+			}
+		}
+		
+		/*
 		if (sel_tr != null) {
 			IndividualExportRouteComposer icp = new IndividualExportRouteComposer(
 					this, sel_tr, sel_exReq, sel_tri, sel_tr.getDistance()
 							- sel_tr.getReducedDistance());
 			candidateRouteComposer.add(icp);
 		}
+		*/
 	}
 
 	public void exploreDirectRouteImport(
@@ -1002,11 +1030,22 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
 		ImportContainerRequest sel_imReq = null;
-		for (int i = 0; i < imReq.length; i++) {
+		Truck sel_truck  = null;
+		Mooc sel_mooc = null;
+		for (int i = 0; i < nbImReqs; i++) {
 			if (imReqScheduled[i])
 				continue;
 			for (int j = 0; j < trucks.length; j++) {
 				for (int k = 0; k < moocs.length; k++) {
+					double d = evaluateImportRequest(
+							imReq[i], trucks[j], moocs[k]);
+					if(d < minDistance){
+						minDistance = d;
+						sel_imReq = imReq[i];
+						sel_truck = trucks[j];
+						sel_mooc = moocs[k];
+					}
+					/*
 					backup();
 					TruckRouteInfo4Request tri = createRouteForImportRequest(
 							imReq[i], trucks[j], moocs[k]);
@@ -1024,15 +1063,31 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 						sel_imReq = imReq[i];
 					}
 					restore();
+					*/
 				}
 			}
 		}
+		
+		if(sel_truck != null){
+			sel_tri = createRouteForImportRequest(
+					sel_imReq, sel_truck, sel_mooc);
+			if(sel_tri != null){
+				sel_tr = sel_tri.route;
+				
+				IndividualImportRouteComposer icp = new IndividualImportRouteComposer(
+						this, sel_tr, sel_tri, sel_imReq, sel_tr.getDistance()
+								- sel_tr.getReducedDistance());
+				candidateRouteComposer.add(icp);
+			}
+		}
+		/*
 		if (sel_tr != null) {
 			IndividualImportRouteComposer icp = new IndividualImportRouteComposer(
 					this, sel_tr, sel_tri, sel_imReq, sel_tr.getDistance()
 							- sel_tr.getReducedDistance());
 			candidateRouteComposer.add(icp);
 		}
+		*/
 	}
 
 	public void exploreDirectRouteWarehouseWarehouse(
@@ -1042,7 +1097,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		TruckRouteInfo4Request sel_tri = null;
 		WarehouseContainerTransportRequest sel_whReq = null;
 
-		for (int i = 0; i < whReq.length; i++) {
+		for (int i = 0; i < nbWhReqs; i++) {
 			if (whReqScheduled[i])
 				continue;
 			for (int j = 0; j < trucks.length; j++) {
@@ -1158,11 +1213,11 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			if (!exReqScheduled[i])
 				nbUnScheduledExReq++;
 		}
-		for (int i = 0; i < imReq.length; i++) {
+		for (int i = 0; i < nbImReqs; i++) {
 			if (!imReqScheduled[i])
 				nbUnScheduledImReq++;
 		}
-		for (int i = 0; i < whReq.length; i++) {
+		for (int i = 0; i < nbWhReqs; i++) {
 			if (!whReqScheduled[i])
 				nbUnScheduledWhReq++;
 		}
@@ -1228,7 +1283,9 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		IA.standardize(input);
 		
 		initLog();
-		modifyContainerCode();
+		
+		//modifyContainerCode();
+		
 		mapData();
 		init();
 
@@ -1369,17 +1426,45 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 					+ "::solve, special operators, candidates_routes.sz = "
 					+ candidate_routes.size());
 			if (candidate_routes.size() == 0) {
-				//exploreDirectRouteExport(candidate_routes);
-				//exploreDirectRouteImport(candidate_routes);
-				//exploreDirectRouteWarehouseWarehouse(candidate_routes);
-				//exploreDirectRouteEmptyContainerFromDepotRequest(candidate_routes);
-				//exploreDirectRouteEmptyContainerToDepotRequest(candidate_routes);
-				//exploreDirectRouteTransportContainerRequest(candidate_routes);
-				exploreDirectRouteImportLadenRequest(candidate_routes);
-				exploreDirectRouteImportEmptyRequest(candidate_routes);
-				exploreDirectRouteExportLadenRequest(candidate_routes);
-				exploreDirectRouteExportEmptyRequest(candidate_routes);
+				System.out.println(name() + "::solve, start exploreDirectRouteExport");
+				exploreDirectRouteExport(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteExport");
 				
+				System.out.println(name() + "::solve, start exploreDirectRouteImport");
+				exploreDirectRouteImport(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteImport");
+				
+				System.out.println(name() + "::solve, start exploreDirectRouteWarehouseWarehouse");
+				exploreDirectRouteWarehouseWarehouse(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteWarehouseWarehouse");
+				
+				System.out.println(name() + "::solve, start exploreDirectRouteEmptyContainerFromDepotRequest");
+				exploreDirectRouteEmptyContainerFromDepotRequest(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteEmptyContainerFromDepotRequest");
+				
+				System.out.println(name() + "::solve, start exploreDirectRouteEmptyContainerToDepotRequest");
+				exploreDirectRouteEmptyContainerToDepotRequest(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteEmptyContainerToDepotRequest");
+				
+				System.out.println(name() + "::solve, start exploreDirectRouteTransportContainerRequest");
+				exploreDirectRouteTransportContainerRequest(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteTransportContainerRequest");
+				
+				System.out.println(name() + "::solve, start exploreDirectRouteImportLadenRequest");
+				exploreDirectRouteImportLadenRequest(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteImportLadenRequest");
+				
+				System.out.println(name() + "::solve, start exploreDirectRouteImportEmptyRequest");
+				exploreDirectRouteImportEmptyRequest(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteImportEmptyRequest");
+				
+				System.out.println(name() + "::solve, start exploreDirectRouteExportLadenRequest");
+				exploreDirectRouteExportLadenRequest(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteExportLadenRequest");
+				
+				System.out.println(name() + "::solve, start exploreDirectRouteExportEmptyRequest");
+				exploreDirectRouteExportEmptyRequest(candidate_routes);
+				System.out.println(name() + "::solve, finish exploreDirectRouteExportEmptyRequest");
 				
 				System.out.println(name()
 						+ "::solve, direct operators, candidates_routes.sz = "

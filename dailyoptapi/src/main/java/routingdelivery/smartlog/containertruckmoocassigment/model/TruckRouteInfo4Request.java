@@ -79,8 +79,15 @@ public class TruckRouteInfo4Request {
 	public void setLastTimeContainer(Container container, Integer lastTime){
 		mContainer2LastTime.put(container,  lastTime);
 	}
+	public String name(){
+		return "TruckRouteInfo4Request";
+	}
 	public int getLastTimeContainer(Container container){
-		return mContainer2LastTime.get(container);
+		//if(mContainer2LastTime == null) System.out.println(name() + "::getLastTimeContainer, mContainer2LastTime NULL???");
+		//if(container == null)System.out.println(name() + "::getLastTimeContainer, container NULL???");
+		if( mContainer2LastTime.get(container) != null)
+			return mContainer2LastTime.get(container);
+		return -1;
 	}
 	
 }

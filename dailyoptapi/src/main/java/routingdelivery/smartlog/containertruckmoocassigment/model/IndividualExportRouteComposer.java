@@ -1,5 +1,7 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
+import java.util.HashMap;
+
 import routingdelivery.smartlog.containertruckmoocassigment.service.InitGreedyImproveSpecialOperatorSolver;
 
 public class IndividualExportRouteComposer implements RouteComposer {
@@ -55,8 +57,12 @@ public class IndividualExportRouteComposer implements RouteComposer {
 			solver.mMooc2LastTime.put(mooc, tri.getLastTimeMooc(mooc));
 		}
 		for(Container container: tri.mContainer2LastDepot.keySet()){
-			solver.mContainer2LastDepot.put(container, tri.getLastDepotContainer(container));
-			solver.mContainer2LastTime.put(container, tri.getLastTimeContainer(container));
+			if(tri.getLastDepotContainer(container) != null)
+				solver.mContainer2LastDepot.put(container, tri.getLastDepotContainer(container));
+			//if(solver.mContainer2LastTime == null)
+			//	solver.mContainer2LastTime = new HashMap<Container, Integer>();
+			
+				solver.mContainer2LastTime.put(container, tri.getLastTimeContainer(container));
 		}		
 	}
 	public String name(){
