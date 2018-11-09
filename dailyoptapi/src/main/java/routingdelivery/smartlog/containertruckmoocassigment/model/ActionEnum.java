@@ -27,5 +27,5 @@ public class ActionEnum {
 	// extra action
 	public static final String UNLINK_EMPTY_CONTAINER_AT_WAREHOUSE = "UNLINK_EMPTY_CONTAINER_AT_WAREHOUSE";
 	public static final String UNLINK_LOADED_CONTAINER_AT_WAREHOUSE = "UNLINK_LOADED_CONTAINER_AT_WAREHOUSE";
-	
+	public static final String UNLINK_MOOC_AT_WAREHOUSE = "UNLINK_MOOC_AT_WAREHOUSE";
 }

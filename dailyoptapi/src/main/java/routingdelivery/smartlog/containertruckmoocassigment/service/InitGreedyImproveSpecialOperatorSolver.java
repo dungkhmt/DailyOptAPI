@@ -688,37 +688,39 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		double minDistance = Integer.MAX_VALUE;
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
-		ImportLadenRequests sel_req = null;
+		ImportLadenRequests sel_imLadenReq = null;
+		Truck sel_truck  = null;
+		Mooc sel_mooc = null;
 		for(int i = 0; i < imLadenReq.length; i++){
 			if(imLadenReqScheduled[i]) continue;
 			
 			for(int j = 0; j < trucks.length; j++){
 				for(int k = 0; k < moocs.length; k++){
-					backup();
-					TruckRouteInfo4Request tri = createRouteForImportLadenRequest(imLadenReq[i], trucks[j], moocs[k]);
-					if (tri != null) {
-						TruckRoute tr = tri.route;
-						double dis = tr.getDistance()
-								- tr.getReducedDistance();
-						if (dis < minDistance) {
-							minDistance = dis;
-							sel_tr = tr;
-							sel_tri = tri;
-							sel_req = imLadenReq[i];
-						}
+					if (mMooc2LastDepot.get(moocs[k]) == null)
+						continue;
+					double d = evaluateImportLadenRequest(imLadenReq[i], trucks[j], moocs[k]);
+					if(d < minDistance){
+						minDistance = d;
+						sel_imLadenReq = imLadenReq[i];
+						sel_truck = trucks[j];
+						sel_mooc = moocs[k];
 					}
-					restore();
 				}
 			}
 		}
 		
-		if (sel_tr != null) {
-			IndividualImportLadenRouteComposer icp = new IndividualImportLadenRouteComposer(
-					this, sel_tr, sel_req, sel_tri, sel_tr.getDistance()
-							- sel_tr.getReducedDistance());
-			candidateRouteComposer.add(icp);
+		if (sel_truck != null) {
+			sel_tri = createRouteForImportLadenRequest(sel_imLadenReq, sel_truck, sel_mooc);
+			if(sel_tri != null){
+				sel_tr = sel_tri.route;
+				IndividualImportLadenRouteComposer icp = new IndividualImportLadenRouteComposer(
+						this, sel_tr, sel_imLadenReq, sel_tri, sel_tr.getDistance()
+								- sel_tr.getReducedDistance());
+				candidateRouteComposer.add(icp);
+			}
 		}
 	}
+	
 	public void exploreDirectRouteImportEmptyRequest(CandidateRouteComposer candidateRouteComposer){
 		double minDistance = Integer.MAX_VALUE;
 		TruckRoute sel_tr = null;
@@ -729,6 +731,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			
 			for(int j = 0; j < trucks.length; j++){
 				for(int k = 0; k < moocs.length; k++){
+					if (mMooc2LastDepot.get(moocs[k]) == null)
+						continue;
 					backup();
 					TruckRouteInfo4Request tri = createRouteForImportEmptyRequest(imEmptyReq[i], trucks[j], moocs[k]);
 					if (tri != null) {
@@ -764,6 +768,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			
 			for(int j = 0; j < trucks.length; j++){
 				for(int k = 0; k < moocs.length; k++){
+					if (mMooc2LastDepot.get(moocs[k]) == null)
+						continue;
 					backup();
 					TruckRouteInfo4Request tri = createRouteForExportEmptyRequest(exEmptyReq[i], trucks[j], moocs[k]);
 					if (tri != null) {
@@ -800,6 +806,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			
 			for(int j = 0; j < trucks.length; j++){
 				for(int k = 0; k < moocs.length; k++){
+					if (mMooc2LastDepot.get(moocs[k]) == null)
+						continue;
 					backup();
 					TruckRouteInfo4Request tri = createRouteForExportLadenRequest(exLadenReq[i], trucks[j], moocs[k]);
 					if (tri != null) {
@@ -839,7 +847,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			for (int j = 0; j < trucks.length; j++) {
 				for (int k = 0; k < moocs.length; k++) {
 					for (int q = 0; q < containers.length; q++) {
-						if (mContainer2LastDepot.get(containers) == null)
+						if (mContainer2LastDepot.get(containers[q]) == null ||
+								mMooc2LastDepot.get(moocs[k]) == null)
 							continue;
 						backup();
 						TruckRouteInfo4Request tri = createRouteForEmptyContainerFromDepotRequest(
@@ -882,6 +891,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 
 			for (int j = 0; j < trucks.length; j++) {
 				for (int k = 0; k < moocs.length; k++) {
+					if (mMooc2LastDepot.get(moocs[k]) == null)
+						continue;
 					Container container = mCode2Container
 							.get(emptyContainerToDepotReq[i].getContainerCode());
 					backup();
@@ -923,6 +934,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 
 			for (int j = 0; j < trucks.length; j++) {
 				for (int k = 0; k < moocs.length; k++) {
+					if (mMooc2LastDepot.get(moocs[k]) == null)
+						continue;
 					Container container = mCode2Container
 							.get(transportContainerReq[i].getContainerCode());
 					backup();
@@ -970,7 +983,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			for (int j = 0; j < trucks.length; j++) {
 				for (int k = 0; k < moocs.length; k++) {
 					for (int q = 0; q < containers.length; q++) {
-						if (mContainer2LastDepot.get(containers[q]) == null)
+						if (mContainer2LastDepot.get(containers[q]) == null ||
+								mMooc2LastDepot.get(moocs[k]) == null)
 							continue;
 						double d = evaluateExportRoute(exReq[i], trucks[j], moocs[k], containers[q]);
 						if(d < minDistance){
@@ -1037,6 +1051,8 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 				continue;
 			for (int j = 0; j < trucks.length; j++) {
 				for (int k = 0; k < moocs.length; k++) {
+					if (mMooc2LastDepot.get(moocs[k]) == null)
+						continue;
 					double d = evaluateImportRequest(
 							imReq[i], trucks[j], moocs[k]);
 					if(d < minDistance){
