@@ -725,39 +725,52 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		double minDistance = Integer.MAX_VALUE;
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
-		ImportEmptyRequests sel_req = null;
+		ImportEmptyRequests sel_imEmptyReq = null;
+		Truck sel_truck  = null;
+		Mooc sel_mooc = null;
 		for(int i = 0; i < imEmptyReq.length; i++){
 			if(imEmptyReqScheduled[i]) continue;
 			
 			for(int j = 0; j < trucks.length; j++){
-				for(int k = 0; k < moocs.length; k++){
-					if (mMooc2LastDepot.get(moocs[k]) == null)
-						continue;
-					backup();
-					TruckRouteInfo4Request tri = createRouteForImportEmptyRequest(imEmptyReq[i], trucks[j], moocs[k]);
-					if (tri != null) {
-						TruckRoute tr = tri.route;
-						double dis = tr.getDistance()
-								- tr.getReducedDistance();
-						if (dis < minDistance) {
-							minDistance = dis;
-							sel_tr = tr;
-							sel_tri = tri;
-							sel_req = imEmptyReq[i];
+				if(imEmptyReq[i].isBreakRomooc()){
+					double d = evaluateImportEmptyRequest(imEmptyReq[i], trucks[j]);
+					if(d < minDistance){
+						minDistance = d;
+						sel_imEmptyReq = imEmptyReq[i];
+						sel_truck = trucks[j];
+					}
+				}
+				else{
+					for(int k = 0; k < moocs.length; k++){
+						if (mMooc2LastDepot.get(moocs[k]) == null)
+							continue;
+						double d = evaluateImportEmptyRequest(imEmptyReq[i], trucks[j], moocs[k]);
+						if(d < minDistance){
+							minDistance = d;
+							sel_imEmptyReq = imEmptyReq[i];
+							sel_truck = trucks[j];
+							sel_mooc = moocs[k];
 						}
 					}
-					restore();
 				}
 			}
 		}
 		
-		if (sel_tr != null) {
-			IndividualImportEmptyRouteComposer icp = new IndividualImportEmptyRouteComposer(
-					this, sel_tr, sel_req, sel_tri, sel_tr.getDistance()
-							- sel_tr.getReducedDistance());
-			candidateRouteComposer.add(icp);
+		if (sel_truck != null) {
+			if(sel_imEmptyReq.isBreakRomooc())
+				sel_tri = createRouteForImportEmptyRequest(sel_imEmptyReq, sel_truck);
+			else
+				sel_tri = createRouteForImportEmptyRequest(sel_imEmptyReq, sel_truck, sel_mooc);
+			if(sel_tri != null){
+				sel_tr = sel_tri.route;
+				IndividualImportEmptyRouteComposer icp = new IndividualImportEmptyRouteComposer(
+						this, sel_tr, sel_imEmptyReq, sel_tri, sel_tr.getDistance()
+								- sel_tr.getReducedDistance());
+				candidateRouteComposer.add(icp);
+			}
 		}
 	}
+	
 	public void exploreDirectRouteExportEmptyRequest(CandidateRouteComposer candidateRouteComposer){
 		double minDistance = Integer.MAX_VALUE;
 		TruckRoute sel_tr = null;
