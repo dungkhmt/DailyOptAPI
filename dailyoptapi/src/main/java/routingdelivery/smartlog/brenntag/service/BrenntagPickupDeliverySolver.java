@@ -3784,7 +3784,7 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 				double minW = Integer.MAX_VALUE;
 				for (Trip t : T) {
 					int vh_idx = t.start.vehicleIndex;
-					matchTrips[vh_idx][clusterItems.size() - 1] = t;
+					//matchTrips[vh_idx][clusterItems.size() - 1] = t;
 
 					Vehicle vh = getVehicle(vh_idx);
 

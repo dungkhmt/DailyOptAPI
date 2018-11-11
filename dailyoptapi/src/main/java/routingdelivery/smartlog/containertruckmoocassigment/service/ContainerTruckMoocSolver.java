@@ -466,9 +466,9 @@ public class ContainerTruckMoocSolver {
 		// }
 		if (mLocationCode2Index.get(src) == null
 				|| mLocationCode2Index.get(dest) == null) {
-			// System.out.println(name() + "::getDistance, src " + src +
-			// " OR dest " + dest + " NOT COMPLETE, INPUT ERROR??????");
-			return 1000;
+			System.out.println(name() + "::getDistance, src " + src +
+			 " OR dest " + dest + " NOT COMPLETE, INPUT ERROR??????");
+			//return 1000;
 		}
 
 		int is = mLocationCode2Index.get(src);
@@ -479,9 +479,9 @@ public class ContainerTruckMoocSolver {
 	public int getTravelTime(String src, String dest) {
 		if (mLocationCode2Index.get(src) == null
 				|| mLocationCode2Index.get(dest) == null) {
-			// System.out.println(name() + "::getTravelTime, src " + src +
-			// " OR dest " + dest + " NOT COMPLETE, INPUT ERROR??????");
-			return 1000;
+			 System.out.println(name() + "::getTravelTime, src " + src +
+			 " OR dest " + dest + " NOT COMPLETE, INPUT ERROR??????");
+			//return 1000;
 
 		}
 

@@ -54,6 +54,52 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 		timeLimitExpired = false;
 	
 	}
+	public String districtOfTrip(VehicleTrip t){
+		String s = "";
+		HashSet<String> S = new HashSet<String>();
+		for(Point p: t.seqPoints){
+			if(mPoint2Type.get(p).equals("D")){
+			String lc = mPoint2LocationCode.get(p);
+			String districtCode = mLocationCode2DistrictCode.get(lc);
+			if(districtCode != null)
+				S.add(districtCode);
+			}
+		}
+		for(String dc: S)
+			s += dc + ",";
+		return s;
+	}
+	public void logVehicleRoutes(VarRoutesVR XR) {
+		if (CHECK_AND_LOG) {
+			VehicleTripCollection VTC = analyzeTrips(XR);
+
+			for (int k = 1; k <= XR.getNbRoutes(); k++) {
+				Point s = XR.startPoint(k);
+
+				Vehicle vh = mPoint2Vehicle.get(s);
+				if (XR.emptyRoute(k) && !isInternalVehicle(vh))
+					continue;
+
+				ArrayList<VehicleTrip> t = VTC.mVehicle2Trips.get(vh);
+				String tripInfo = "";
+				for (int i = 0; i < t.size(); i++) {
+					tripInfo = tripInfo + "[" + t.get(i).load + ", nbPoints "
+							+ t.get(i).seqPoints.size() + "," + districtOfTrip(t.get(i)) + "], ";
+				}
+				for (int i = 0; i < t.size(); i++)
+					for (int j = i + 1; j < t.size(); j++)
+						if (conflictTrips(t.get(i), t.get(j))) {
+							tripInfo = tripInfo + " conflict[" + i + "," + j
+									+ "], ";
+						}
+				log(name() + "::logVehicleRoutes, vehicle " + vh.getCode()
+						+ ", cap = " + vh.getWeight() + ", route = "
+						+ (XR.emptyRoute(k) ? "EMPTY" : "NOT_EMPTY")
+						+ ", trips " + tripInfo);
+			}
+		}
+	}
+
 	public PickupDeliverySolution[] collectSolutions() {
 		PickupDeliverySolution[] s = new PickupDeliverySolution[solutionCollection
 				.size()];
@@ -856,7 +902,7 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 						.getStatistic()
 						.getIndicator()
 						.setDescription(
-								"Gom điểm giao, tối ưu số KM cho xe nhà , sau đó gán lại các đơn từ xe ngoài cho xe nhà ");
+								"Gom điểm giao, tối ưu số KM cho xe nhà, sau đó gán lại các đơn từ xe ngoài cho xe nhà ");
 				reassignVehicleOptimizeLoadExternalVehicles(solution04);
 				solutionCollection.add(solution04, input.getParams());
 
@@ -2885,6 +2931,7 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 		return false;
 	
 	}
+	
 	public boolean hillClimbingMerge4EachVehicle(boolean loadConstraint) {
 		log(name() + "::hillClimbingMerge4EachVehicle START XR = "
 				+ toStringShort(XR) + ", START-COST = " + cost.getValue());

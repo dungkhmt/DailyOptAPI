@@ -7947,6 +7947,7 @@ public class PickupDeliverySolver {
 		return solution;
 	}
 
+	
 	public void logVehicleRoutes(VarRoutesVR XR) {
 		if (CHECK_AND_LOG) {
 			VehicleTripCollection VTC = analyzeTrips(XR);

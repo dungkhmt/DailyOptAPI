@@ -338,8 +338,8 @@ public class TestAPI {
 			DistrictBasedRBrenntagMultiPickupDeliverySolver dsolver = 
 					new DistrictBasedRBrenntagMultiPickupDeliverySolver(startExecutionTime);
 			
-			dsolver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
-			//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+			//dsolver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+			dsolver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
 
 			if(input.getParams().getInternalVehicleFirst() != null && 
 					input.getParams().getInternalVehicleFirst().equals("Y")){
@@ -382,7 +382,7 @@ public class TestAPI {
 					
 				
 			}
-
+			return ms;
 		}
 		
 		
