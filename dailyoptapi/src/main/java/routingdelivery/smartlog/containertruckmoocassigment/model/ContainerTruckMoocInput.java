@@ -41,6 +41,8 @@ public class ContainerTruckMoocInput {
 	
 
 	
+	
+
 	public ContainerTruckMoocInput(
 			ExportContainerTruckMoocRequest[] exRequests,
 			ImportContainerTruckMoocRequest[] imRequests,

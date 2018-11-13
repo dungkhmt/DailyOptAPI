@@ -23,4 +23,12 @@ public class MoocPacking {
 	public void setContTypeQuantity(int contTypeQuantity){
 		this.contTypeQuantity = contTypeQuantity;
 	}
+
+	public MoocPacking() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	
+	
 }

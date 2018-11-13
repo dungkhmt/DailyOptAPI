@@ -3119,6 +3119,7 @@ public class ContainerTruckMoocSolver {
 					+ dwi.getAttachEmptyMoocContainerDuration();// duration;
 		}
 		RouteElement e4 = new RouteElement();
+		
 		e4.setWarehouse(mCode2Warehouse.get(lastLocationCode));
 		
 		//from wh to container depot

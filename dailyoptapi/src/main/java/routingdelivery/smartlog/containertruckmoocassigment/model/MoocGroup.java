@@ -24,4 +24,10 @@ public class MoocGroup {
 	public void setPacking(MoocPacking[] packing){
 		this.packing = packing;
 	}
+
+	public MoocGroup() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
 }
