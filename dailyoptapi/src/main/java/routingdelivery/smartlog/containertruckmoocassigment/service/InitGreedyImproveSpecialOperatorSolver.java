@@ -698,6 +698,11 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 				for(int k = 0; k < moocs.length; k++){
 					if (mMooc2LastDepot.get(moocs[k]) == null)
 						continue;
+					if(!fitContMoocType(imLadenReq[i].getContainerCategory(), imLadenReq[i].getContainerCategory(),
+							moocs[k].getCategory()) ||
+						!checkWeight(imLadenReq[i].getWeight(), imLadenReq[i].getWeight(),
+							moocs[k].getWeight(), trucks[j].getWeight()))
+						continue;
 					double d = evaluateImportLadenRequest(imLadenReq[i], trucks[j], moocs[k]);
 					if(d < minDistance){
 						minDistance = d;
@@ -743,6 +748,9 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 				else{
 					for(int k = 0; k < moocs.length; k++){
 						if (mMooc2LastDepot.get(moocs[k]) == null)
+							continue;
+						if(!fitContMoocType(imEmptyReq[i].getContainerCategory(), imEmptyReq[i].getContainerCategory(),
+								moocs[k].getCategory()))
 							continue;
 						double d = evaluateImportEmptyRequest(imEmptyReq[i], trucks[j], moocs[k]);
 						if(d < minDistance){
@@ -999,6 +1007,11 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 						if (mContainer2LastDepot.get(containers[q]) == null ||
 								mMooc2LastDepot.get(moocs[k]) == null)
 							continue;
+						if(!fitContMoocType(exReq[i].getContainerCategory(), containers[q].getCategoryCode(),
+								moocs[k].getCategory()) ||
+							!checkWeight(exReq[i].getWeight(), containers[q].getWeight(),
+								moocs[k].getWeight(), trucks[j].getWeight()))
+							continue;
 						double d = evaluateExportRoute(exReq[i], trucks[j], moocs[k], containers[q]);
 						if(d < minDistance){
 							minDistance = d;
@@ -1065,6 +1078,11 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			for (int j = 0; j < trucks.length; j++) {
 				for (int k = 0; k < moocs.length; k++) {
 					if (mMooc2LastDepot.get(moocs[k]) == null)
+						continue;
+					if(!fitContMoocType(imReq[i].getContainerCategory(), imReq[i].getContainerCategory(),
+							moocs[k].getCategory()) ||
+						!checkWeight(imReq[i].getWeight(), imReq[i].getWeight(),
+							moocs[k].getWeight(), trucks[j].getWeight()))
 						continue;
 					double d = evaluateImportRequest(
 							imReq[i], trucks[j], moocs[k]);

@@ -29,6 +29,7 @@ public class ContainerTruckMoocInput {
 	private Warehouse[] warehouses;
 	private Truck[] trucks;
 	private Mooc[] moocs;
+	private MoocGroup[] moocGroup;
 	private Port[] ports;
 	
 	private Container[] containers;
@@ -53,7 +54,7 @@ public class ContainerTruckMoocInput {
 			ImportLadenRequests[] imLadenRequests, ShipCompany[] companies,
 			DepotContainer[] depotContainers, DepotMooc[] depotMoocs,
 			DepotTruck[] depotTrucks, Warehouse[] warehouses, Truck[] trucks,
-			Mooc[] moocs, Port[] ports, Container[] containers,
+			Mooc[] moocs, MoocGroup[] moocGroup, Port[] ports, Container[] containers,
 			DistanceElement[] distance, DistanceElement[] travelTime,
 			ConfigParam params) {
 		super();
@@ -74,6 +75,7 @@ public class ContainerTruckMoocInput {
 		this.warehouses = warehouses;
 		this.trucks = trucks;
 		this.moocs = moocs;
+		this.moocGroup = moocGroup;
 		this.ports = ports;
 		this.containers = containers;
 		this.distance = distance;
@@ -180,8 +182,8 @@ public class ContainerTruckMoocInput {
 			TransportContainerRequest[] transportContainerRequests,
 			ShipCompany[] companies, DepotContainer[] depotContainers,
 			DepotMooc[] depotMoocs, DepotTruck[] depotTrucks,
-			Warehouse[] warehouses, Truck[] trucks, Mooc[] moocs, Port[] ports,
-			Container[] containers, DistanceElement[] distance,
+			Warehouse[] warehouses, Truck[] trucks, Mooc[] moocs, MoocGroup[] moocGroup,
+			Port[] ports, Container[] containers, DistanceElement[] distance,
 			DistanceElement[] travelTime, ConfigParam params) {
 		super();
 		this.exRequests = exRequests;
@@ -197,6 +199,7 @@ public class ContainerTruckMoocInput {
 		this.warehouses = warehouses;
 		this.trucks = trucks;
 		this.moocs = moocs;
+		this.moocGroup = moocGroup;
 		this.ports = ports;
 		this.containers = containers;
 		this.distance = distance;
@@ -304,6 +307,13 @@ public class ContainerTruckMoocInput {
 		this.moocs = moocs;
 	}
 
+	public MoocGroup[] getMoocGroup(){
+		return this.moocGroup;
+	}
+	
+	public void setMoocGroup(MoocGroup[] moocGroup){
+		this.moocGroup = moocGroup;
+	}
 
 	public Container[] getContainers() {
 		return containers;
@@ -387,12 +397,12 @@ public class ContainerTruckMoocInput {
 		
 		Truck[] trucks = new Truck[6];
 		String[] returnDepotTruckCodes = {"DepotTruck001","DepotTruck002"};
-		trucks[0] = new Truck("Truck0001","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
-		trucks[1] = new Truck("Truck0002","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
-		trucks[2] = new Truck("Truck0003","DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
-		trucks[3] = new Truck("Truck0004","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
-		trucks[4] = new Truck("Truck0005","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
-		trucks[5] = new Truck("Truck0006","DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[0] = new Truck("Truck0001", 39, "DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[1] = new Truck("Truck0002", 35, "DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[2] = new Truck("Truck0003", 30, "DepotTruck001","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[3] = new Truck("Truck0004", 32, "DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[4] = new Truck("Truck0005", 31, "DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
+		trucks[5] = new Truck("Truck0006", 36, "DepotTruck002","2018-07-17 06:00:00","2018-07-17 21:00:00",returnDepotTruckCodes);
 		
 		Mooc[] moocs = new Mooc[6];
 		String[] returnDepotMoocCodes = {"DepotMooc001","DepotMooc002"};
@@ -402,6 +412,12 @@ public class ContainerTruckMoocInput {
 		moocs[3] = new Mooc("Mooc0004","20",20,"DepotMooc002",returnDepotMoocCodes);
 		moocs[4] = new Mooc("Mooc0005","40",40,"DepotMooc002",returnDepotMoocCodes);
 		moocs[5] = new Mooc("Mooc0006","45",45,"DepotMooc002",returnDepotMoocCodes);
+		
+		MoocGroup[] moocGroup = new MoocGroup[1];
+		MoocPacking[] packing = new MoocPacking[2];
+		packing[0] = new MoocPacking("20DC", 2);
+		packing[1] = new MoocPacking("40DC", 1);
+		moocGroup[0] = new MoocGroup("Mooc xuong 40", packing);
 		
 		Container[] containers = new Container[6];
 		String[] returnDepotCodes = {"DepotContainer001","DepotContainer002","DepotContainer003"};
@@ -701,6 +717,7 @@ public class ContainerTruckMoocInput {
 				warehouses, 
 				trucks, 
 				moocs, 
+				moocGroup,
 				ports, 
 				containers, 
 				dis, 
