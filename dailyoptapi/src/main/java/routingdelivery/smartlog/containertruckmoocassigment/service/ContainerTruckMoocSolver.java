@@ -473,6 +473,8 @@ public class ContainerTruckMoocSolver {
 		}
 
 		int is = mLocationCode2Index.get(src);
+		if(mLocationCode2Index.get(dest) == null)
+			System.out.println("dest " + dest);
 		int id = mLocationCode2Index.get(dest);
 		return distance[is][id];
 	}
@@ -3084,9 +3086,10 @@ public class ContainerTruckMoocSolver {
 				departureTime, req, null);
 		int[] seq = ss.seq;
 
+		Warehouse wh = null;
 		for (int i = 0; i < seq.length; i++) {
 			DeliveryWarehouseInfo dwi = req.getDeliveryWarehouses()[seq[i]];
-			Warehouse wh = mCode2Warehouse.get(dwi.getWareHouseCode());
+			wh = mCode2Warehouse.get(dwi.getWareHouseCode());
 			travelTime = getTravelTime(lastLocationCode, wh.getLocationCode());
 			distance += getDistance(lastLocationCode, wh.getLocationCode());
 			
@@ -3120,7 +3123,7 @@ public class ContainerTruckMoocSolver {
 		}
 		RouteElement e4 = new RouteElement();
 		
-		e4.setWarehouse(mCode2Warehouse.get(lastLocationCode));
+		e4.setWarehouse(wh);
 		
 		//from wh to container depot
 		RouteElement e5 = new RouteElement();
