@@ -4,6 +4,7 @@ import routingdelivery.model.ConfigParams;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ConfigParam;
 
 public class SolutionIndicator {
+	public static final double EPS = 0.01;
 	private double distance;
 	private int nbInternalTrucks;
 	private int nbExternalTrucks;
@@ -195,7 +196,12 @@ public class SolutionIndicator {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	
+	public boolean equal(SolutionIndicator I){
+		return Math.abs(distance - I.getDistance()) < EPS
+				&& nbInternalTrucks == I.getNbInternalTrucks()
+				&& nbExternalTrucks == I.getNbExternalTrucks()
+				&& Math.abs(internalTruckLoad - I.getInternalTruckLoad()) < EPS;
+	}
 	public boolean better(SolutionIndicator I, ConfigParams params){
 		if(distance >= I.getDistance()) return false;
 		if(params.getInternalVehicleFirst().equals("Y")){

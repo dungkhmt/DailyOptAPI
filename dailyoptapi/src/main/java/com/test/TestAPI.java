@@ -382,6 +382,7 @@ public class TestAPI {
 					
 				
 			}
+			ms.sortIncreasingOrderDistance();
 			return ms;
 		}
 		
@@ -483,7 +484,7 @@ public class TestAPI {
 			return ms;
 			*/
 		}
-		
+		ms.sortIncreasingOrderDistance();
 		return ms;
 		//return solver.computeVehicleSuggestion(input);
 	}

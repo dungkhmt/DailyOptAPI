@@ -41,6 +41,12 @@ public class SolutionCollection {
 		return sel_sol;
 	}
 	public void add(PickupDeliverySolution s, ConfigParams params){
+		for(int i = 0; i < solutions.size(); i++){
+			PickupDeliverySolution si = solutions.get(i);
+			if(si.getStatistic().getIndicator().equal(s.getStatistic().getIndicator())) 
+				return;// do not add equal solution
+		}
+		
 		if(solutions.size() < maxSize){
 			solutions.add(s);
 		}else{

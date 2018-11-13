@@ -351,8 +351,8 @@ public class ContainerTruckMoocSolver {
 			idx++;
 			locationCodes[idx] = lc;
 			mLocationCode2Index.put(lc, idx);
-			// System.out.println(name() + "::mapData, mLocationCode2Index.put("
-			// + lc + "," + idx + ")");
+			System.out.println(name() + "::mapData, mLocationCode2Index.put("
+			+ lc + "," + idx + ")");
 		}
 		distance = new double[s_locationCode.size()][s_locationCode.size()];
 		travelTime = new double[s_locationCode.size()][s_locationCode.size()];
@@ -628,6 +628,8 @@ public class ContainerTruckMoocSolver {
 				DepotContainer depot = mCode2DepotContainer.get(depotCode);
 				if (depot != null) {
 					String lc = depot.getLocationCode();
+					//System.out.println(name() + "::findDepotForReleaseContainer, depotContainer " + 
+					//depotCode + ", locationCode = " + lc);
 					double d = getDistance(e.getLocationCode(), lc);
 					if (d < minDistance) {
 						minDistance = d;
