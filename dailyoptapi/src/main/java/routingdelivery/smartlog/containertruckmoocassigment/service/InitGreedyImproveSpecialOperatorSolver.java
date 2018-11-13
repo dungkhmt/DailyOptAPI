@@ -783,37 +783,43 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		double minDistance = Integer.MAX_VALUE;
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
-		ExportEmptyRequests sel_req = null;
+		ExportEmptyRequests sel_exEmptyReq = null;
+		Truck sel_truck  = null;
+		Mooc sel_mooc = null;
 		for(int i = 0; i < exEmptyReq.length; i++){
 			if(exEmptyReqScheduled[i]) continue;
 			
 			for(int j = 0; j < trucks.length; j++){
 				for(int k = 0; k < moocs.length; k++){
-					if (mMooc2LastDepot.get(moocs[k]) == null)
-						continue;
-					backup();
-					TruckRouteInfo4Request tri = createRouteForExportEmptyRequest(exEmptyReq[i], trucks[j], moocs[k]);
-					if (tri != null) {
-						TruckRoute tr = tri.route;
-						double dis = tr.getDistance()
-								- tr.getReducedDistance();
-						if (dis < minDistance) {
-							minDistance = dis;
-							sel_tr = tr;
-							sel_tri = tri;
-							sel_req = exEmptyReq[i];
+					for (int q = 0; q < containers.length; q++) {
+						if (mMooc2LastDepot.get(moocs[k]) == null)
+							continue;
+						if(!fitContMoocType(exEmptyReq[i].getContainerCategory(), containers[q].getCategoryCode(),
+								moocs[k].getCategory()) ||
+							!checkWeight(containers[q].getWeight(), containers[q].getWeight(),
+								moocs[k].getWeight(), trucks[j].getWeight()))
+							continue;
+						double d = evaluateExportEmptyRequest(exEmptyReq[i], trucks[j], moocs[k]);
+						if(d < minDistance){
+							minDistance = d;
+							sel_exEmptyReq = exEmptyReq[i];
+							sel_truck = trucks[j];
+							sel_mooc = moocs[k];
 						}
 					}
-					restore();
 				}
 			}
 		}
 		
-		if (sel_tr != null) {
-			IndividualExportEmptyRouteComposer icp = new IndividualExportEmptyRouteComposer(
-					this, sel_tr, sel_req, sel_tri, sel_tr.getDistance()
-							- sel_tr.getReducedDistance());
-			candidateRouteComposer.add(icp);
+		if (sel_truck != null) {
+			sel_tri = createRouteForExportEmptyRequest(sel_exEmptyReq, sel_truck, sel_mooc);
+			if(sel_tri != null){
+				sel_tr = sel_tri.route;
+				IndividualExportEmptyRouteComposer icp = new IndividualExportEmptyRouteComposer(
+						this, sel_tr, sel_exEmptyReq, sel_tri, sel_tr.getDistance()
+								- sel_tr.getReducedDistance());
+				candidateRouteComposer.add(icp);
+			}
 		}
 	}
 
@@ -821,37 +827,52 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		double minDistance = Integer.MAX_VALUE;
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
-		ExportLadenRequests sel_req = null;
+		ExportLadenRequests sel_exLadenReq = null;
+		Truck sel_truck  = null;
+		Mooc sel_mooc = null;
 		for(int i = 0; i < exLadenReq.length; i++){
 			if(exLadenReqScheduled[i]) continue;
 			
 			for(int j = 0; j < trucks.length; j++){
-				for(int k = 0; k < moocs.length; k++){
-					if (mMooc2LastDepot.get(moocs[k]) == null)
-						continue;
-					backup();
-					TruckRouteInfo4Request tri = createRouteForExportLadenRequest(exLadenReq[i], trucks[j], moocs[k]);
-					if (tri != null) {
-						TruckRoute tr = tri.route;
-						double dis = tr.getDistance()
-								- tr.getReducedDistance();
-						if (dis < minDistance) {
-							minDistance = dis;
-							sel_tr = tr;
-							sel_tri = tri;
-							sel_req = exLadenReq[i];
+				if(exLadenReq[i].isBreakRomooc()){
+					double d = evaluateExportLadenRequest(exLadenReq[i], trucks[j]);
+					if(d < minDistance){
+						minDistance = d;
+						sel_exLadenReq = exLadenReq[i];
+						sel_truck = trucks[j];
+					}
+				}
+				else{
+					for(int k = 0; k < moocs.length; k++){
+						if (mMooc2LastDepot.get(moocs[k]) == null)
+							continue;
+						if(!fitContMoocType(exLadenReq[i].getContainerCategory(), exLadenReq[i].getContainerCategory(),
+								moocs[k].getCategory()))
+							continue;
+						double d = evaluateExportLadenRequest(exLadenReq[i], trucks[j], moocs[k]);
+						if(d < minDistance){
+							minDistance = d;
+							sel_exLadenReq = exLadenReq[i];
+							sel_truck = trucks[j];
+							sel_mooc = moocs[k];
 						}
 					}
-					restore();
 				}
 			}
 		}
 		
-		if (sel_tr != null) {
-			IndividualExportLadenRouteComposer icp = new IndividualExportLadenRouteComposer(
-					this, sel_tr, sel_req, sel_tri, sel_tr.getDistance()
-							- sel_tr.getReducedDistance());
-			candidateRouteComposer.add(icp);
+		if (sel_truck != null) {
+			if(sel_exLadenReq.isBreakRomooc())
+				sel_tri = createRouteForExportLadenRequest(sel_exLadenReq, sel_truck);
+			else
+				sel_tri = createRouteForExportLadenRequest(sel_exLadenReq, sel_truck, sel_mooc);
+			if(sel_tri != null){
+				sel_tr = sel_tri.route;
+				IndividualExportLadenRouteComposer icp = new IndividualExportLadenRouteComposer(
+						this, sel_tr, sel_exLadenReq, sel_tri, sel_tr.getDistance()
+								- sel_tr.getReducedDistance());
+				candidateRouteComposer.add(icp);
+			}
 		}
 	}
 
