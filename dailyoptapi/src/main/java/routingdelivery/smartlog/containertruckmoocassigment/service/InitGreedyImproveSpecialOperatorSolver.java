@@ -1163,6 +1163,9 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		double minDistance = Integer.MAX_VALUE;
 		TruckRoute sel_tr = null;
 		TruckRouteInfo4Request sel_tri = null;
+		Truck sel_truck  = null;
+		Mooc sel_mooc = null;
+		Container sel_cont = null;
 		WarehouseContainerTransportRequest sel_whReq = null;
 
 		for (int i = 0; i < nbWhReqs; i++) {
@@ -1171,31 +1174,38 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			for (int j = 0; j < trucks.length; j++) {
 				for (int k = 0; k < moocs.length; k++) {
 					for (int q = 0; q < containers.length; q++) {
-						backup();
-						TruckRouteInfo4Request tri = createRouteForWarehouseWarehouseRequest(
-								whReq[i], trucks[j], moocs[k], containers[q]);
-						if (tri != null) {
-							TruckRoute tr = tri.route;
-
-							double dis = tr.getDistance()
-									- tr.getReducedDistance();
-							if (dis < minDistance) {
-								minDistance = dis;
-								sel_tr = tr;
-								sel_tri = tri;
-								sel_whReq = whReq[i];
-							}
+						if (mContainer2LastDepot.get(containers[q]) == null ||
+								mMooc2LastDepot.get(moocs[k]) == null)
+							continue;
+						if(!fitContMoocType(whReq[i].getContainerCategory(),
+								containers[q].getCategoryCode(),
+								moocs[k].getCategory()) ||
+							!checkWeight(whReq[i].getWeight(), containers[q].getWeight(),
+								moocs[k].getWeight(), trucks[j].getWeight()))
+							continue;
+						double d = evaluateWarehouseWarehouseRequest(whReq[i],
+								trucks[j], moocs[k], containers[q]);
+						if(d < minDistance){
+							minDistance = d;
+							sel_truck = trucks[j];
+							sel_mooc = moocs[k];
+							sel_cont = containers[q];
+							sel_whReq = whReq[i];
 						}
-						restore();
 					}
 				}
 			}
 		}
-		if (sel_tr != null) {
-			IndividualWarehouseRouteComposer icp = new IndividualWarehouseRouteComposer(
-					this, sel_tr, sel_tri, sel_whReq, sel_tr.getDistance()
-							- sel_tr.getReducedDistance());
-			candidateRouteComposer.add(icp);
+		if(sel_truck != null){
+			sel_tri = createRouteForWarehouseWarehouseRequest(
+					sel_whReq, sel_truck, sel_mooc, sel_cont);
+			if(sel_tri != null){
+				sel_tr = sel_tri.route;
+				IndividualWarehouseRouteComposer icp = new IndividualWarehouseRouteComposer(
+						this, sel_tr, sel_tri, sel_whReq, sel_tr.getDistance()
+								- sel_tr.getReducedDistance());
+				candidateRouteComposer.add(icp);
+			}
 		}
 	}
 
