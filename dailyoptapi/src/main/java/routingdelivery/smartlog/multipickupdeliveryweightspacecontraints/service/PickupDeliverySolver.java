@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.BrennTagPickupDeliveryInput;
+import routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.ShimanoPickupDeliveryInput;
 import routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.DistanceElement;
 import routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.Item;
 import routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.LocationConfig;
@@ -78,7 +78,7 @@ public class PickupDeliverySolver {
 	public static final String NGOAI_THANH = "NGOAI_THANH";
 
 	public static final double EPS = 0.0000001;
-	public BrennTagPickupDeliveryInput input;
+	public ShimanoPickupDeliveryInput input;
 	public PickupDeliveryRequest[] requests;
 	public Vehicle[] vehicles;
 	public Vehicle[] externalVehicles;
@@ -359,7 +359,7 @@ public class PickupDeliverySolver {
 					VehicleTrip t = VTC.mVehicle2Trips.get(vh).get(j);
 					internalTruckLoad += t.load;
 				}
-				internalCapacity += vh.getWeight()*VTC.mVehicle2Trips.get(vh).size();
+				internalCapacity += vh.getCBM()*VTC.mVehicle2Trips.get(vh).size();
 			}
 		}
 		if (externalVehicles != null) {
@@ -369,7 +369,7 @@ public class PickupDeliverySolver {
 					VehicleTrip t = VTC.mVehicle2Trips.get(vh).get(j);
 					externalTruckLoad += t.load;
 				}
-				externalCapacity += vh.getWeight()*VTC.mVehicle2Trips.get(vh).size();
+				externalCapacity += vh.getCBM()*VTC.mVehicle2Trips.get(vh).size();
 			}
 		}
 		// SolutionIndicator I = new SolutionIndicator(distance,
@@ -1036,9 +1036,9 @@ public class PickupDeliverySolver {
 				if (maxload < load)
 					maxload = load;
 			}
-			if (maxload > vh.getWeight()) {
+			if (maxload > vh.getCBM()) {
 				log(name() + "::checkLoadOnRoute, vehicle weight = "
-						+ vh.getWeight() + " < maxload = " + maxload
+						+ vh.getCBM() + " < maxload = " + maxload
 						+ ", checkLoadOnRoute FAILED, BUG????");
 				return false;
 			}
@@ -1112,7 +1112,7 @@ public class PickupDeliverySolver {
 		}
 		// check load w.r.t capacity
 		if (loadConstraint) {
-			if (vt1.load + vt2.load > vt2.vehicle.getWeight())
+			if (vt1.load + vt2.load > vt2.vehicle.getCBM())
 				return Integer.MAX_VALUE;
 		}
 
@@ -1213,7 +1213,7 @@ public class PickupDeliverySolver {
 				violations++;
 			}
 			// if (awn.getSumWeights(q) > cap[k - 1]) {
-			if (awn.getSumWeights(q) > vt2.vehicle.getWeight()) {
+			if (awn.getSumWeights(q) > vt2.vehicle.getCBM()) {
 				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
 				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
 				// + ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) +
@@ -1304,12 +1304,12 @@ public class PickupDeliverySolver {
 		}
 		// check load w.r.t capacity
 		if (loadConstraint) {
-			if (vt1.load + vt2.load > vt2.vehicle.getWeight()) {
+			if (vt1.load + vt2.load > vt2.vehicle.getCBM()) {
 				if (vh.getCode().equals(debugCode)) {
 					log(name() + "::evaluateMoveTripOneVehicle, vehicle "
 							+ vh.getCode() + ", vt1.load = " + vt1.load
 							+ " vt2.load =  " + vt2.load + " > cap = "
-							+ vt2.vehicle.getWeight() + " RETURN INFTY");
+							+ vt2.vehicle.getCBM() + " RETURN INFTY");
 				}
 				return new double[] { Integer.MAX_VALUE, Integer.MAX_VALUE };
 			}
@@ -1428,7 +1428,7 @@ public class PickupDeliverySolver {
 				}
 			}
 			// if (awn.getSumWeights(q) > cap[k - 1]) {
-			if (awn.getSumWeights(q) > vh.getWeight()) {
+			if (awn.getSumWeights(q) > vh.getCBM()) {
 				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
 				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
 				// + ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) +
@@ -1577,12 +1577,12 @@ public class PickupDeliverySolver {
 		}
 		// check load w.r.t capacity
 		if (loadConstraint) {
-			if (vt1.load + vt2.load > vt2.vehicle.getWeight()) {
+			if (vt1.load + vt2.load > vt2.vehicle.getCBM()) {
 				if (vh.getCode().equals(debugCode)) {
 					log(name() + "::evaluateMoveTripOneVehicle, vehicle "
 							+ vh.getCode() + ", vt1.load = " + vt1.load
 							+ " vt2.load =  " + vt2.load + " > cap = "
-							+ vt2.vehicle.getWeight() + " RETURN INFTY");
+							+ vt2.vehicle.getCBM() + " RETURN INFTY");
 				}
 				return;
 			}
@@ -1681,7 +1681,7 @@ public class PickupDeliverySolver {
 		}
 		// check load w.r.t capacity
 		if (loadConstraint) {
-			if (vt1.load > vh.getWeight())
+			if (vt1.load > vh.getCBM())
 				return Integer.MAX_VALUE;
 		}
 
@@ -1757,7 +1757,7 @@ public class PickupDeliverySolver {
 				// violations);
 				violations++;
 			}
-			if (awn.getSumWeights(q) > vh.getWeight()) {// cap[k - 1]) {
+			if (awn.getSumWeights(q) > vh.getCBM()) {// cap[k - 1]) {
 				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
 				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
 				// + ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) +
@@ -1885,7 +1885,7 @@ public class PickupDeliverySolver {
 		if (loadConstraint) {
 			double loadVH = 0;
 			if(vt != null) loadVH = vt.load;
-			if (load + loadVH > vh.getWeight())
+			if (load + loadVH > vh.getCBM())
 				return Integer.MAX_VALUE;
 		}
 		ArrayList<Point> restore_L1 = XR.getClientPointList(k1);
@@ -2035,7 +2035,7 @@ public class PickupDeliverySolver {
 				// violations);
 				violations++;
 			}
-			if (awn.getSumWeights(q) > vh.getWeight()) {// cap[k - 1]) {
+			if (awn.getSumWeights(q) > vh.getCBM()) {// cap[k - 1]) {
 				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
 				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
 				// + ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) +
@@ -2221,7 +2221,7 @@ public class PickupDeliverySolver {
 		if (loadConstraint) {
 			double loadVH = 0;
 			//if(vt != null) loadVH = vt.load;
-			if (load + loadVH > vh.getWeight())
+			if (load + loadVH > vh.getCBM())
 				return new double[]{1,Integer.MAX_VALUE};
 		}
 
@@ -2309,7 +2309,7 @@ public class PickupDeliverySolver {
 				// violations);
 				violations++;
 			}
-			if (awn.getSumWeights(q) > vh.getWeight()) {// cap[k - 1]) {
+			if (awn.getSumWeights(q) > vh.getCBM()) {// cap[k - 1]) {
 				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
 				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
 				// + ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) +
@@ -2427,7 +2427,7 @@ public class PickupDeliverySolver {
 		if (loadConstraint) {
 			double loadVH = 0;
 			//if(vt != null) loadVH = vt.load;
-			if (load + loadVH > vh.getWeight())
+			if (load + loadVH > vh.getCBM())
 				return true;
 		}
 
@@ -2537,7 +2537,7 @@ public class PickupDeliverySolver {
 		if (loadConstraint) {
 			double loadVH = 0;
 			if(vt != null) loadVH = vt.load;
-			if (load + loadVH > vh.getWeight())
+			if (load + loadVH > vh.getCBM())
 				return;
 		}
 
@@ -2657,7 +2657,7 @@ public class PickupDeliverySolver {
 
 		// check load w.r.t capacity
 		if (loadConstraint) {
-			if (mPoint2Demand.get(pickup) > vh.getWeight())
+			if (mPoint2Demand.get(pickup) > vh.getCBM())
 				return Integer.MAX_VALUE;
 		}
 
@@ -2728,7 +2728,7 @@ public class PickupDeliverySolver {
 				// violations);
 				violations++;
 			}
-			if (awn.getSumWeights(q) > vh.getWeight()) {// cap[k - 1]) {
+			if (awn.getSumWeights(q) > vh.getCBM()) {// cap[k - 1]) {
 				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
 				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
 				// + ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) +
@@ -2829,10 +2829,10 @@ public class PickupDeliverySolver {
 		// check load w.r.t capacity
 		if (loadConstraint) {
 			if (vt1.load - mPoint2Demand.get(pickup1)
-					+ mPoint2Demand.get(pickup2) > vh1.getWeight())
+					+ mPoint2Demand.get(pickup2) > vh1.getCBM())
 				return Integer.MAX_VALUE;
 			if (vt2.load - mPoint2Demand.get(pickup2)
-					+ mPoint2Demand.get(pickup1) > vh2.getWeight())
+					+ mPoint2Demand.get(pickup1) > vh2.getCBM())
 				return Integer.MAX_VALUE;
 		}
 
@@ -2988,7 +2988,7 @@ public class PickupDeliverySolver {
 			if (!checkConflictItemsAtPoint(q)) {
 				violations++;
 			}
-			if (awn.getSumWeights(q) > vh1.getWeight()) {// cap[k - 1]) {
+			if (awn.getSumWeights(q) > vh1.getCBM()) {// cap[k - 1]) {
 				violations++;
 			}
 		}
@@ -3000,7 +3000,7 @@ public class PickupDeliverySolver {
 			if (!checkConflictItemsAtPoint(q)) {
 				violations++;
 			}
-			if (awn.getSumWeights(q) > vh2.getWeight()) {// cap[k - 1]) {
+			if (awn.getSumWeights(q) > vh2.getCBM()) {// cap[k - 1]) {
 				violations++;
 			}
 		}
@@ -3120,10 +3120,10 @@ public class PickupDeliverySolver {
 		// check load w.r.t capacity
 		if (loadConstraint) {
 			if (vt1.load - mPoint2Demand.get(pickup1)
-					+ mPoint2Demand.get(pickup2) > vh1.getWeight())
+					+ mPoint2Demand.get(pickup2) > vh1.getCBM())
 				return;
 			if (vt2.load - mPoint2Demand.get(pickup2)
-					+ mPoint2Demand.get(pickup1) > vh2.getWeight())
+					+ mPoint2Demand.get(pickup1) > vh2.getCBM())
 				return;
 		}
 
@@ -3296,7 +3296,7 @@ public class PickupDeliverySolver {
 
 		// check load w.r.t capacity
 		if (loadConstraint) {
-			if (vt1.load + vt2.load > newVehicle.getWeight())
+			if (vt1.load + vt2.load > newVehicle.getCBM())
 				return Integer.MAX_VALUE;
 		}
 
@@ -3393,7 +3393,7 @@ public class PickupDeliverySolver {
 				// violations);
 				violations++;
 			}
-			if (awn.getSumWeights(q) > newVehicle.getWeight()) {
+			if (awn.getSumWeights(q) > newVehicle.getCBM()) {
 				// log(name() + "::evaluateViolationsAddTwoPoints(" + pickup.ID
 				// + "," + p.ID + "," + delivery.ID + "," + d.ID + ", k = " + k
 				// + ", sumWeight(" + p.ID + ") = " + awn.getSumWeights(p) +
@@ -3539,9 +3539,9 @@ public class PickupDeliverySolver {
 
 		// check load w.r.t capacity
 		if (loadConstraint) {
-			if (vt11.load + vt21.load > vh2.getWeight())
+			if (vt11.load + vt21.load > vh2.getCBM())
 				return Integer.MAX_VALUE;
-			if (vt22.load + vt12.load > vh1.getWeight())
+			if (vt22.load + vt12.load > vh1.getCBM())
 				return Integer.MAX_VALUE;
 		}
 
@@ -3674,7 +3674,7 @@ public class PickupDeliverySolver {
 			if (!checkConflictItemsAtPoint(q)) {
 				violations++;
 			}
-			if (awn.getSumWeights(q) > vh1.getWeight()) {
+			if (awn.getSumWeights(q) > vh1.getCBM()) {
 				violations++;
 			}
 		}
@@ -3686,7 +3686,7 @@ public class PickupDeliverySolver {
 			if (!checkConflictItemsAtPoint(q)) {
 				violations++;
 			}
-			if (awn.getSumWeights(q) > vh2.getWeight()) {
+			if (awn.getSumWeights(q) > vh2.getCBM()) {
 				violations++;
 			}
 		}
@@ -4504,7 +4504,7 @@ public class PickupDeliverySolver {
 		
 		for(int i = 0; i < sL.length-1; i++){
 			for(int j = i+1; j < sL.length; j++){
-				if(sL[i].getWeight() < sL[j].getWeight()){
+				if(sL[i].getCBM() < sL[j].getCBM()){
 					Vehicle tmp = sL[i]; sL[i] = sL[j]; sL[j] = tmp;
 				}
 			}
@@ -4588,13 +4588,13 @@ public class PickupDeliverySolver {
 					.get(vh.getCode());
 			if (NRL == null) {
 				log(name() + "::logVehicleNotReachedLocations, vehicle "
-						+ vh.getCode() + "," + vh.getWeight() + " REACH-ALL");
+						+ vh.getCode() + "," + vh.getCBM() + " REACH-ALL");
 			} else {
 				String lcs = "";
 				for (String lc : NRL)
 					lcs += lc + ",";
 				log(name() + "::logVehicleNotReachedLocations, vehicle "
-						+ vh.getCode() + "," + vh.getWeight() + " not-reach "
+						+ vh.getCode() + "," + vh.getCBM() + " not-reach "
 						+ lcs);
 			}
 		}
@@ -4604,13 +4604,13 @@ public class PickupDeliverySolver {
 					.get(vh.getCode());
 			if (NRL == null) {
 				log(name() + "::logVehicleNotReachedLocations, vehicle "
-						+ vh.getCode() + "," + vh.getWeight() + " REACH-ALL");
+						+ vh.getCode() + "," + vh.getCBM() + " REACH-ALL");
 			} else {
 				String lcs = "";
 				for (String lc : NRL)
 					lcs += lc + ",";
 				log(name() + "::logVehicleNotReachedLocations, vehicle "
-						+ vh.getCode() + "," + vh.getWeight() + " not-reach "
+						+ vh.getCode() + "," + vh.getCBM() + " not-reach "
 						+ lcs);
 			}
 		}
@@ -6556,7 +6556,7 @@ public class PickupDeliverySolver {
 		return remainUnScheduled;
 	}
 	
-	public void preprocess(BrennTagPickupDeliveryInput input) {
+	public void preprocess(ShimanoPickupDeliveryInput input) {
 
 		mLogicalItem2PhysicalItems = new HashMap<Item, Item[]>();
 		PickupDeliveryRequest[] req = new PickupDeliveryRequest[input
@@ -6584,7 +6584,7 @@ public class PickupDeliverySolver {
 					name = name + req[i].getItems()[j].getName() + "-";
 					code = code + req[i].getItems()[j].getCode() + "-";
 					quantity += req[i].getItems()[j].getQuantity();
-					weight += req[i].getItems()[j].getWeight();
+					weight += req[i].getItems()[j].getCBM();
 					CBM += req[i].getItems()[j].getCBM();
 					pickupDuration += req[i].getItems()[j].getPickupDuration();
 					deliveryDuration += req[i].getItems()[j]
@@ -6772,9 +6772,9 @@ public class PickupDeliverySolver {
 			if (!checkPossibleVehicleCategoryLocation(vh, t.seqPoints))
 				continue;
 
-			if (vh.getWeight() >= t.load) {
-				if (input.getVehicleCategories()[i].getWeight() < minCap) {
-					minCap = input.getVehicleCategories()[i].getWeight();
+			if (vh.getCBM() >= t.load) {
+				if (input.getVehicleCategories()[i].getCBM() < minCap) {
+					minCap = input.getVehicleCategories()[i].getCBM();
 					sel_vh = input.getVehicleCategories()[i];
 				}
 			}
@@ -6786,9 +6786,9 @@ public class PickupDeliverySolver {
 				continue;
 
 			if (!usedInternalVehicles.contains(vh)) {
-				if (vh.getWeight() >= t.load) {
-					if (vh.getWeight() < minCap) {
-						minCap = vh.getWeight();
+				if (vh.getCBM() >= t.load) {
+					if (vh.getCBM() < minCap) {
+						minCap = vh.getCBM();
 						sel_vh = vh;
 					}
 				}
@@ -6805,7 +6805,7 @@ public class PickupDeliverySolver {
 		int nbExtVehicles = computeExternalVehicles();
 		for (int k = 0; k < nbExtVehicles; k++) {
 			Vehicle vh = externalVehicles[k];
-			if (vh.getWeight() >= demand && vehicleCanGoToPoint(vh, delivery)
+			if (vh.getCBM() >= demand && vehicleCanGoToPoint(vh, delivery)
 					&& vehicleCanGoToPoint(vh, pickup)) {
 				L.add(vh);
 			}
@@ -7137,7 +7137,7 @@ public class PickupDeliverySolver {
 						e = new RoutingElement(v.getStartLocationCode(), "-",
 								d_lat + "," + d_lng, d_lat, d_lng, "-", "-",
 								s_at, s_dt);
-						e.setDescription("weight: " + v.getWeight());
+						e.setDescription("weight: " + v.getCBM());
 						double e_load = getAccumulatedLoad(XR, p);// awn.getSumWeights(p);
 						double e_distance = getAccumulatedDistance(XR, p);// awe.getCostRight(p);
 						e.setLoad(e_load);
@@ -7379,7 +7379,7 @@ public class PickupDeliverySolver {
 						e = new RoutingElement(v.getStartLocationCode(), "-",
 								d_lat + "," + d_lng, d_lat, d_lng, "-", "-",
 								s_at, s_dt);
-						e.setDescription("weight: " + v.getWeight());
+						e.setDescription("weight: " + v.getCBM());
 						double e_load = (int) 0;
 						if (awn.getSumWeights(p) > Utility.EPS)
 							e_load = awn.getSumWeights(p);
@@ -7586,7 +7586,7 @@ public class PickupDeliverySolver {
 			}
 			routeInfo[i] = new StatisticRoute(vh.getCode(),
 					routes[i].getDistance(),
-					routes[i].getVehicle().getWeight(), routes[i].getLoad(),
+					routes[i].getVehicle().getCBM(), routes[i].getLoad(),
 					(routes[i].getElements().length - 2) / 2, st);
 		}
 		StatisticInformation info = new StatisticInformation(totalDistance,
@@ -7679,7 +7679,7 @@ public class PickupDeliverySolver {
 						e = new RoutingElement(v.getStartLocationCode(), "-",
 								d_lat + "," + d_lng, d_lat, d_lng, "-", "-",
 								s_at, s_dt);
-						e.setDescription("weight: " + v.getWeight());
+						e.setDescription("weight: " + v.getCBM());
 						double e_load = (int) 0;
 						if (awn.getSumWeights(p) > Utility.EPS)
 							e_load = awn.getSumWeights(p);
@@ -7902,7 +7902,7 @@ public class PickupDeliverySolver {
 			}
 			routeInfo[i] = new StatisticRoute(vh.getCode(),
 					routes[i].getDistance(),
-					routes[i].getVehicle().getWeight(), routes[i].getLoad(),
+					routes[i].getVehicle().getCBM(), routes[i].getLoad(),
 					(routes[i].getElements().length - 2) / 2, st);
 		}
 
@@ -7957,7 +7957,7 @@ public class PickupDeliverySolver {
 									+ "], ";
 						}
 				log(name() + "::logVehicleRoutes, vehicle " + vh.getCode()
-						+ ", cap = " + vh.getWeight() + ", route = "
+						+ ", cap = " + vh.getCBM() + ", route = "
 						+ (XR.emptyRoute(k) ? "EMPTY" : "NOT_EMPTY")
 						+ ", trips " + tripInfo);
 			}
@@ -8012,7 +8012,7 @@ public class PickupDeliverySolver {
 						e = new RoutingElement(v.getStartLocationCode(), "-",
 								d_lat + "," + d_lng, d_lat, d_lng, "-", "-",
 								s_at, s_dt);
-						e.setDescription("weight: " + v.getWeight());
+						e.setDescription("weight: " + v.getCBM());
 						double e_load = awn.getSumWeights(p);
 						double e_distance = awe.getCostRight(p);
 						e.setLoad(e_load);

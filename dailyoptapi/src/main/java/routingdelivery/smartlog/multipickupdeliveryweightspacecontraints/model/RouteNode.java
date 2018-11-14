@@ -14,7 +14,7 @@ public class RouteNode {
 	public ArrayList<ItemAmount> items;
 	public int vehicleIndex;
 	public String type;
-	public BrenntagPickupDeliverySolver solver;
+	public ShimanoPickupDeliverySolver solver;
 	public String description;
 	
 	public String toStringShort(){

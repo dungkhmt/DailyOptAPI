@@ -10,7 +10,7 @@ public class Trip {
 	public RouteNode end;
 	public String type;
 	private Vehicle vh;
-	BrenntagPickupDeliverySolver solver;
+	ShimanoPickupDeliverySolver solver;
 	
 	public Trip(RouteNode start, RouteNode end, String type) {
 		super();
