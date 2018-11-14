@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
+import routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.*;
 import routingdelivery.model.PickupDeliveryInput;
 import routingdelivery.model.PickupDeliveryMultiSolutions;
 import routingdelivery.model.PickupDeliveryRequest;
@@ -38,6 +39,7 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruck
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocSolution;
 import routingdelivery.smartlog.containertruckmoocassigment.service.ContainerTruckMoocService;
 import routingdelivery.smartlog.containertruckmoocassigment.service.ContainerTruckMoocSolver;
+import routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.service.DistrictBasedMultiPickupDeliveryWeightSpaceSolver;
 import routingdelivery.smartlog.sem.model.SEMPickupDeliveryInput;
 import routingdelivery.smartlog.sem.model.SEMPickupDeliverySolution;
 import routingdelivery.smartlog.sem.service.SEMPickupDeliverySolver;
@@ -192,6 +194,37 @@ public class TestAPI {
 		}
 	}
 
+	public void writeGlobalRequest(routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.BrennTagPickupDeliveryInput input, String dir_group) {
+		try {
+			DateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
+			Date date = new Date();
+
+			// System.out.println(dateFormat.format(date)); //2014/08/06
+			// 15:59:48
+			String dt = dateFormat.format(date);
+			String[] s = dt.split(":");
+
+			String dir = ROOT_DIR + "/logs/" + dir_group + "/" + DateTimeUtils.currentDate();
+			File f = new File(dir);
+			if (!f.exists()) {
+				f.mkdir();
+			}
+
+			String fn = dir + "/request-" + s[0] + s[1] + s[2] + "-" + s[3]
+					+ s[4] + s[5] + ".txt";
+			PrintWriter out = new PrintWriter(fn);
+
+			ObjectMapper mapper = new ObjectMapper();
+			String jsoninput = mapper.writeValueAsString(input);
+
+			// out.println("input: JSON");
+			out.println(jsoninput);
+
+			out.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
 	
 	@CrossOrigin
 	@RequestMapping(value = "/pickup-delivery", method = RequestMethod.POST)
@@ -458,6 +491,202 @@ public class TestAPI {
 		}else{
 			PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
 			PickupDeliverySolution[] solutions = solver.collectSolutions();
+			ms.addSolutions(solutions);
+			//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+			//return ms;
+			/*
+			if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
+				return ms;
+			}
+			
+			ArrayList<PickupDeliverySolution> L = new ArrayList<PickupDeliverySolution>();
+			for(int i = 0; i < solutions.length; i++) L.add(solutions[i]);
+			
+			for(int i = 0; i < input.getRequests().length; i++){
+				PickupDeliveryRequest r = input.getRequests()[i];
+				r.extendLateDelivery(input.getParams().getExtendLateDelivery());
+			}
+			sol = solver.computeVehicleSuggestion(input);
+			PickupDeliverySolution[] ext_solutions = solver.collectSolutions();
+			for(int i = 0; i < ext_solutions.length; i++) L.add(ext_solutions[i]);
+			
+			PickupDeliverySolution[] final_solutions = new PickupDeliverySolution[L.size()];
+			for(int i = 0; i < final_solutions.length; i++) final_solutions[i] = L.get(i);
+			
+			ms = new PickupDeliveryMultiSolutions(final_solutions);
+			return ms;
+			*/
+		}
+		ms.sortIncreasingOrderDistance();
+		return ms;
+		//return solver.computeVehicleSuggestion(input);
+	}
+
+	@CrossOrigin
+	@RequestMapping(value = "/multi-pickup-delivery-multi-solutions-weightspace-constraint", method = RequestMethod.POST)
+	public routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliveryMultiSolutions computeMultiPickupDeliveryMultiSolutionWeightSpaceContraint(
+			HttpServletRequest request,
+			@RequestBody routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.BrennTagPickupDeliveryInput input) {
+
+		// Gson gson = new Gson();
+		// String json = gson.toJson(input);
+		try {
+			writeGlobalRequest(input,"multibrenntagpickupdelivery");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		// PickupDeliverySolver solver = new PickupDeliverySolver();
+		// BrenntagPickupDeliverySolver solver = new
+		// BrenntagPickupDeliverySolver();
+		
+		//RBrenntagMultiPickupDeliverySolver solver = new RBrenntagMultiPickupDeliverySolver();
+		
+		
+		
+		// return solver.compute(input);
+		// return solver.computeNew(input);
+		
+		//if(true)return solver.computeVehicleSuggestion(input);
+		
+		
+		//solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		
+		routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliveryMultiSolutions ms = 
+				new routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliveryMultiSolutions();
+		long startExecutionTime = System.currentTimeMillis();
+		
+		if(input.getParams().getTimeLimit() == 0)
+			input.getParams().setTimeLimit(10);
+		
+		routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliveryRequest[] origin_req = input.cloneRequests();
+		
+		if(input.getParams().getDistrictBased() != null)if(input.getParams().getDistrictBased().equals("Y")){
+			
+			DistrictBasedMultiPickupDeliveryWeightSpaceSolver dsolver = 
+					new DistrictBasedMultiPickupDeliveryWeightSpaceSolver(startExecutionTime);
+			
+			//dsolver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+			dsolver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+
+			if(input.getParams().getInternalVehicleFirst() != null && 
+					input.getParams().getInternalVehicleFirst().equals("Y")){
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.Vehicle[] externalVehicles = input.getExternalVehicles();
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.Vehicle[] vehicleCategory = input.getVehicleCategories();
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliveryRequest[] dreq = input.cloneRequests();
+				input.setVehicleCategories(null);
+				input.setExternalVehicles(null);
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution s = dsolver.computeVehicleSuggestion(input);
+				if(s.getDescription().equals("OK")){
+					routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution[] solutions = dsolver.collectSolutions();
+					ms.addSolutions(solutions);
+					//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+					//return ms;
+				}
+				else{// try to use external vehicles
+					input.setExternalVehicles(externalVehicles);
+					input.setVehicleCategories(vehicleCategory);
+					input.setRequests(dreq);
+					//PickupDeliveryRequest[] req1 = input.cloneRequests();
+					routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution sol = dsolver.computeVehicleSuggestion(input);
+					routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution[] solutions = dsolver.collectSolutions();
+					ms.addSolutions(solutions);
+					//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+					//return ms;
+				}
+			}else{
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution sol = dsolver.computeVehicleSuggestion(input);
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution[] solutions = dsolver.collectSolutions();
+				ms.addSolutions(solutions);
+				//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+				//return ms;
+			}
+			
+			if(ms.getSolutions() != null){
+				for(int ii = 0; ii < ms.getSolutions().length; ii++){
+					routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution sol = ms.getSolutions()[ii];
+					sol.setDescription(sol.getDescription() + " - " + " GOM THEO KHU VUC");
+				}
+					
+				
+			}
+			ms.sortIncreasingOrderDistance();
+			return ms;
+		}
+		
+		
+		routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.service.RBrenntagMultiPickupDeliverySolver solver = 
+				new routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.service.RBrenntagMultiPickupDeliverySolver(startExecutionTime);
+		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		
+		input.setRequests(origin_req);
+		
+		if(input.getParams().getInternalVehicleFirst() != null && 
+				input.getParams().getInternalVehicleFirst().equals("Y")){
+			routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.Vehicle[] externalVehicles = input.getExternalVehicles();
+			routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.Vehicle[] vehicleCategory = input.getVehicleCategories();
+			routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliveryRequest[] req = input.cloneRequests();
+			input.setVehicleCategories(null);
+			input.setExternalVehicles(null);
+			routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution s = solver.computeVehicleSuggestion(input);
+			if(s.getDescription().equals("OK")){
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution[] solutions = solver.collectSolutions();
+				ms.addSolutions(solutions);
+				//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+				//return ms;
+			}
+			else{// try to use external vehicles
+				input.setExternalVehicles(externalVehicles);
+				input.setVehicleCategories(vehicleCategory);
+				input.setRequests(req);
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliveryRequest[] req1 = input.cloneRequests();
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
+				routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution[] solutions = solver.collectSolutions();
+				ms.addSolutions(solutions);
+				//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
+				//return ms;
+				/*
+				if(input.getParams().getExtendLateDelivery() == 0 && input.getParams().getExtendCapacity() == 0){
+					return ms;
+				}
+				
+				ArrayList<PickupDeliverySolution> L = new ArrayList<PickupDeliverySolution>();
+				for(int i = 0; i < solutions.length; i++) L.add(solutions[i]);
+				
+				for(int i = 0; i < input.getVehicles().length; i++){
+					Vehicle vh = input.getVehicles()[i];
+					vh.setWeight(vh.getWeight() + input.getParams().getExtendCapacity());
+				}
+				for(int i = 0; i < input.getVehicleCategories().length; i++){
+					Vehicle vh = input.getVehicleCategories()[i];
+					vh.setWeight(vh.getWeight() + input.getParams().getExtendCapacity());
+				}
+				
+				input.setRequests(req1);
+				for(int i = 0; i < input.getRequests().length; i++){
+					PickupDeliveryRequest r = input.getRequests()[i];
+					r.extendLateDelivery(input.getParams().getExtendLateDelivery());
+				}
+				
+				sol = solver.computeVehicleSuggestion(input);
+				PickupDeliverySolution[] ext_solutions = solver.collectSolutions();
+				for(int i = 0; i < ext_solutions.length; i++){
+					ext_solutions[i].setDescription(ext_solutions[i].getDescription() + " EXTEND");
+				}
+				for(int i = 0; i < ext_solutions.length; i++) L.add(ext_solutions[i]);
+				
+				PickupDeliverySolution[] final_solutions = new PickupDeliverySolution[L.size()];
+				for(int i = 0; i < final_solutions.length; i++) final_solutions[i] = L.get(i);
+				
+				ms = new PickupDeliveryMultiSolutions(final_solutions);
+				
+				return ms;
+				*/
+			}
+		}else{
+			routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution sol = solver.computeVehicleSuggestion(input);
+			routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliverySolution[] solutions = solver.collectSolutions();
 			ms.addSolutions(solutions);
 			//PickupDeliveryMultiSolutions ms = new PickupDeliveryMultiSolutions(solutions);
 			//return ms;
