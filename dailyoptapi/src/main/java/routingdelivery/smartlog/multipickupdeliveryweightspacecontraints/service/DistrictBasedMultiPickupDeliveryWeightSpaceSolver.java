@@ -12,7 +12,7 @@ import routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.*
 import utils.DateTimeUtils;
 
 public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
-		BrenntagPickupDeliverySolver {
+	ShimanoPickupDeliverySolver {
 
 	public static int DAYS_MOVE = 100;
 	public static double THRESHOLD_DELTA_NEGATIVE = -0.1;
@@ -74,7 +74,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 									+ "], ";
 						}
 				log(name() + "::logVehicleRoutes, vehicle " + vh.getCode()
-						+ ", cap = " + vh.getWeight() + ", route = "
+						+ ", cap = " + vh.getCBM() + ", route = "
 						+ (XR.emptyRoute(k) ? "EMPTY" : "NOT_EMPTY")
 						+ ", trips " + tripInfo);
 			}
@@ -113,7 +113,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 				a_items.add(I);
 				if (deliveryLocationCode.equals(debug_delivery_location_code)) {
 					log(name() + "::processMergeOrderItemsFTL, item "
-							+ I.getCode() + ", " + I.getWeight());
+							+ I.getCode() + ", " + I.getCBM());
 				}
 			}
 		}
@@ -155,7 +155,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 					|| debug_delivery_location_code == null) {
 				double W = 0;
 				for (Item I : a_items)
-					W += I.getWeight();
+					W += I.getCBM();
 
 				if (deliveryLocationCode.equals(debug_delivery_location_code)) {
 					System.out
@@ -163,11 +163,11 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 									+ "::processMergeOrderItemsFTL -> prepare LoadFTL for vehicle "
 									+ getVehicle(vehicle_index[k]).getCode()
 									+ ", cap = "
-									+ getVehicle(vehicle_index[k]).getWeight()
+									+ getVehicle(vehicle_index[k]).getCBM()
 									+ " a_items = " + a_items.size() + ", W = "
 									+ W + ", items = ");
 					for (int jj = 0; jj < a_items.size(); jj++) {
-						System.out.print(a_items.get(jj).getWeight() + ", ");
+						System.out.print(a_items.get(jj).getCBM() + ", ");
 					}
 					System.out.println();
 				}
@@ -214,8 +214,8 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 					// ", vehicle weight = " + vh.getWeight()
 					// + ", MAX_INT = " + minW);
 
-					if (vh.getWeight() / 1000 < minW) {
-						minW = vh.getWeight() / 1000;
+					if (vh.getCBM() / 1000 < minW) {
+						minW = vh.getCBM() / 1000;
 						sel_trip = t;
 					}
 				}
@@ -278,7 +278,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 						log.println(name()
 								+ "::processMergeOrderItemsFTL, LOAD-FTL for vehicle "
 								+ vh.getCode() + "-" + vh.getVehicleCategory()
-								+ ", weight " + vh.getWeight()
+								+ ", weight " + vh.getCBM()
 								+ ", remain weight = " + getTotalItemWeight());
 				}
 				System.out
@@ -293,13 +293,13 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 							+ " -> LoadFTL success for vehicle "
 							+ getVehicle(vehicle_index[k]).getCode()
 							+ ", cap = "
-							+ getVehicle(vehicle_index[k]).getWeight()
+							+ getVehicle(vehicle_index[k]).getCBM()
 							+ ", collectItems = " + collectItems.size() + ": ");
 					double w = 0;
 					for (int jj = 0; jj < collectItems.size(); jj++) {
-						System.out.print(collectItems.get(jj).getWeight()
+						System.out.print(collectItems.get(jj).getCBM()
 								+ ", ");
-						w += collectItems.get(jj).getWeight();
+						w += collectItems.get(jj).getCBM();
 					}
 					System.out.println(", total served weight = " + w);
 				}
@@ -365,7 +365,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 	}
 
 	public PickupDeliverySolution computeVehicleSuggestion(
-			BrennTagPickupDeliveryInput input) {
+			ShimanoPickupDeliveryInput input) {
 		this.input = input;
 		// startExecutionTime = System.currentTimeMillis();
 		// timeLimitExpired = false;
@@ -376,16 +376,21 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 
 		// compute total capacity for estimation
 		int totalCapacity = 0;
+		//int totalCBM = 0;
 		if (input.getVehicles() != null)
-			for (int i = 0; i < input.getVehicles().length; i++)
-				totalCapacity += input.getVehicles()[i].getWeight();
+			for (int i = 0; i < input.getVehicles().length; i++){
+				totalCapacity += input.getVehicles()[i].getCBM();
+				//totalCBM += input.getVehicles()[i].getCBM();
+			}
 		if (input.getExternalVehicles() != null)
 			for (int i = 0; i < input.getExternalVehicles().length; i++) {
-				totalCapacity += input.getExternalVehicles()[i].getWeight();
+				totalCapacity += input.getExternalVehicles()[i].getCBM();
+				//totalCBM += input.getExternalVehicles()[i].getCBM();
 			}
 
 		// compute total weight of orders for estimation
 		double totalItemWeights = 0;
+		//double totalItemCBM = 0;
 		int nbItems = 0;
 		HashSet<String> itemCodes = new HashSet<String>();
 		if (input.getRequests() != null) {
@@ -406,7 +411,8 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 						} else {
 							itemCodes.add(I.getCode());
 						}
-						totalItemWeights += I.getWeight();
+						totalItemWeights += I.getCBM();
+						//totalItemCBM += I.getCBM();
 						nbItems++;
 						log(name()
 								+ "::computeVehicleSuggestion, item "
@@ -414,7 +420,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 										.getCode()
 								+ ", weight = "
 								+ +input.getRequests()[i].getItems()[j]
-										.getWeight());
+										.getCBM());
 					}
 				}
 			}
@@ -423,10 +429,14 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 				+ ", nbOrders = " + input.getRequests().length);
 
 		int totalVehicleCategoryWeight = 0;
+		//int totalVehicleCategoryCBM = 0;
 		if (input.getVehicleCategories() != null)
 			for (int i = 0; i < input.getVehicleCategories().length; i++) {
 				totalVehicleCategoryWeight += input.getVehicleCategories()[i]
-						.getWeight();
+						.getCBM();
+				//totalVehicleCategoryCBM += input.getVehicleCategories()[i]
+				//		.getCBM();
+				
 				input.getVehicleCategories()[i].setDescription("SUGGESTED");
 			}
 		int rep = 0;
@@ -437,11 +447,18 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 			if (rep == 0)
 				rep = 1;
 		}
+		
+		
 		if (log != null) {
 			log.println(name() + "::computeVehicleSuggestion, totalCapacity = "
 					+ totalCapacity + ", totalVehicleCategoryCapacity = "
 					+ totalVehicleCategoryWeight + ", totalItemWeight = "
-					+ totalItemWeights + ", rep = " + rep);
+					+ totalItemWeights 
+					//+ "totalCBM = "
+					//+ totalCBM + ", totalVehicleCategoryCBM = "
+					//+ totalVehicleCategoryCBM + ", totalItemCBM = "
+					//+ totalItemCBM					
+					+ ", rep = " + rep);
 		}
 
 		this.input = input;
@@ -450,6 +467,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		log(name() + "::computeVehicleSuggestion, AFTER SPLIT CONFLICT ITEMS");
 		nbItems = 0;
 		totalItemWeights = 0;
+		//totalItemCBM = 0;
 		if (input.getRequests() != null) {
 			log(name() + "::computeVehicleSuggestion, nbOrders = "
 					+ input.getRequests().length);
@@ -463,7 +481,8 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 					for (int j = 0; j < r.getItems().length; j++) {
 						Item I = r.getItems()[j];
 
-						totalItemWeights += I.getWeight();
+						totalItemWeights += I.getCBM();
+						//totalItemCBM += I.getCBM();
 						nbItems++;
 						log(name()
 								+ "::computeVehicleSuggestion, item "
@@ -471,7 +490,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 										.getCode()
 								+ ", weight = "
 								+ input.getRequests()[i].getItems()[j]
-										.getWeight());
+										.getCBM());
 					}
 				}
 			}
@@ -543,10 +562,10 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 			for (int i = 0; i < requests.length; i++) {
 				mRequest2Index.put(requests[i], i);
 				// System.out.println("Order " + requests[i].getOrderID());
-				double W = 0;
-				for (int j = 0; j < requests[i].getItems().length; j++) {
-					W += requests[i].getItems()[j].getWeight();
-				}
+				//double W = 0;
+				//for (int j = 0; j < requests[i].getItems().length; j++) {
+				//	W += requests[i].getItems()[j].getWeight();
+				//}
 				// System.out.println("W = " + W);
 			}
 
@@ -1185,7 +1204,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 						+ unusedInternalVehicles.size() + " BUG??? ");
 				for (Vehicle v : unusedInternalVehicles) {
 					log(name() + "::computeVehicleSuggestion Un-Used Vehicle "
-							+ v.getCode() + ", cap = " + v.getWeight());
+							+ v.getCode() + ", cap = " + v.getCBM());
 				}
 				solutionAllOK = false;
 			}
@@ -1220,8 +1239,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		for (int i : unScheduledPointIndices) {
 			String description = "";
 			Point pickup = pickupPoints.get(i);
-			BrennTagRouteSolverForOneVehicle S = new BrennTagRouteSolverForOneVehicle(
-					this);
+			ShimanoRouteSolverForOneVehicle S = new ShimanoRouteSolverForOneVehicle(this);
 			for (int j = 0; j < input.getVehicleCategories().length; j++) {
 				description += S.analyzeNotServed(
 						input.getVehicleCategories()[j], i);
@@ -1285,7 +1303,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 			RoutingSolution rs = sol.getRoutes()[i];
 			log(name() + "::computeVehicleSuggestion, scheduled vehicle "
 					+ rs.getVehicle().getCode() + ", "
-					+ rs.getVehicle().getWeight());
+					+ rs.getVehicle().getCBM());
 		}
 
 		// reassignVehiclePrioritizeInternalVehicles(sol);
@@ -1352,19 +1370,19 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		int nbExtVehicles = computeExternalVehicles();
 		for (int i = 0; i < nbIntVehicles; i++) {
 			Vehicle vh = vehicles[i];
-			double extCap = vh.getWeight()
+			double extCap = vh.getCBM()
 					* input.getParams().getExtendCapacity() * 1.0 / 100;
 			// vh.setWeight(vh.getWeight() +
 			// input.getParams().getExtendCapacity());
-			vh.setWeight(vh.getWeight() + extCap);
+			vh.setCBM(vh.getCBM() + extCap);
 		}
 		for (int i = 0; i < nbExtVehicles; i++) {
 			Vehicle vh = externalVehicles[i];
-			double extCap = vh.getWeight()
+			double extCap = vh.getCBM()
 					* input.getParams().getExtendCapacity() * 1.0 / 100;
 			// vh.setWeight(vh.getWeight() +
 			// input.getParams().getExtendCapacity());
-			vh.setWeight(vh.getWeight() + extCap);
+			vh.setCBM(vh.getCBM() + extCap);
 		}
 
 		if (input.getRequests() != null) {
@@ -1758,7 +1776,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 			else
 				vh = externalVehicles[k - vehicles.length];
 
-			cap[k] = vh.getWeight();// vehicles[k].getWeight();
+			cap[k] = vh.getCBM();// vehicles[k].getWeight();
 
 			idxPoint++;
 			Point s = new Point(idxPoint);
@@ -1870,9 +1888,9 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 						+ (XR.emptyRoute(k) ? "EMPTY" : "NOT_EMPTY"));
 				if (isInternalVehicle(vh)) {
 					if (XR.emptyRoute(k)) {
-						if (maxWeight < vh.getWeight()) {
+						if (maxWeight < vh.getCBM()) {
 							sel_route = k;
-							maxWeight = vh.getWeight();
+							maxWeight = vh.getCBM();
 						}
 						intVES = intVS + vh.getCode() + ", ";
 						count++;
@@ -1921,11 +1939,11 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 					.println(name()
 							+ "::hillClimbingScheduleAllInternalVehicles, nbInternal not-scheduled vehicles = "
 							+ count + ", sel vehicle = " + vh.getCode()
-							+ ", cap = " + vh.getWeight());
+							+ ", cap = " + vh.getCBM());
 			log(name()
 					+ "::hillClimbingScheduleAllInternalVehicles, nbInternal not-scheduled vehicles = "
 					+ count + ", sel vehicle = " + vh.getCode() + ", cap = "
-					+ vh.getWeight() + ", intVehicle = " + intVS
+					+ vh.getCBM() + ", intVehicle = " + intVS
 					+ ", internal-not-used-vehicle = " + intVES);
 
 			for (int i = 0; i < t.length; i++) {
@@ -2206,7 +2224,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 							log(name()
 									+ "::hillClimbingMoveRequestFromExternalToInternalVehicle, w = "
 									+ w + ", vehicle vj = " + vj.getCode()
-									+ ", cap " + vj.getWeight() + ", delta = "
+									+ ", cap " + vj.getCBM() + ", delta = "
 									+ delta + ", minDelta = " + minDelta);
 						}
 
@@ -2397,7 +2415,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 				for (Vehicle vh : freeVehicles) {
 					log(name()
 							+ "::hillClimbingMoveRequestFromExternalToInternalVehicleSplittingItemsAtSameLocationMinimizeDistance, free-vehicle "
-							+ vh.getCode() + ", cap " + vh.getWeight());
+							+ vh.getCode() + ", cap " + vh.getCBM());
 
 				}
 
@@ -2614,7 +2632,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 						if (mPoint2Type.get(pickup).equals("D"))
 							continue;
 						if (mPoint2Demand.get(pickup) + t[j].load > vj
-								.getWeight())
+								.getCBM())
 							continue;
 
 						// int idx = mPickupPoint2PickupIndex.get(pickup);
@@ -3647,7 +3665,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 						+ sel_j + "].sz = "
 						+ VTC.mVehicle2Trips.get(t[sel_j].vehicle).size()
 						+ ", START delta = " + minDelta + ", select vehicle "
-						+ mPoint2Vehicle.get(XR.startPoint(sel_k)).getWeight());
+						+ mPoint2Vehicle.get(XR.startPoint(sel_k)).getCBM());
 				System.out
 						.println(name()
 								+ "::hillClimbingNewVehicleOptimizeDistanceExternalVehicle, time = "
@@ -3663,7 +3681,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 								+ minDelta
 								+ ", select vehicle "
 								+ mPoint2Vehicle.get(XR.startPoint(sel_k))
-										.getWeight());
+										.getCBM());
 				// performMoveTrip(XR, t[sel_i],t[sel_j]);
 				performMoveTripNewVehicle(XR, t[sel_i], t[sel_j],
 						XR.startPoint(sel_k), DIXAVEGAN);
@@ -3759,7 +3777,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 				if (XR.emptyRoute(k)) {
 					log(name() + "::hillClimbingNewVehicle, emptyRoute[" + k
 							+ "], vehicle "
-							+ mPoint2Vehicle.get(XR.startPoint(k)).getWeight());
+							+ mPoint2Vehicle.get(XR.startPoint(k)).getCBM());
 				}
 			}
 			ArrayList<Integer> L = new ArrayList<Integer>();
@@ -3840,7 +3858,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 						+ sel_j + "].sz = "
 						+ VTC.mVehicle2Trips.get(t[sel_j].vehicle).size()
 						+ ", START delta = " + minDelta + ", select vehicle "
-						+ mPoint2Vehicle.get(XR.startPoint(sel_k)).getWeight());
+						+ mPoint2Vehicle.get(XR.startPoint(sel_k)).getCBM());
 				System.out.println(name()
 						+ "::hillClimbingNewVehicle, time = "
 						+ (time * 0.001)
@@ -3851,7 +3869,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 						// + "] = " + t[sel_i].seqPointString() + ", t[" + sel_j
 						// + "] = " + t[sel_j].seqPointString()
 						+ ", START delta = " + minDelta + ", select vehicle "
-						+ mPoint2Vehicle.get(XR.startPoint(sel_k)).getWeight());
+						+ mPoint2Vehicle.get(XR.startPoint(sel_k)).getCBM());
 				// performMoveTrip(XR, t[sel_i],t[sel_j]);
 				performMoveTripNewVehicle(XR, t[sel_i], t[sel_j],
 						XR.startPoint(sel_k), DIXAVEGAN);

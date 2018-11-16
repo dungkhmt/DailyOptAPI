@@ -1,7 +1,7 @@
 package routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model;
 
 
-public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
+public class ShimanoPickupDeliveryInput extends PickupDeliveryInput{
 	private DistanceElement[] travelTime;
 	private ExclusiveItem[] exclusiveItemPairs;// cap 2 items khong the van chuyen cung nhau
 	private ExclusiveVehicleLocation[] exclusiveVehicleLocations;// xe ko the di den location
@@ -11,7 +11,7 @@ public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
 	private LocationConfig[] locationConfigs;
 	
 	
-	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+	public ShimanoPickupDeliveryInput(PickupDeliveryRequest[] requests,
 			Vehicle[] vehicles, DistanceElement[] distances,
 			ConfigParams params, DistanceElement[] travelTime,
 			ExclusiveItem[] exclusiveItemPairs,
@@ -59,7 +59,7 @@ public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
 		this.exclusiveVehicleCategoryLocations = exclusiveVehicleCategoryLocations;
 	}
 
-	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+	public ShimanoPickupDeliveryInput(PickupDeliveryRequest[] requests,
 			Vehicle[] vehicles, DistanceElement[] distances,
 			ConfigParams params, DistanceElement[] travelTime,
 			ExclusiveItem[] exclusiveItemPairs,
@@ -75,7 +75,7 @@ public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
 		this.exclusiveVehicleCategoryLocations = exclusiveVehicleCategoryLocations;
 	}
 
-	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+	public ShimanoPickupDeliveryInput(PickupDeliveryRequest[] requests,
 			Vehicle[] vehicles, DistanceElement[] distances,
 			ConfigParams params, DistanceElement[] travelTime,
 			ExclusiveItem[] exclusiveItemPairs,
@@ -97,7 +97,7 @@ public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
 		this.vehicleCategories = vehicleCategories;
 	}
 
-	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+	public ShimanoPickupDeliveryInput(PickupDeliveryRequest[] requests,
 			Vehicle[] vehicles, DistanceElement[] distances,
 			ConfigParams params, DistanceElement[] travelTime,
 			ExclusiveItem[] exclusiveItemPairs,
@@ -143,25 +143,25 @@ public class BrennTagPickupDeliveryInput extends PickupDeliveryInput{
 		this.externalVehicles = externalVehicles;
 	}
 
-	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+	public ShimanoPickupDeliveryInput(PickupDeliveryRequest[] requests,
 			Vehicle[] vehicles, DistanceElement[] distances,
 			ConfigParams params, DistanceElement[] travelTime) {
 		super(requests, vehicles, distances, params);
 		this.travelTime = travelTime;
 	}
 
-	public BrennTagPickupDeliveryInput() {
+	public ShimanoPickupDeliveryInput() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+	public ShimanoPickupDeliveryInput(PickupDeliveryRequest[] requests,
 			Vehicle[] vehicles, ConfigParams params) {
 		super(requests, vehicles, params);
 		// TODO Auto-generated constructor stub
 	}
 
-	public BrennTagPickupDeliveryInput(PickupDeliveryRequest[] requests,
+	public ShimanoPickupDeliveryInput(PickupDeliveryRequest[] requests,
 			Vehicle[] vehicles, DistanceElement[] distances, ConfigParams params) {
 		super(requests, vehicles, distances, params);
 		// TODO Auto-generated constructor stub

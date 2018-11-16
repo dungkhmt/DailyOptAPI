@@ -15,8 +15,8 @@ import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeigh
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightNodesVR;
 import utils.DateTimeUtils;
 
-public class BrennTagRouteSolverForOneVehicle {
-	BrenntagPickupDeliverySolver solver;
+public class ShimanoRouteSolverForOneVehicle {
+	ShimanoPickupDeliverySolver solver;
 	VRManager mgr;
 	VarRoutesVR XR;
 	AccumulatedWeightNodesVR awn;
@@ -33,13 +33,12 @@ public class BrennTagRouteSolverForOneVehicle {
 	IFunctionVR totalCost;
 	double totalWeights;
 
-	public BrennTagRouteSolverForOneVehicle(BrenntagPickupDeliverySolver solver) {
+	public ShimanoRouteSolverForOneVehicle(ShimanoPickupDeliverySolver solver) {
 		this.solver = solver;
-
 	}
 
 	public String name() {
-		return BrennTagRouteSolverForOneVehicle.class.getName();
+		return ShimanoRouteSolverForOneVehicle.class.getName();
 	}
 	
 	public String analyzeNotServed(Vehicle vh, int index) {
@@ -133,9 +132,9 @@ public class BrennTagRouteSolverForOneVehicle {
 					+ solver.getOrderIDAtPoint(pickup);
 			return retDes;
 		}
-		if(vh.getWeight() < solver.mPoint2Demand.get(pickup)){
+		if(vh.getCBM() < solver.mPoint2Demand.get(pickup)){
 			retDes = "\nTá»•ng Ä‘Æ¡n hÃ ng = " + solver.mPoint2Demand.get(pickup) + " vÆ°á»£t quÃ¡ táº£i trá»�ng xe (" + 
-		vh.getVehicleCategory() + ")" + vh.getWeight();
+		vh.getVehicleCategory() + ")" + vh.getCBM();
 			return retDes;
 		}
 		Point p = XR.startPoint(1);
@@ -236,7 +235,7 @@ public class BrennTagRouteSolverForOneVehicle {
 			cand.add(i);
 		totalWeights = 0;
 		System.out.println(name() + "::solve, vehicle category = "
-				+ vh.getWeight() + ", cand = " + cand.size());
+				+ vh.getCBM() + ", cand = " + cand.size());
 		while (cand.size() > 0) {
 			Point sel_pickup = null;
 			Point sel_delivery = null;
@@ -314,7 +313,7 @@ public class BrennTagRouteSolverForOneVehicle {
 						for (Point tmp = p; tmp != XR.next(d); tmp = XR
 								.next(tmp)) {
 							if (nwm.getWeight(pickup) + awn.getSumWeights(tmp) > vh
-									.getWeight()) {
+									.getCBM()) {
 								ok = false;
 								break;
 							}
@@ -403,7 +402,7 @@ public class BrennTagRouteSolverForOneVehicle {
 					}
 				}
 				System.out.println(name() + "::solve, vehicle category = "
-						+ vh.getWeight() + ", ACCEPT index " + sel_i
+						+ vh.getCBM() + ", ACCEPT index " + sel_i
 						+ ", REMAIN cand = " + cand.size() + ", XR = "
 						+ XR.toString());
 			}

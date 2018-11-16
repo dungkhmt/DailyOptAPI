@@ -194,7 +194,7 @@ public class TestAPI {
 		}
 	}
 
-	public void writeGlobalRequest(routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.BrennTagPickupDeliveryInput input, String dir_group) {
+	public void writeGlobalRequest(routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.ShimanoPickupDeliveryInput input, String dir_group) {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
 			Date date = new Date();
@@ -523,10 +523,10 @@ public class TestAPI {
 	}
 
 	@CrossOrigin
-	@RequestMapping(value = "/multi-pickup-delivery-multi-solutions-weightspace-constraint", method = RequestMethod.POST)
+	@RequestMapping(value = "/multi-pickup-delivery-multi-solutions-shimano", method = RequestMethod.POST)
 	public routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.PickupDeliveryMultiSolutions computeMultiPickupDeliveryMultiSolutionWeightSpaceContraint(
 			HttpServletRequest request,
-			@RequestBody routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.BrennTagPickupDeliveryInput input) {
+			@RequestBody routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.model.ShimanoPickupDeliveryInput input) {
 
 		// Gson gson = new Gson();
 		// String json = gson.toJson(input);
@@ -615,8 +615,8 @@ public class TestAPI {
 		}
 		
 		
-		routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.service.RBrenntagMultiPickupDeliverySolver solver = 
-				new routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.service.RBrenntagMultiPickupDeliverySolver(startExecutionTime);
+		routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.service.ShimanoMultiPickupDeliverySolver solver = 
+				new routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.service.ShimanoMultiPickupDeliverySolver(startExecutionTime);
 		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
 		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
 		
