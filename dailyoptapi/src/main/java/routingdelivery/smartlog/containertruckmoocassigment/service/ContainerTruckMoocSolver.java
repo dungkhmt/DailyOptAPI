@@ -130,10 +130,6 @@ public class ContainerTruckMoocSolver {
 		return mCode2Warehouse.get(code);
 	}
 
-	public Warehouse getWarehouseFromLocationCode(String code) {
-		return mCode2Warehouse.get(code);
-	}
-
 	public Port getPortFromCode(String code) {
 		return mCode2Port.get(code);
 	}

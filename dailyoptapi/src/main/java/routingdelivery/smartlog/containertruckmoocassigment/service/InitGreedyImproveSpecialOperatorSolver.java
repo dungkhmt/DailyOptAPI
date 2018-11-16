@@ -1287,7 +1287,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		int nbUnScheduledExReq = 0;
 		int nbUnScheduledImReq = 0;
 		int nbUnScheduledWhReq = 0;
-		for (int i = 0; i < exReq.length; i++) {
+		for (int i = 0; i < nbExReqs; i++) {
 			if (!exReqScheduled[i])
 				nbUnScheduledExReq++;
 		}
