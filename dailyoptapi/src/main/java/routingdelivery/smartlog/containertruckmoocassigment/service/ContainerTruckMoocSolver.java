@@ -2019,7 +2019,7 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_EXPORT_EMPTY);
 		propagate(tr);
 		updateTruckAtDepot(truck);
 		updateMoocAtDepot(mooc);
@@ -2194,7 +2194,7 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_EXPORT_LADEN);
 		propagate(tr);
 		updateTruckAtDepot(truck);
 		updateMoocAtDepot(mooc);
@@ -2353,7 +2353,7 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_EXPORT_LADEN);
 		propagate(tr);
 		updateTruckAtDepot(truck);
 		updateMoocAtDepot(mooc);
@@ -2535,7 +2535,7 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_IMPORT_EMPTY);
 		propagate(tr);
 		updateTruckAtDepot(truck);
 		updateMoocAtDepot(mooc);
@@ -2706,7 +2706,7 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_IMPORT_EMPTY);
 		propagate(tr);
 		updateTruckAtDepot(truck);
 		updateMoocAtDepot(mooc);
@@ -2891,7 +2891,7 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_IMPORT_LADEN);
 		propagate(tr);
 		updateTruckAtDepot(truck);
 		updateMoocAtDepot(mooc);
