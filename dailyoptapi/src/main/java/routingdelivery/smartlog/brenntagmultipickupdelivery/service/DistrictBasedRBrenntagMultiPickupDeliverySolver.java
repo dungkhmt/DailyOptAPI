@@ -1022,6 +1022,12 @@ public class DistrictBasedRBrenntagMultiPickupDeliverySolver extends
 
 		relaxLoadTimeConstraintAndSolve();
 
+		greedyConstructive(true);
+		PickupDeliverySolution greedy_solution = buildSolution(XR);
+		greedy_solution.setDescription("GREEDY");
+		solutionCollection.add(greedy_solution, input.getParams());
+				
+		
 		/*
 		 * if (input.getParams().getInternalVehicleFirst().equals("Y")) {
 		 * hillClimbingScheduleAllInternalVehicles(true);

@@ -1114,7 +1114,33 @@ public class PickupDeliverySolver {
 		}
 		return true;
 	}
+	public boolean checkContraintsAtRoute(int k){
+		int violations = 0;
+		Point s = XR.startPoint(k);
+		Vehicle vh = mPoint2Vehicle.get(s);
+		for (Point q = XR.startPoint(k); q != XR.endPoint(k); q = XR.next(q)) {
+			if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q)) {
+				violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
+						.get(q));
+				
+			}
+			if (!checkConflictItemsAtPoint(q)) {
+				violations++;
+			}
+			if (awn.getSumWeights(q) > vh.getWeight()) {
+				violations++;
+			}
 
+		}
+
+		// check end_working_time of vehicle
+		Point q = XR.endPoint(k);
+		if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
+			violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
+					.get(q));
+
+		return violations == 0;
+	}
 	public double evaluateMoveTrip(VarRoutesVR XR, VehicleTrip vt1,
 			VehicleTrip vt2, boolean DIXAVEGAN, boolean loadConstraint) {
 		if (vt1.vehicle == vt2.vehicle)
