@@ -67,6 +67,10 @@ public class ContainerTruckMoocSolver {
 	public HashMap<String, Warehouse> mCode2Warehouse;
 	public HashMap<String, Port> mCode2Port;
 	public HashMap<String, HashSet<String>> mDepotContainerCode2ShipCompanyCode;
+	
+	public HashMap<String, ArrayList<Truck>> mDepot2TruckList;
+	public HashMap<String, ArrayList<Mooc>> mDepot2MoocList;
+	public HashMap<String, ArrayList<Container>> mDepot2ContainerList;
 
 	public HashMap<String, HashSet<Container>> mShipCompanyCode2Containers;
 
@@ -397,21 +401,57 @@ public class ContainerTruckMoocSolver {
 					+ input.getWarehouses()[i].getCode());
 		}
 		mCode2Mooc = new HashMap<String, Mooc>();
+		mDepot2MoocList = new HashMap<String, ArrayList<Mooc>>();
 		for (int i = 0; i < input.getMoocs().length; i++) {
-			mCode2Mooc.put(input.getMoocs()[i].getCode(), input.getMoocs()[i]);
+			Mooc mooc = input.getMoocs()[i];
+			mCode2Mooc.put(mooc.getCode(), mooc);
+			String depotMoocCode = mooc.getDepotMoocCode();
+			if(depotMoocCode == null)
+				depotMoocCode = "isScheduled";
+			ArrayList<Mooc> moocList = mDepot2MoocList.get(depotMoocCode);
+			if(moocList == null)
+				moocList = new ArrayList<Mooc>();
+			moocList.add(mooc);
+			mDepot2MoocList.put(depotMoocCode, moocList);
 		}
+		if(mDepot2MoocList.get("isScheduled") == null)
+			mDepot2MoocList.put("isScheduled", new ArrayList<Mooc>());
+		
 		mCode2Truck = new HashMap<String, Truck>();
+		mDepot2TruckList = new HashMap<String, ArrayList<Truck>>();
 		for (int i = 0; i < input.getTrucks().length; i++) {
-			mCode2Truck.put(input.getTrucks()[i].getCode(),
-					input.getTrucks()[i]);
+			Truck truck = input.getTrucks()[i];
+			mCode2Truck.put(truck.getCode(),
+					truck);
+			String depotTruckCode = truck.getDepotTruckCode();
+			if(depotTruckCode == null)
+				depotTruckCode = "isScheduled";
+			ArrayList<Truck> truckList = mDepot2TruckList.get(depotTruckCode);
+			if(truckList == null)
+				truckList = new ArrayList<Truck>();
+			truckList.add(truck);
+			mDepot2TruckList.put(depotTruckCode, truckList);
 		}
+		if(mDepot2TruckList.get("isScheduled") == null)
+			mDepot2TruckList.put("isScheduled", new ArrayList<Truck>());
+		
 		mCode2Container = new HashMap<String, Container>();
+		mDepot2ContainerList = new HashMap<String, ArrayList<Container>>();
 		for (int i = 0; i < input.getContainers().length; i++) {
 			Container c = input.getContainers()[i];
 			mCode2Container.put(c.getCode(), c);
-			System.out.println(name() + "::mapData, mCode2Container.put("
-					+ c.getCode() + ")");
+			String depotContainerCode = c.getDepotContainerCode();
+			if(depotContainerCode == null)
+				depotContainerCode = "isScheduled";
+			ArrayList<Container> contList = mDepot2ContainerList.get(depotContainerCode);
+			if(contList == null)
+				contList = new ArrayList<Container>();
+			contList.add(c);
+			mDepot2ContainerList.put(depotContainerCode, contList);
 		}
+		if(mDepot2ContainerList.get("isScheduled") == null)
+			mDepot2ContainerList.put("isScheduled", new ArrayList<Container>());
+		
 		mCode2Port = new HashMap<String, Port>();
 		for (int i = 0; i < input.getPorts().length; i++) {
 			mCode2Port.put(input.getPorts()[i].getCode(), input.getPorts()[i]);
@@ -1979,8 +2019,11 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_EXPORT_EMPTY);
 		propagate(tr);
+		updateTruckAtDepot(truck);
+		updateMoocAtDepot(mooc);
+		//updateContainerAtDepot(container);
 
 		tri.route = tr;
 		tri.lastUsedIndex = lastUsedIndex;
@@ -2151,8 +2194,11 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_EXPORT_LADEN);
 		propagate(tr);
+		updateTruckAtDepot(truck);
+		updateMoocAtDepot(mooc);
+		//updateContainerAtDepot(container);
 
 		tri.route = tr;
 		tri.lastUsedIndex = lastUsedIndex;
@@ -2307,8 +2353,11 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_EXPORT_LADEN);
 		propagate(tr);
+		updateTruckAtDepot(truck);
+		updateMoocAtDepot(mooc);
+		//updateContainerAtDepot(container);
 
 		tri.route = tr;
 		tri.lastUsedIndex = lastUsedIndex;
@@ -2410,8 +2459,9 @@ public class ContainerTruckMoocSolver {
 				+ r.getOrderCode() + ", containerCode = "
 				+ r.getContainerCode());
 
+		Container container = mCode2Container.get(r.getContainerCode());
 		DepotContainer depot = findDepotForReleaseContainer(lastElement,
-				mCode2Container.get(r.getContainerCode()));
+				container);
 		e3.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 		e3.setDepotContainer(depot);
 
@@ -2485,8 +2535,11 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_IMPORT_EMPTY);
 		propagate(tr);
+		updateTruckAtDepot(truck);
+		updateMoocAtDepot(mooc);
+		updateContainerAtDepot(container);
 
 		tri.route = tr;
 		tri.lastUsedIndex = lastUsedIndex;
@@ -2574,8 +2627,9 @@ public class ContainerTruckMoocSolver {
 				+ r.getOrderCode() + ", containerCode = "
 				+ r.getContainerCode());
 
+		Container container = mCode2Container.get(r.getContainerCode());
 		DepotContainer depot = findDepotForReleaseContainer(lastElement,
-				mCode2Container.get(r.getContainerCode()));
+				container);
 		e3.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 		e3.setDepotContainer(depot);
 
@@ -2652,8 +2706,11 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_IMPORT_EMPTY);
 		propagate(tr);
+		updateTruckAtDepot(truck);
+		updateMoocAtDepot(mooc);
+		updateContainerAtDepot(container);
 
 		tri.route = tr;
 		tri.lastUsedIndex = lastUsedIndex;
@@ -2834,9 +2891,12 @@ public class ContainerTruckMoocSolver {
 		TruckRoute tr = new TruckRoute();
 		tr.setNodes(e);
 		tr.setTruck(truck);
-		tr.setType(TruckRoute.DIRECT_EXPORT);
+		tr.setType(TruckRoute.DIRECT_IMPORT_LADEN);
 		propagate(tr);
-
+		updateTruckAtDepot(truck);
+		updateMoocAtDepot(mooc);
+		//updateContainerAtDepot(container);
+		
 		tri.route = tr;
 		tri.lastUsedIndex = lastUsedIndex;
 		//tri.additionalDistance = distance;
@@ -3213,7 +3273,10 @@ public class ContainerTruckMoocSolver {
 		r.setTruck(truck);
 		r.setType(TruckRoute.DIRECT_IMPORT);
 		propagate(r);
-
+		updateTruckAtDepot(truck);
+		updateMoocAtDepot(mooc);
+		updateContainerAtDepot(container);
+		
 		tri.route = r;
 		tri.additionalDistance = distance;
 		tri.lastUsedIndex = lastUsedIndex;
@@ -4160,7 +4223,10 @@ public class ContainerTruckMoocSolver {
 		r.setTruck(truck);
 		r.setType(TruckRoute.DIRECT_EXPORT);
 		propagate(r);
-
+		updateTruckAtDepot(truck);
+		updateMoocAtDepot(mooc);
+		updateContainerAtDepot(container);
+		
 		tri.route = r;
 		tri.lastUsedIndex = lastUsedIndex;
 		tri.additionalDistance = distance;
@@ -4533,7 +4599,10 @@ public class ContainerTruckMoocSolver {
 		r.setTruck(truck);
 		r.setType(TruckRoute.DIRECT_WAREHOUSE);
 		propagate(r);
-
+		updateTruckAtDepot(truck);
+		updateMoocAtDepot(mooc);
+		updateContainerAtDepot(container);
+		
 		tri.route = r;
 		tri.lastUsedIndex = lastUsedIndex;
 		tri.additionalDistance = distance;
@@ -6434,5 +6503,144 @@ public class ContainerTruckMoocSolver {
 		}
 		return SL;
 	}
+	
+	public ArrayList<Container> getAvailableContainerAtDepot(double wReq, String requestContainerType, String depot){
+		ArrayList<Container> availableContList = new ArrayList<Container>();
+		ArrayList<Container> contListAtDepot = mDepot2ContainerList.get(depot);
+		if(!depot.equals("isScheduled")){
+			for(int i = 0; i < contListAtDepot.size(); i++){
+				Container c = contListAtDepot.get(i);
+				if(c.getWeight() >= wReq && requestContainerType.equals(c.getCategoryCode())
+						&& mContainer2LastDepot.get(c) != null){
+					availableContList.add(c);
+					break;
+				}
+			}
+		}
+		else{
+			for(int i = 0; i < contListAtDepot.size(); i++){
+				Container c = contListAtDepot.get(i);
+				if(c.getWeight() >= wReq && requestContainerType.equals(c.getCategoryCode())
+						&& mContainer2LastDepot.get(c) != null){
+					availableContList.add(c);
+				}
+			}
+		}
+		return availableContList;
+	}
+	
+	public ArrayList<Mooc> getAvailableMoocAtDepot(double wCont, String contType, String depot){
+		ArrayList<Mooc> availableMoocList = new ArrayList<Mooc>();
+		ArrayList<Mooc> moocListAtDepot = mDepot2MoocList.get(depot);
+		if(!depot.equals("isScheduled")){
+			for(int i = 0; i < moocListAtDepot.size(); i++){
+				Mooc mooc = moocListAtDepot.get(i);
+				boolean contTypeinMoocGroup = false;
+				MoocGroup[] moocGroup = input.getMoocGroup();
+				for(int j = 0; j < moocGroup.length; j++){
+					MoocGroup group = moocGroup[j];
+					if(group.getCode().equals(mooc.getCategory())){
+						for(int k = 0; k < group.getPacking().length; k++){
+							if(group.getPacking()[k].getContTypeCode().equals(contType)){
+								contTypeinMoocGroup = true;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				if(mooc.getWeight() >= wCont && contTypeinMoocGroup
+						&& mMooc2LastDepot.get(mooc) != null){
+					availableMoocList.add(mooc);
+					break;
+				}
+			}
+		}
+		else{
+			for(int i = 0; i < moocListAtDepot.size(); i++){
+				Mooc mooc = moocListAtDepot.get(i);
+				boolean contTypeinMoocGroup = false;
+				MoocGroup[] moocGroup = input.getMoocGroup();
+				for(int j = 0; j < moocGroup.length; j++){
+					MoocGroup group = moocGroup[j];
+					if(group.getCode().equals(mooc.getCategory())){
+						for(int k = 0; k < group.getPacking().length; k++){
+							if(group.getPacking()[k].getContTypeCode().equals(contType)){
+								contTypeinMoocGroup = true;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				if(mooc.getWeight() >= wCont && contTypeinMoocGroup
+						&& mMooc2LastDepot.get(mooc) != null){
+					availableMoocList.add(mooc);
+				}
+			}
+		}
+		return availableMoocList;
+	}
+	
+	public ArrayList<Truck> getAvailableTruckAtDepot(double wMooc, String depot){
+		ArrayList<Truck> availableTruckList = new ArrayList<Truck>();
+		ArrayList<Truck> truckListAtDepot = mDepot2TruckList.get(depot);
+		if(!depot.equals("isScheduled")){
+			for(int i = 0; i < truckListAtDepot.size(); i++){
+				if(truckListAtDepot.get(i).getWeight() >= wMooc){
+					availableTruckList.add(truckListAtDepot.get(i));
+					break;
+				}
+			}
+		}
+		else{
+			for(int i = 0; i < truckListAtDepot.size(); i++){
+				if(truckListAtDepot.get(i).getWeight() >= wMooc)
+					availableTruckList.add(truckListAtDepot.get(i));
+			}
+		}
+		return availableTruckList;
+	}
 
+	public void updateTruckAtDepot(Truck truck){
+		String depotTruckCode = truck.getDepotTruckCode();
+		if(depotTruckCode == null)
+			return;
+		ArrayList<Truck> availableTruckAtDepot = mDepot2TruckList.get(depotTruckCode);
+		if(availableTruckAtDepot.contains(truck)){
+			availableTruckAtDepot.remove(truck);
+			mDepot2TruckList.put(depotTruckCode, availableTruckAtDepot);
+			ArrayList<Truck> truckIsScheduled = mDepot2TruckList.get("isScheduled");
+			truckIsScheduled.add(truck);
+			mDepot2TruckList.put("isScheduled", truckIsScheduled);
+		}
+	}
+	
+	public void updateMoocAtDepot(Mooc mooc){
+		String depotMoocCode = mooc.getDepotMoocCode();
+		if(depotMoocCode == null)
+			return;
+		ArrayList<Mooc> availableMoocAtDepot = mDepot2MoocList.get(depotMoocCode);
+		if(availableMoocAtDepot.contains(mooc)){
+			availableMoocAtDepot.remove(mooc);
+			mDepot2MoocList.put(depotMoocCode, availableMoocAtDepot);
+			ArrayList<Mooc> moocIsScheduled = mDepot2MoocList.get("isScheduled");
+			moocIsScheduled.add(mooc);
+			mDepot2MoocList.put("isScheduled", moocIsScheduled);
+		}
+	}
+	
+	public void updateContainerAtDepot(Container cont){
+		String depotContainerCode = cont.getDepotContainerCode();
+		if(depotContainerCode == null)
+			return;
+		ArrayList<Container> availableContainerAtDepot = mDepot2ContainerList.get(depotContainerCode);
+		if(availableContainerAtDepot.contains(cont)){
+			availableContainerAtDepot.remove(cont);
+			mDepot2ContainerList.put(depotContainerCode, availableContainerAtDepot);
+			ArrayList<Container> contIsScheduled = mDepot2ContainerList.get("isScheduled");
+			contIsScheduled.add(cont);
+			mDepot2ContainerList.put("isScheduled", contIsScheduled);
+		}
+	}
 }

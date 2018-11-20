@@ -692,23 +692,24 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		Truck sel_truck  = null;
 		Mooc sel_mooc = null;
 		for(int i = 0; i < imLadenReq.length; i++){
-			if(imLadenReqScheduled[i]) continue;
-			
-			for(int j = 0; j < trucks.length; j++){
-				for(int k = 0; k < moocs.length; k++){
-					if (mMooc2LastDepot.get(moocs[k]) == null)
-						continue;
-					if(!fitContMoocType(imLadenReq[i].getContainerCategory(), imLadenReq[i].getContainerCategory(),
-							moocs[k].getCategory()) ||
-						!checkWeight(imLadenReq[i].getWeight(), imLadenReq[i].getWeight(),
-							moocs[k].getWeight(), trucks[j].getWeight()))
-						continue;
-					double d = evaluateImportLadenRequest(imLadenReq[i], trucks[j], moocs[k]);
-					if(d < minDistance){
-						minDistance = d;
-						sel_imLadenReq = imLadenReq[i];
-						sel_truck = trucks[j];
-						sel_mooc = moocs[k];
+			if(imLadenReqScheduled[i])
+				continue;
+			for (String keyM : mDepot2MoocList.keySet()) {
+				ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(imLadenReq[i].getWeight(), 
+						imLadenReq[i].getContainerCategory(), keyM);
+				for(int k = 0; k < avaiMoocList.size(); k++){
+					for(String keyT : mDepot2TruckList.keySet()) {
+						ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
+								avaiMoocList.get(k).getWeight(), keyT);
+						for(int j = 0; j < avaiTruckList.size(); j++){
+							double d = evaluateImportLadenRequest(imLadenReq[i], avaiTruckList.get(j), avaiMoocList.get(k));
+							if(d < minDistance){
+								minDistance = d;
+								sel_imLadenReq = imLadenReq[i];
+								sel_truck = avaiTruckList.get(j);
+								sel_mooc = avaiMoocList.get(k);
+							}
+						}
 					}
 				}
 			}
@@ -789,22 +790,28 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		for(int i = 0; i < exEmptyReq.length; i++){
 			if(exEmptyReqScheduled[i]) continue;
 			
-			for(int j = 0; j < trucks.length; j++){
-				for(int k = 0; k < moocs.length; k++){
-					for (int q = 0; q < containers.length; q++) {
-						if (mMooc2LastDepot.get(moocs[k]) == null)
-							continue;
-						if(!fitContMoocType(exEmptyReq[i].getContainerCategory(), containers[q].getCategoryCode(),
-								moocs[k].getCategory()) ||
-							!checkWeight(containers[q].getWeight(), containers[q].getWeight(),
-								moocs[k].getWeight(), trucks[j].getWeight()))
-							continue;
-						double d = evaluateExportEmptyRequest(exEmptyReq[i], trucks[j], moocs[k]);
-						if(d < minDistance){
-							minDistance = d;
-							sel_exEmptyReq = exEmptyReq[i];
-							sel_truck = trucks[j];
-							sel_mooc = moocs[k];
+			for (String keyC : mDepot2ContainerList.keySet()) {
+				ArrayList<Container> avaiContList = getAvailableContainerAtDepot(0, 
+						exEmptyReq[i].getContainerCategory(), keyC);
+				for(int q = 0; q < avaiContList.size(); q++){
+					for (String keyM : mDepot2MoocList.keySet()) {
+						ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(avaiContList.get(q).getWeight(), 
+								avaiContList.get(q).getCategoryCode(), keyM);
+						for(int k = 0; k < avaiMoocList.size(); k++){
+							for(String keyT : mDepot2TruckList.keySet()) {
+								ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
+										avaiMoocList.get(k).getWeight(), keyT);
+								for(int j = 0; j < avaiTruckList.size(); j++){
+									double d = evaluateExportEmptyRequest(exEmptyReq[i], 
+											avaiTruckList.get(j), avaiMoocList.get(k));
+									if(d < minDistance){
+										minDistance = d;
+										sel_exEmptyReq = exEmptyReq[i];
+										sel_truck = avaiTruckList.get(j);
+										sel_mooc = avaiMoocList.get(k);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -1022,43 +1029,29 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			if (exReqScheduled[i])
 				continue;
 
-			for (int j = 0; j < trucks.length; j++) {
-				for (int k = 0; k < moocs.length; k++) {
-					for (int q = 0; q < containers.length; q++) {
-						if (mContainer2LastDepot.get(containers[q]) == null ||
-								mMooc2LastDepot.get(moocs[k]) == null)
-							continue;
-						if(!fitContMoocType(exReq[i].getContainerCategory(), containers[q].getCategoryCode(),
-								moocs[k].getCategory()) ||
-							!checkWeight(exReq[i].getWeight(), containers[q].getWeight(),
-								moocs[k].getWeight(), trucks[j].getWeight()))
-							continue;
-						double d = evaluateExportRoute(exReq[i], trucks[j], moocs[k], containers[q]);
-						if(d < minDistance){
-							minDistance = d;
-							sel_truck = trucks[j];
-							sel_mooc = moocs[k];
-							sel_container = containers[q];
-							sel_exReq = exReq[i];
-						}
-						/*
-						backup();
-						TruckRouteInfo4Request tri = createRouteForExportRequest(
-								exReq[i], trucks[j], moocs[k], containers[q]);
-
-						if (tri != null) {
-							TruckRoute tr = tri.route;
-							double dis = tr.getDistance()
-									- tr.getReducedDistance();
-							if (dis < minDistance) {
-								minDistance = dis;
-								sel_tr = tr;
-								sel_tri = tri;
-								sel_exReq = exReq[i];
+			for (String keyC : mDepot2ContainerList.keySet()) {
+				ArrayList<Container> avaiContList = getAvailableContainerAtDepot(exReq[i].getWeight(), 
+						exReq[i].getContainerCategory(), keyC);
+				for(int q = 0; q < avaiContList.size(); q++){
+					for (String keyM : mDepot2MoocList.keySet()) {
+						ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(avaiContList.get(q).getWeight(), 
+								avaiContList.get(q).getCategoryCode(), keyM);
+						for(int k = 0; k < avaiMoocList.size(); k++){
+							for(String keyT : mDepot2TruckList.keySet()) {
+								ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
+										avaiMoocList.get(k).getWeight(), keyT);
+								for(int j = 0; j < avaiTruckList.size(); j++){
+									double d = evaluateExportRoute(exReq[i], avaiTruckList.get(j), avaiMoocList.get(k), avaiContList.get(q));
+									if(d < minDistance){
+										minDistance = d;
+										sel_truck = avaiTruckList.get(j);
+										sel_mooc = avaiMoocList.get(k);
+										sel_container = avaiContList.get(q);
+										sel_exReq = exReq[i];
+									}
+								}
 							}
 						}
-						restore();
-						*/
 					}
 				}
 			}
@@ -1096,42 +1089,25 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		for (int i = 0; i < nbImReqs; i++) {
 			if (imReqScheduled[i])
 				continue;
-			for (int j = 0; j < trucks.length; j++) {
-				for (int k = 0; k < moocs.length; k++) {
-					if (mMooc2LastDepot.get(moocs[k]) == null)
-						continue;
-					if(!fitContMoocType(imReq[i].getContainerCategory(), imReq[i].getContainerCategory(),
-							moocs[k].getCategory()) ||
-						!checkWeight(imReq[i].getWeight(), imReq[i].getWeight(),
-							moocs[k].getWeight(), trucks[j].getWeight()))
-						continue;
-					double d = evaluateImportRequest(
-							imReq[i], trucks[j], moocs[k]);
-					if(d < minDistance){
-						minDistance = d;
-						sel_imReq = imReq[i];
-						sel_truck = trucks[j];
-						sel_mooc = moocs[k];
-					}
-					/*
-					backup();
-					TruckRouteInfo4Request tri = createRouteForImportRequest(
-							imReq[i], trucks[j], moocs[k]);
-					if (tri == null) {
-						restore();
-						continue;
-					}
-					TruckRoute tr = tri.route;
 
-					double dis = tr.getDistance() - tr.getReducedDistance();
-					if (dis < minDistance) {
-						minDistance = dis;
-						sel_tr = tr;
-						sel_tri = tri;
-						sel_imReq = imReq[i];
+			for (String keyM : mDepot2MoocList.keySet()) {
+				ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(imReq[i].getWeight(), 
+						imReq[i].getContainerCategory(), keyM);
+				for(int k = 0; k < avaiMoocList.size(); k++){
+					for(String keyT : mDepot2TruckList.keySet()) {
+						ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
+								avaiMoocList.get(k).getWeight(), keyT);
+						for(int j = 0; j < avaiTruckList.size(); j++){
+							double d = evaluateImportRequest(
+									imReq[i], avaiTruckList.get(j), avaiMoocList.get(k));
+							if(d < minDistance){
+								minDistance = d;
+								sel_imReq = imReq[i];
+								sel_truck = avaiTruckList.get(j);
+								sel_mooc = avaiMoocList.get(k);
+							}
+						}
 					}
-					restore();
-					*/
 				}
 			}
 		}
@@ -1171,26 +1147,29 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		for (int i = 0; i < nbWhReqs; i++) {
 			if (whReqScheduled[i])
 				continue;
-			for (int j = 0; j < trucks.length; j++) {
-				for (int k = 0; k < moocs.length; k++) {
-					for (int q = 0; q < containers.length; q++) {
-						if (mContainer2LastDepot.get(containers[q]) == null ||
-								mMooc2LastDepot.get(moocs[k]) == null)
-							continue;
-						if(!fitContMoocType(whReq[i].getContainerCategory(),
-								containers[q].getCategoryCode(),
-								moocs[k].getCategory()) ||
-							!checkWeight(whReq[i].getWeight(), containers[q].getWeight(),
-								moocs[k].getWeight(), trucks[j].getWeight()))
-							continue;
-						double d = evaluateWarehouseWarehouseRequest(whReq[i],
-								trucks[j], moocs[k], containers[q]);
-						if(d < minDistance){
-							minDistance = d;
-							sel_truck = trucks[j];
-							sel_mooc = moocs[k];
-							sel_cont = containers[q];
-							sel_whReq = whReq[i];
+			for (String keyC : mDepot2ContainerList.keySet()) {
+				ArrayList<Container> avaiContList = getAvailableContainerAtDepot(exReq[i].getWeight(), 
+						exReq[i].getContainerCategory(), keyC);
+				for(int q = 0; q < avaiContList.size(); q++){
+					for (String keyM : mDepot2MoocList.keySet()) {
+						ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(avaiContList.get(q).getWeight(), 
+								avaiContList.get(q).getCategoryCode(), keyM);
+						for(int k = 0; k < avaiMoocList.size(); k++){
+							for(String keyT : mDepot2TruckList.keySet()) {
+								ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
+										avaiMoocList.get(k).getWeight(), keyT);
+								for(int j = 0; j < avaiTruckList.size(); j++){
+									double d = evaluateWarehouseWarehouseRequest(whReq[i],
+											avaiTruckList.get(j), avaiMoocList.get(k), avaiContList.get(q));
+									if(d < minDistance){
+										minDistance = d;
+										sel_truck = avaiTruckList.get(j);
+										sel_mooc = avaiMoocList.get(k);
+										sel_cont = avaiContList.get(q);
+										sel_whReq = whReq[i];
+									}
+								}
+							}
 						}
 					}
 				}

@@ -5,6 +5,10 @@ import java.util.ArrayList;
 public class TruckRoute {
 	public static final String DIRECT_EXPORT = "DIRECT_EXPORT";
 	public static final String DIRECT_IMPORT = "DIRECT_IMPORT";
+	public static final String DIRECT_EXPORT_LADEN = "DIRECT_EXPORT_LADEN";
+	public static final String DIRECT_EXPORT_EMPTY = "DIRECT_EXPORT_EMPTY";
+	public static final String DIRECT_IMPORT_LADEN = "DIRECT_IMPORT_LADEN";
+	public static final String DIRECT_IMPORT_EMPTY = "DIRECT_IMPORT_EMPTY";
 	public static final String DIRECT_WAREHOUSE = "DIRECT_WAREHOUSE";
 	public static final String SWAP = "SWAP";
 	public static final String TANG_BO = "TANG_BO";
