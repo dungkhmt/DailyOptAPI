@@ -625,9 +625,9 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 				// continue;
 				if (totalVehicleCategoryWeight < EPS) {
 					PickupDeliverySolution sol = new PickupDeliverySolution();
-					sol.setErrorMSG("KhÃƒÂ´ng Ã„â€˜Ã¡Â»Â§ xe Ã„â€˜Ã¡Â»Æ’ vÃ¡ÂºÂ­n chuyÃ¡Â»Æ’n hÃ¡ÂºÂ¿t Ã„â€˜Ã†Â¡n, tÃ¡Â»â€¢ng khÃ¡ÂºÂ£ nÃ„Æ’ng vÃ¡ÂºÂ­n chuyÃ¡Â»Æ’n cÃ¡Â»Â§a xe nhÃƒÂ  = "
+					sol.setErrorMSG("Không đủ xe để vận chuyển hết đơn, tổng khả năng vận chuyển của xe nhà = "
 							+ totalCapacity
-							+ ", tÃ¡Â»â€¢ng khÃ¡Â»â€˜i lÃ†Â°Ã¡Â»Â£ng hÃƒÂ ng hoÃƒÂ¡ = "
+							+ ", tổng khối lượng hàng hoá = "
 							+ totalItemWeights);
 					sol.setDescription("KO");
 					return sol;
@@ -705,6 +705,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 
 		inputIndicator = analyzeInput();
 
+
 		long time1 = System.currentTimeMillis() - startExecutionTime;
 
 		System.out.println("STARTING HillClimbing, time = " + (time1 * 0.001)
@@ -754,11 +755,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		reassignVehiclePrioritizeInternalVehicles(XR);
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution solution0 = buildSolution(XR);
-		solution0
-				.getStatistic()
-				.getIndicator()
-				.setDescription(
-						"Khá»Ÿi táº¡o cÃ¡c chuyáº¿n trá»±c tiáº¿p, chÆ°a gom Ä‘iá»ƒm giao");
+		solution0.getStatistic().getIndicator().setDescription("Khởi tạo các chuyến đi trực tiếp, chưa gom điểm giao");
 		solutionCollection.add(solution0, input.getParams());
 
 		if (CHECK_AND_LOG) {
@@ -898,11 +895,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 				// reassignExternalVehicleOptimizeLoad(XR);
 
 				PickupDeliverySolution solution04 = buildSolution(XR);
-				solution04
-						.getStatistic()
-						.getIndicator()
-						.setDescription(
-								"Gom Ä‘iá»ƒm giao, tá»‘i Æ°u sá»‘ KM cho xe nhÃ , sau Ä‘Ã³ gÃ¡n láº¡i cÃ¡c Ä‘Æ¡n tá»« xe ngoÃ i cho xe nhÃ Â ");
+				solution04.getStatistic().getIndicator().setDescription("Gom điểm giao, tối ưu KM cho các xe nhà, sau đó gán lại các đơn hàng từ xe ngoài về cho xe nhà");
 				reassignVehicleOptimizeLoadExternalVehicles(solution04);
 				solutionCollection.add(solution04, input.getParams());
 
@@ -923,12 +916,8 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 				hasChanged = hasChanged || ok31;
 				reassignExternalVehicleOptimizeLoad(XR);
 				PickupDeliverySolution solution05 = buildSolution(XR);
-				solution05
-						.getStatistic()
-						.getIndicator()
-						.setDescription(
-								"Tiáº¿p tá»¥c thá»­ chuyá»ƒn cÃ¡c Ä‘Æ¡n hÃ ng tá»« xe tháº§u ngoÃ i vá»� xe nhÃ  chÆ°a Ä‘Æ°á»£c sá»­ dá»¥ng, "
-						+ "cháº¥p nháº­n chia láº» Ä‘Æ¡n cÃ¹ng Ä‘iá»ƒm giao");
+				solution05.getStatistic().getIndicator().setDescription("Tiếp tục thử chuyển các đơn hàng từ xe thầu ngoài về xe nhà chưa được sử dụng, "
+						+ "chấp nhận chia lẻ đơn cùng điểm giao");
 				solutionCollection.add(solution05, input.getParams());
 
 				log(name()
@@ -1000,12 +989,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		}
 
 		PickupDeliverySolution solution1 = buildSolution(XR);
-		solution1
-				.getStatistic()
-				.getIndicator()
-				.setDescription(
-						"Tá»‘i Æ°u tiáº¿p sá»‘ KM, cÃ³ thá»ƒ khÃ´ng Æ°u tiÃªn sá»­ dá»¥ng xe nhÃ  trÆ°á»›c");
-		reassignVehicleOptimizeLoadExternalVehicles(solution1);
+		solution1.getStatistic().getIndicator().setDescription("Tối ưu tiếp số KM, có thể không ưu tiên sử dụng xe nhà trước");reassignVehicleOptimizeLoadExternalVehicles(solution1);
 		solutionCollection.add(solution1, input.getParams());
 
 		if (input.getParams().getInternalVehicleFirst().equals("Y")) {
@@ -1017,11 +1001,19 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 			}
 		}
 
+		
+		
 		PickupDeliverySolution sol = solutionCollection.selectBest(input
 				.getParams());
 
 		relaxLoadTimeConstraintAndSolve();
 
+		//greedyConstructive(true);
+		//PickupDeliverySolution greedy_solution = buildSolution(XR);
+		//greedy_solution.setDescription("GREEDY");
+		//solutionCollection.add(greedy_solution, input.getParams());
+		
+		
 		/*
 		 * if (input.getParams().getInternalVehicleFirst().equals("Y")) {
 		 * hillClimbingScheduleAllInternalVehicles(true);
@@ -1434,11 +1426,8 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		boolean ok21 = hillClimbingNewVehicleOptimizeDistanceExternalVehicle(true);
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution sol21 = buildSolution(XR);
-		sol21.getStatistic()
-				.getIndicator()
-				.setDescription(
-						"NÃ¡Â»â€ºi lÃ¡Â»ï¿½ng giÃ¡Â»â€ºi hÃ¡ÂºÂ¡n vÃ¡Â»ï¿½ tÃ¡ÂºÂ£i trÃ¡Â»ï¿½ng vÃƒÂ  thÃ¡Â»ï¿½i hÃ¡ÂºÂ¡n giao hÃƒÂ ng tÃ¡ÂºÂ¡i Ã„â€˜iÃ¡Â»Æ’m giao. "
-								+ "TiÃ¡ÂºÂ¿p tÃ¡Â»Â¥c gom thÃƒÂªm cÃƒÂ¡c Ã„â€˜iÃ¡Â»Æ’m giao Ã„â€˜Ã¡Â»Æ’ tÃ¡Â»â€˜i Ã†Â°u thÃƒÂªm sÃ¡Â»â€˜ KM cÃ¡Â»Â§a xe nhÃƒÂ , dÃ¡Â»â€œn Ã„â€˜Ã†Â¡n hÃƒÂ ng xe thÃ¡ÂºÂ§u ngoÃƒÂ i vÃ¡Â»ï¿½ cho xe nhÃƒÂ ");
+		sol21.getStatistic().getIndicator().setDescription("Nới lỏng giới hạn về tải trọng và thời hạn giao hàng tại điểm giao. "
+				+ "Tiếp tục gom thêm các điểm giao để tối ưu thêm số KM của xe nhà, dồn đơn hàng xe thầu ngoài về cho xe nhà");
 		solutionCollection.add(sol21, input.getParams());
 		sol21.setDescription(sol21.getDescription() + " EXTEND");
 
@@ -1452,11 +1441,8 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution sol4 = buildSolution(XR);
 		solutionCollection.add(sol4, input.getParams());
-		sol4.getStatistic()
-				.getIndicator()
-				.setDescription(
-						"NÃ¡Â»â€ºi lÃƒÂ²ng giÃ¡Â»â€ºi hÃ¡ÂºÂ¡n vÃ¡Â»ï¿½ tÃ¡ÂºÂ£i trÃ¡Â»ï¿½ng vÃƒÂ  thÃ¡Â»ï¿½i hÃ¡ÂºÂ¡n giao hÃƒÂ ng tÃ¡ÂºÂ¡i Ã„â€˜iÃ¡Â»Æ’m giao. "
-								+ "TÃ¡Â»â€˜i Ã†Â°u sÃ¡Â»â€˜ KM mÃ¡Â»â„¢t cÃƒÂ¡ch tÃ¡Â»â€¢ng thÃ¡Â»Æ’, cÃƒÂ³ thÃ¡Â»Æ’ khÃƒÂ´ng Ã†Â°u tiÃƒÂªn sÃ¡Â»Â­ dÃ¡Â»Â¥ng xe nhÃƒÂ  trÃ†Â°Ã¡Â»â€ºc");
+		sol4.getStatistic().getIndicator().setDescription("Nới lòng giới hạn về tải trọng và thời hạn giao hàng tại điểm giao. "
+				+ "Tối ưu số KM một cách tổng thể, có thể không ưu tiên sử dụng xe nhà trước");
 		sol4.setDescription(sol4.getDescription() + " EXTEND");
 	}
 
@@ -2930,7 +2916,64 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		return false;
 	
 	}
-	
+	/*
+	public boolean greedyConstructive(boolean loadConstraint){
+		mgr.performRemoveAllClientPoints();
+		while(true){
+			int sel_i = -1;
+			Point sel_p = null;
+			Point sel_d = null;
+			Point sel_pickup = null;
+			Point sel_delivery = null;
+			double bestEval = Integer.MAX_VALUE;
+			for(int i = 0; i < pickupPoints.size(); i++){
+				Point pickup = pickupPoints.get(i);
+				Point delivery = deliveryPoints.get(i);
+				for(int k = 1; k <= XR.getNbRoutes(); k++){
+					for(Point p = XR.startPoint(k);  p != XR.endPoint(k); p = XR.next(p)){
+						for(Point d = p; d != XR.endPoint(k); d = XR.next(d)){
+							double eval = cost.evaluateAddTwoPoints(pickup, p, delivery, d);
+							if(eval < bestEval){
+								bestEval = eval;
+								sel_i = i;
+								sel_p = p;
+								sel_d = d;
+							}
+							
+						}
+					}
+				}
+				
+			}
+			if(sel_i == -1) break;
+			
+			mgr.performAddTwoPoints(sel_pickup, sel_p, sel_delivery, sel_d);
+			System.out.println(name() + "::greedyConstructive, bestEval = " + bestEval + ", cost = " + cost.getValue());
+		}
+		return false;
+	}
+	*/
+	public boolean hillClimbingMixPickupDeliveryPoints(boolean loadConstraint){
+		// route likes: s - P1 - P2 - P3 - D2 - P4 - D1 - D4 - D3 - e
+		log(name() + "::hillClimbingMixPickupDeliveryPoints START XR = "
+				+ toStringShort(XR) + ", START-COST = " + cost.getValue());
+
+		boolean hasChanged = false;
+
+		while (true) {
+			double time = System.currentTimeMillis() - startExecutionTime;
+			if (time > input.getParams().getTimeLimit() * 60 * 1000) {
+				System.out
+						.println(name()
+								+ "::hillClimbingMerge4EachVehicle + TIME LIMIT EXPIRED, BREAK");
+				timeLimitExpired = true;
+				break;
+			}
+				
+			
+		}
+		return hasChanged;
+	}
 	public boolean hillClimbingMerge4EachVehicle(boolean loadConstraint) {
 		log(name() + "::hillClimbingMerge4EachVehicle START XR = "
 				+ toStringShort(XR) + ", START-COST = " + cost.getValue());
@@ -3741,6 +3784,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 				timeLimitExpired = true;
 				break;
 			}
+
 
 			VehicleTripCollection VTC = analyzeTrips(XR);
 			ArrayList<VehicleTrip> trips = VTC.trips;

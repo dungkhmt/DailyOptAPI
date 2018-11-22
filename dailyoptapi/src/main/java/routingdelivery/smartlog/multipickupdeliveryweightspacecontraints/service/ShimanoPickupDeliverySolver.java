@@ -7222,12 +7222,12 @@ public class ShimanoPickupDeliverySolver extends PickupDeliverySolver {
 			hasTravelTime[i][i] = true;
 		}
 		if (input.getDistances() == null) {
-			s = "KhÃ´ng cÃ³ thÃ´ng tin vá»� khoáº£ng cÃ¡ch";
+			s = "Không tìm thấy thông tin về khoảng cách";
 			ok = false;
 			return s;
 		}
 		if (input.getTravelTime() == null) {
-			s = "KhÃ´ng cÃ³ thÃ´ng tin vá»� thá»�i gian di chuyá»ƒn";
+			s = "Không có thông tin về thời gian di chuyển";
 			ok = false;
 			return s;
 		}
@@ -7257,7 +7257,7 @@ public class ShimanoPickupDeliverySolver extends PickupDeliverySolver {
 				if (i != j && !hasDistance[i][j]) {
 					String lci = listLocationCodes.get(i);
 					String lcj = listLocationCodes.get(j);
-					s = "KhÃ´ng cÃ³ thÃ´ng tin vá»� khoáº£ng cÃ¡ch giá»¯a locationCode "
+					s = "Không có thông tin về khoảng cách giữa locationCode "
 							+ lci + " -> " + lcj + ". ";
 					ok = false;
 					break;
@@ -7272,7 +7272,7 @@ public class ShimanoPickupDeliverySolver extends PickupDeliverySolver {
 				if (i != j && !hasTravelTime[i][j]) {
 					String lci = listLocationCodes.get(i);
 					String lcj = listLocationCodes.get(j);
-					s = "KhÃ´ng cÃ³ thÃ´ng tin vá»� thá»�i gian di chuyá»ƒn tá»« locationCode "
+					s = "Không có thông tin về thời gian di chuyển từ locationCode "
 							+ lci + " -> " + lcj + ". ";
 					ok = false;
 					break;
@@ -7321,6 +7321,7 @@ public class ShimanoPickupDeliverySolver extends PickupDeliverySolver {
 					PickupDeliveryRequest r = input.getRequests()[i];
 					for (int j = 0; j < r.getItems().length; j++) {
 						Item I = r.getItems()[j];
+						
 						boolean okok = false;
 						String desdes = "";
 						// if (input.getVehicleCategories() != null)
@@ -7330,7 +7331,8 @@ public class ShimanoPickupDeliverySolver extends PickupDeliverySolver {
 							Vehicle v = input.getVehicles()[k];// input.getVehicleCategories()[k];
 							String des = checkFeasibleRequest(I, v);
 							if (!des.equals("OK")) {
-								desdes = desdes + des;
+								//desdes = desdes + des;
+								desdes = des;
 								// ok = false;
 							} else {
 								okok = true;
@@ -7341,7 +7343,8 @@ public class ShimanoPickupDeliverySolver extends PickupDeliverySolver {
 							Vehicle v = input.getExternalVehicles()[k];// input.getVehicleCategories()[k];
 							String des = checkFeasibleRequest(I, v);
 							if (!des.equals("OK")) {
-								desdes = desdes + des;
+								//desdes = desdes + des;
+								desdes = des;
 								// ok = false;
 							} else {
 								okok = true;
@@ -7409,8 +7412,8 @@ public class ShimanoPickupDeliverySolver extends PickupDeliverySolver {
 				if (!okdelivery) {
 					ok = false;
 					s = s
-							+ "KhÃ´ng thá»ƒ tÃ¬m tháº¥y xe cÃ³ thá»ƒ phá»¥c vá»¥ giao Item hÃ ng "
-							+ I.getCode() + " cá»§a Ä‘Æ¡n hÃ ng " + r.getOrderCode()
+							+ "Không thể tìm thấy xe có thể phục vụ giao Item hàng "
+							+ I.getCode() + " của đơn hàng " + r.getOrderCode()
 							+ ". ";
 				}
 			}
@@ -7588,8 +7591,9 @@ public class ShimanoPickupDeliverySolver extends PickupDeliverySolver {
 				.getCode());// mVehicleCategory2NotReachedLocations.get(v);
 		if (locations != null) {
 			if (locations.contains(r.getDeliveryLocationCode())) {
-				des = "Xe " + v.getCode() + " khÃ´ng thá»ƒ Ä‘áº¿n Ä‘iá»ƒm "
-						+ r.getDeliveryLocationCode() + " Ä‘á»ƒ giao hÃ ng; ";
+				des = "Xe " + v.getCode() + " không thể đến điểm "
+						+ r.getDeliveryLocationCode() + " để giao hàng; ";
+				
 				return des;
 			}
 		}
@@ -7631,41 +7635,40 @@ public class ShimanoPickupDeliverySolver extends PickupDeliverySolver {
 		int latestAllowedArrivalTimePickup = (int) DateTimeUtils.dateTime2Int(r
 				.getLatePickupTime());
 		if (arrivalTimePickup > latestAllowedArrivalTimePickup) {
-			des = "Thá»�i gian Ä‘áº¿n Ä‘iá»ƒm láº¥y hÃ ng "
+			des = "Thời gian đến điểm lấy hàng "
 					+ I.getCode()
-					+ " cá»§a Ä‘Æ¡n "
+					+ " của đơn "
 					+ r.getOrderCode()
-					+ " á»Ÿ Ä‘á»‹a Ä‘iá»ƒm "
+					+ " ở địa điểm "
 					+ r.getPickupLocationCode()
-					+ " sá»›m nháº¥t lÃ  "
+					+ " sớm nhất là "
 					+ DateTimeUtils.unixTimeStamp2DateTime(arrivalTimePickup)
-					+ " muá»™n hÆ¡n thá»�i Ä‘iá»ƒm láº¥y hÃ ng muá»™n nháº¥t cho phÃ©p lÃ  "
+					+ " muộn hơn thời điểm lấy hàng muộn nhất cho phép là "
 					+ DateTimeUtils
 							.unixTimeStamp2DateTime(latestAllowedArrivalTimePickup)
 					+ "; ";
 		}
 		if (arrivalTimeDelivery > latestAllowedArrivalTimeDelivery) {
 			des = ""
-					+ "Thá»�i gian Ä‘áº¿n Ä‘iá»ƒm tráº£ hÃ ng "
+					+ "Thời gian đến điểm trả hàng "
 					+ I.getCode()
-					+ " cá»§a Ä‘Æ¡n "
+					+ " của đơn "
 					+ r.getOrderCode()
-					+ " á»Ÿ Ä‘á»‹a Ä‘iá»ƒm "
+					+ " ở địa điểm "
 					+ r.getDeliveryLocationCode()
-					+ "  sá»›m nháº¥t lÃ  "
+					+ "  sớm nhất là "
 					+ DateTimeUtils.unixTimeStamp2DateTime(arrivalTimeDelivery)
-					+ " muá»™n hÆ¡n thá»�i Ä‘iá»ƒm tráº£ hÃ ng muá»™n nháº¥t cho phÃ©p lÃ  "
+					+ " muộn hơn thời điểm trả hàng muộn nhất cho phép là "
 					+ DateTimeUtils
 							.unixTimeStamp2DateTime(latestAllowedArrivalTimeDelivery)
 					+ "; ";
 		}
 		if (arrivalTimeDepot > end_working_time) {
-			des = "" + "Thá»�i Ä‘iá»ƒm quay vá»� kho " + v.getEndLocationCode()
-					+ " lÃ  "
+			des = "" + "Thời điểm quay về kho " + v.getEndLocationCode()
+					+ " là "
 					+ DateTimeUtils.unixTimeStamp2DateTime(arrivalTimeDepot)
-					+ " lá»›n hÆ¡n thá»�i gian káº¿t thÃºc phiÃªn lÃ m viá»‡c lÃ  "
+					+ " lớn hơn thời gian kết thúc phiên làm việc là "
 					+ v.getEndWorkingTime();
-
 		}
 		return des;
 	}

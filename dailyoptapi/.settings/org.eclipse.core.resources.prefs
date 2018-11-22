@@ -6,3 +6,6 @@ encoding//src/main/java/routingdelivery/smartlog/brenntag/service/RBrennTagPicku
 encoding//src/main/java/routingdelivery/smartlog/brenntagmultipickupdelivery/service/DistrictBasedRBrenntagMultiPickupDeliverySolver.java=UTF-8
 encoding//src/main/java/routingdelivery/smartlog/brenntagmultipickupdelivery/service/RBrenntagMultiPickupDeliverySolver.java=UTF-8
 encoding//src/main/java/routingdelivery/smartlog/multipickupdeliveryweightspacecontraints/service/DistrictBasedMultiPickupDeliveryWeightSpaceSolver.java=UTF-8
+encoding//src/main/java/routingdelivery/smartlog/multipickupdeliveryweightspacecontraints/service/ShimanoMultiPickupDeliverySolver.java=UTF-8
+encoding//src/main/java/routingdelivery/smartlog/multipickupdeliveryweightspacecontraints/service/ShimanoPickupDeliverySolver.java=UTF-8
+encoding//src/main/java/routingdelivery/smartlog/multipickupdeliveryweightspacecontraints/service/ShimanoRouteSolverForOneVehicle.java=UTF-8

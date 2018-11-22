@@ -5071,6 +5071,64 @@ public class BrenntagPickupDeliverySolver extends PickupDeliverySolver {
 		initModel();
 
 	}
+	
+	public boolean greedyConstructive(boolean loadConstraint){
+		System.out.println(name() + "::greedyConstructive START........");
+		mgr.performRemoveAllClientPoints();
+		boolean[] scheduled = new boolean[pickupPoints.size()];
+		for(int i = 0; i < pickupPoints.size(); i++)
+			scheduled[i] = false;
+		int count = 0;
+		while(true){
+			int sel_i = -1;
+			Point sel_p = null;
+			Point sel_d = null;
+			Point sel_pickup = null;
+			Point sel_delivery = null;
+			double bestEval = Integer.MAX_VALUE;
+			for(int i = 0; i < pickupPoints.size(); i++){
+				if(scheduled[i]) continue;
+				Point pickup = pickupPoints.get(i);
+				Point delivery = deliveryPoints.get(i);
+				for(int k = 1; k <= XR.getNbRoutes(); k++){
+					for(Point p = XR.startPoint(k);  p != XR.endPoint(k); p = XR.next(p)){
+						for(Point d = p; d != XR.endPoint(k); d = XR.next(d)){
+							//double eval = cost.evaluateAddTwoPoints(pickup, p, delivery, d);
+							mgr.performAddTwoPoints(pickup, p, delivery, d);
+							propagate(XR, k);
+							boolean ok = checkContraintsAtRoute(k);
+							// recover
+							mgr.performRemoveOnePoint(pickup);
+							mgr.performRemoveOnePoint(delivery);
+							propagate(XR, k);
+							
+							if(!ok) continue;
+							
+							double eval = cost.getValue();
+							if(eval < bestEval){
+								bestEval = eval;
+								sel_i = i;
+								sel_p = p;
+								sel_d = d;
+								sel_pickup = pickup;
+								sel_delivery = delivery;
+							}
+							
+						}
+					}
+				}
+				
+			}
+			if(sel_i == -1) break;
+			
+			scheduled[sel_i] = true;
+			count++;
+			mgr.performAddTwoPoints(sel_pickup, sel_p, sel_delivery, sel_d);
+			System.out.println(name() + "::greedyConstructive, scheduled " + count +
+					"/" + pickupPoints.size() + ", bestEval = " + bestEval + ", cost = " + cost.getValue());
+		}
+		return false;
+	}
 
 	public HashSet<Integer> greedyConstructMaintainConstraintFTL() {
 		// initializeLog();
