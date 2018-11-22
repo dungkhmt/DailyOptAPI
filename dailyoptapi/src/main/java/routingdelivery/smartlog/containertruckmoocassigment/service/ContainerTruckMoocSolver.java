@@ -569,7 +569,8 @@ public class ContainerTruckMoocSolver {
 	}
 	
 	public boolean checkWeight(double wReq, double wCont, double wMooc, double wTruck){
-		if(wReq > wCont || wCont > wMooc || wMooc > wTruck)
+		double minW = wTruck < wMooc ? wTruck : wMooc;
+		if(wReq > wCont || wCont > minW)
 			return false;
 		return true;
 	}
