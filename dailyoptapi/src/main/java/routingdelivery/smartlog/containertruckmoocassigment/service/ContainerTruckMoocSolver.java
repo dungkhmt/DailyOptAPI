@@ -6409,6 +6409,8 @@ public class ContainerTruckMoocSolver {
 				continue;
 			for (int j = 0; j < R.getContainerRequest().length; j++) {
 				ExportContainerRequest r = R.getContainerRequest()[j];
+				r.setOrderID(R.getOrderID());
+				r.setOrderCode(R.getOrderCode());
 				L.add(r);
 			}
 		}
@@ -6445,6 +6447,8 @@ public class ContainerTruckMoocSolver {
 				continue;
 			for (int j = 0; j < R.getContainerRequest().length; j++) {
 				ImportContainerRequest r = R.getContainerRequest()[j];
+				r.setOrderID(R.getOrderID());
+				r.setOrderCode(R.getOrderCode());
 				L.add(r);
 			}
 		}

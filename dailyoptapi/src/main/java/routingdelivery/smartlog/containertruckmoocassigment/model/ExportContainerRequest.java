@@ -4,7 +4,8 @@ import com.havestplanning.utils.DateTimeUtils;
 
 public class ExportContainerRequest {
 	private String orderItemID;
-	
+	private String orderID;
+	private String orderCode;
 	private String shipCompanyCode;
 	private String depotContainerCode;// depotContainer
 	private String containerCategory;// 20, 40, 45
@@ -71,6 +72,22 @@ public class ExportContainerRequest {
 
 	public void setOrderItemID(String orderItemID) {
 		this.orderItemID = orderItemID;
+	}
+
+	public String getOrderID() {
+		return orderID;
+	}
+	
+	public void setOrderID(String orderID) {
+		this.orderID = orderID;
+	}
+	
+	public String getOrderCode() {
+		return orderCode;
+	}
+
+	public void setOrderCode(String orderCode) {
+		this.orderCode = orderCode;
 	}
 
 	public String getShipCompanyCode() {

@@ -2,7 +2,8 @@ package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class ImportContainerRequest {
 	private String orderItemID;
-	
+	private String orderID;
+	private String orderCode;
 	// 1st segment (Port -> warehouse, Laden)
 	private String shipCompanyCode;
 	private String[] depotContainerCode;
@@ -69,6 +70,22 @@ public class ImportContainerRequest {
 
 	public void setOrderItemID(String orderItemID) {
 		this.orderItemID = orderItemID;
+	}
+	
+	public String getOrderID() {
+		return orderID;
+	}
+	
+	public void setOrderID(String orderID) {
+		this.orderID = orderID;
+	}
+	
+	public String getOrderCode() {
+		return orderCode;
+	}
+
+	public void setOrderCode(String orderCode) {
+		this.orderCode = orderCode;
 	}
 
 	public String getShipCompanyCode() {
