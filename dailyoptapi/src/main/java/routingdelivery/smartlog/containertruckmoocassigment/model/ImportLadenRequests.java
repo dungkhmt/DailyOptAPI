@@ -3,6 +3,7 @@ package routingdelivery.smartlog.containertruckmoocassigment.model;
 public class ImportLadenRequests {
 	private boolean isBreakRomooc;
 	private String containerCategory;
+	private String containerCode;
 	private String containerNo;
 	private String orderCode;
 	private String customerCode;
@@ -20,7 +21,7 @@ public class ImportLadenRequests {
 	
 	
 	public ImportLadenRequests(boolean isBreakRomooc, String containerCategory,
-			String containerNo, String orderCode, String customerCode,
+			String containerCode, String containerNo, String orderCode, String customerCode,
 			String requestDate, String earlyDateTimePickupAtPort,
 			String lateDateTimePickupAtPort,
 			String earlyDateTimeUnloadAtWarehouse,
@@ -30,6 +31,7 @@ public class ImportLadenRequests {
 		super();
 		this.isBreakRomooc = isBreakRomooc;
 		this.containerCategory = containerCategory;
+		this.containerCode = containerCode;
 		this.containerNo = containerNo;
 		this.orderCode = orderCode;
 		this.customerCode = customerCode;
@@ -69,7 +71,13 @@ public class ImportLadenRequests {
 		this.containerCategory = containerCategory;
 	}
 
+	public String getContainerCode() {
+		return containerCode;
+	}
 
+	public void setContainerCode(String containerCode) {
+		this.containerCode = containerCode;
+	}
 
 	public String getContainerNo() {
 		return containerNo;

@@ -28,6 +28,7 @@ public class ExportContainerRequest {
 	private String earlyDateTimeUnloadAtPort;
 	private String lateDateTimeUnloadAtPort;
 	private int unloadDuration;
+	private String customerCode;
 	
 	//private String planSegment;// "1","2","12","13","123",...
 	
@@ -50,7 +51,7 @@ public class ExportContainerRequest {
 			String lateDateTimePickupAtDepot,
 			PickupWarehouseInfo[] pickupWarehouses, String portCode,
 			String earlyDateTimeUnloadAtPort, String lateDateTimeUnloadAtPort,
-			int unloadDuration) {
+			int unloadDuration, String customerCode) {
 		super();
 		this.orderItemID = orderItemID;
 		this.shipCompanyCode = shipCompanyCode;
@@ -64,6 +65,7 @@ public class ExportContainerRequest {
 		this.earlyDateTimeUnloadAtPort = earlyDateTimeUnloadAtPort;
 		this.lateDateTimeUnloadAtPort = lateDateTimeUnloadAtPort;
 		this.unloadDuration = unloadDuration;
+		this.customerCode = customerCode;
 	}
 
 	public String getOrderItemID() {
@@ -178,6 +180,13 @@ public class ExportContainerRequest {
 		this.unloadDuration = unloadDuration;
 	}
 	
+	public String getCustomerCode(){
+		return this.customerCode;
+	}
+	
+	public void setCustomerCode(String customerCode){
+		this.customerCode = customerCode;
+	}
 	
 	
 	

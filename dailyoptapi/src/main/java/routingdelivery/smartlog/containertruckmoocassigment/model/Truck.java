@@ -3,20 +3,24 @@ package routingdelivery.smartlog.containertruckmoocassigment.model;
 public class Truck {
 	private String code;
 	private double weight;
+	private String driverCode;
 	private String depotTruckCode;
 	private String startWorkingTime;
 	private String endWorkingTime;
+	private String status;
 	private String[] returnDepotCodes;// possible depots when finishing services
 	
 	
-	public Truck(String code, double weight, String depotTruckCode, String startWorkingTime,
-			String endWorkingTime, String[] returnDepotCodes) {
+	public Truck(String code, double weight, String driverCode, String depotTruckCode, String startWorkingTime,
+			String endWorkingTime, String status, String[] returnDepotCodes) {
 		super();
 		this.code = code;
 		this.weight = weight;
+		this.driverCode = driverCode;
 		this.depotTruckCode = depotTruckCode;
 		this.startWorkingTime = startWorkingTime;
 		this.endWorkingTime = endWorkingTime;
+		this.status = status;
 		this.returnDepotCodes = returnDepotCodes;
 	}
 	public String[] getReturnDepotCodes() {
@@ -30,6 +34,13 @@ public class Truck {
 	}
 	public void setWeight(double weight) {
 		this.weight = weight;
+	}
+	
+	public String getDriverCode() {
+		return driverCode;
+	}
+	public void setDriverCode(String driverCode) {
+		this.driverCode = driverCode;
 	}
 	
 	public String getCode() {
@@ -57,7 +68,12 @@ public class Truck {
 	public void setEndWorkingTime(String endWorkingTime) {
 		this.endWorkingTime = endWorkingTime;
 	}
-	
+	public String getStatus(){
+		return this.status;
+	}
+	public void setStatus(String status){
+		this.status = status;
+	}
 	public Truck() {
 		super();
 		// TODO Auto-generated constructor stub

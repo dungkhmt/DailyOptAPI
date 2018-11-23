@@ -4,15 +4,17 @@ public class Mooc {
 	private String code;
 	private String category;// 20, 40, 45
 	private double weight;//20, 40, 45
+	private String status;
 	private String depotMoocCode;
 	private String[] returnDepotCodes;// possible depots when finishing services
 	
-	public Mooc(String code, String category, double weight,
+	public Mooc(String code, String category, double weight, String status,
 			String depotMoocCode, String[] returnDepotCodes) {
 		super();
 		this.code = code;
 		this.category = category;
 		this.weight = weight;
+		this.status = status;
 		this.depotMoocCode = depotMoocCode;
 		this.returnDepotCodes = returnDepotCodes;
 	}
@@ -39,6 +41,12 @@ public class Mooc {
 	}
 	public void setWeight(double weight) {
 		this.weight = weight;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 	public String getDepotMoocCode() {
 		return depotMoocCode;
