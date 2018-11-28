@@ -617,8 +617,8 @@ public class TestAPI {
 		
 		routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.service.ShimanoMultiPickupDeliverySolver solver = 
 				new routingdelivery.smartlog.multipickupdeliveryweightspacecontraints.service.ShimanoMultiPickupDeliverySolver(startExecutionTime);
-		solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
-		//solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
+		//solver.CHECK_AND_LOG = false;// set false when deploy to reduce log time
+		solver.CHECK_AND_LOG = true;// call check solution and log info, use when debuging
 		
 		input.setRequests(origin_req);
 		

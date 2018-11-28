@@ -4327,7 +4327,17 @@ public class PickupDeliverySolver {
 
 		return delta;
 	}
-
+	public String pointInfoStr(Point x){
+		String s = "";
+		String lc = mPoint2LocationCode.get(x);
+		ArrayList<PickupDeliveryRequest> r = mPoint2Request.get(x);
+		String s_req = "";
+		if(r != null)
+			for(PickupDeliveryRequest ri: r) s_req += ri.getOrderID() + ",";
+		
+		s = s + x.getID() + "[" + mPoint2Type.get(x) + "," + lc + "," + s_req + "]";
+		return s;
+	}
 	public String toStringShort(VarRoutesVR XR) {
 		String s = "";
 		for (int k = 1; k <= XR.getNbRoutes(); k++)
@@ -4335,7 +4345,13 @@ public class PickupDeliverySolver {
 				s += "route[" + k + "] = ";
 				Point x = XR.getStartingPointOfRoute(k);
 				while (x != XR.getTerminatingPointOfRoute(k)) {
-					s = s + x.getID() + "[" + mPoint2Type.get(x) + "]" + " -> ";
+					String lc = mPoint2LocationCode.get(x);
+					ArrayList<PickupDeliveryRequest> r = mPoint2Request.get(x);
+					String s_req = "";
+					if(r != null)
+						for(PickupDeliveryRequest ri: r) s_req += ri.getOrderID() + ",";
+					
+					s = s + x.getID() + "[" + mPoint2Type.get(x) + "," + lc + "," + s_req + "]" + " -> ";
 					x = XR.next(x);
 				}
 				s = s + x.getID() + "\n";
@@ -7962,6 +7978,33 @@ public class PickupDeliverySolver {
 						+ ", trips " + tripInfo);
 			}
 		}
+	}
+	public boolean checkContraintsAtRoute(int k){
+		int violations = 0;
+		Point s = XR.startPoint(k);
+		Vehicle vh = mPoint2Vehicle.get(s);
+		for (Point q = XR.startPoint(k); q != XR.endPoint(k); q = XR.next(q)) {
+			if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q)) {
+				violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
+						.get(q));
+				
+			}
+			if (!checkConflictItemsAtPoint(q)) {
+				violations++;
+			}
+			if (awn.getSumWeights(q) > vh.getWeight()) {
+				violations++;
+			}
+
+		}
+
+		// check end_working_time of vehicle
+		Point q = XR.endPoint(k);
+		if (mPoint2ArrivalTime.get(q) > lastestAllowedArrivalTime.get(q))
+			violations += (mPoint2ArrivalTime.get(q) - lastestAllowedArrivalTime
+					.get(q));
+
+		return violations == 0;
 	}
 
 	public PickupDeliverySolution buildSolution(VarRoutesVR XR, Vehicle vh,

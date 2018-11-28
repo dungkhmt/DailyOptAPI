@@ -709,15 +709,31 @@ public class ShimanoMultiPickupDeliverySolver extends
 					+ (XR.emptyRoute(k) ? "EMPTY" : "NOT_EMPTY"));
 		}
 
-		log(name() + "::AFTER INIT POINT, BEFORE HillClimbing");
+		
+		log(name() + "::computeVehicleSuggestion, AFTER INIT POINT, BEFORE HillClimbing");
 		logVehicleRoutes(XR);
+		log(name() + "::computeVehicleSuggestion, AFTER INIT POINT, BEFORE HillClimbing XR = " + toStringShort(XR));
+		log(name() + "::computeVehicleSuggestion, AFTER INIT POINT, BEFORE HillClimbing, logTrips = ");
+		logTrips(XR);
+		//VehicleTripCollection VTC = analyzeTrips(XR);
+		
+		boolean ok = mergeTripsGreedy();
+		PickupDeliverySolution solution00 = buildSolution(XR);
+		solution00.getStatistic().getIndicator().setDescription("Khởi tạo chuyến tham lam");
+		solutionCollection.add(solution00, input.getParams());
 
+		log(name() + "::computeVehicleSuggestion, AFTER MergeTripsGreedy, BEFORE HillClimbing, logTrips = ");
+		logTrips(XR);
+		
+		/*
 		reassignVehiclePrioritizeInternalVehicles(XR);
 		reassignExternalVehicleOptimizeLoad(XR);
 		PickupDeliverySolution solution0 = buildSolution(XR);
-		solution0.getStatistic().getIndicator().setDescription("Khá»Ÿi táº¡o cÃ¡c chuyáº¿n Ä‘i trá»±c tiáº¿p, chÆ°a gom Ä‘iá»ƒm giao");
+		solution0.getStatistic().getIndicator().setDescription("Khởi tạo chuyến, chưa gom điểm giao");
 		solutionCollection.add(solution0, input.getParams());
 
+		
+		
 		if (CHECK_AND_LOG) {
 			if (!checkAllSolution(XR)) {
 				log(name()
@@ -857,7 +873,7 @@ public class ShimanoMultiPickupDeliverySolver extends
 				// reassignExternalVehicleOptimizeLoad(XR);
 
 				PickupDeliverySolution solution04 = buildSolution(XR);
-				solution04.getStatistic().getIndicator().setDescription("Gom Ä‘iá»ƒm giao, tá»‘i Æ°u KM cho cÃ¡c xe nhÃ , sau Ä‘Ã³ gÃ¡n láº¡i cÃ¡c Ä‘Æ¡n hÃ ng tá»« xe ngoÃ i vá»� cho xe nhÃ ");
+				solution04.getStatistic().getIndicator().setDescription("Gom điểm giao, tối ưu KM cho các xe nhà, sau đó gán lại các đơn hàng từ xe ngoài về cho xe nhà");
 				reassignVehicleOptimizeLoadExternalVehicles(solution04);
 				solutionCollection.add(solution04, input.getParams());
 
@@ -878,8 +894,8 @@ public class ShimanoMultiPickupDeliverySolver extends
 				hasChanged = hasChanged || ok31;
 				reassignExternalVehicleOptimizeLoad(XR);
 				PickupDeliverySolution solution05 = buildSolution(XR);
-				solution05.getStatistic().getIndicator().setDescription("Tiáº¿p tá»¥c thá»­ chuyá»ƒn cÃ¡c Ä‘Æ¡n hÃ ng tá»« xe tháº§u ngoÃ i vá»� xe nhÃ  chÆ°a Ä‘Æ°á»£c sá»­ dá»¥ng, "
-						+ "cháº¥p nháº­n chia láº» Ä‘Æ¡n cÃ¹ng Ä‘iá»ƒm giao");
+				solution05.getStatistic().getIndicator().setDescription("Tiếp tục thử chuyển các đơn hàng từ xe thầu ngoài về xe nhà chưa được sử dụng, "
+						+ "chấp nhận chia lẻ đơn cùng điểm giao");
 				solutionCollection.add(solution05, input.getParams());
 
 				log(name()
@@ -951,9 +967,16 @@ public class ShimanoMultiPickupDeliverySolver extends
 		}
 
 		PickupDeliverySolution solution1 = buildSolution(XR);
-		solution1.getStatistic().getIndicator().setDescription("Tá»‘i Æ°u tiáº¿p sá»‘ KM, cÃ³ thá»ƒ khÃ´ng Æ°u tiÃªn sá»­ dá»¥ng xe nhÃ  trÆ°á»›c");
+		solution1.getStatistic().getIndicator().setDescription("Tối ưu tiếp số KM, có thể không ưu tiên sử dụng xe nhà trước");
 		reassignVehicleOptimizeLoadExternalVehicles(solution1);
 		solutionCollection.add(solution1, input.getParams());
+		
+		//boolean ok8 = hillClimbingMixPickupDeliveryPoints(true);
+		//hasChanged = hasChanged || ok8;
+		//PickupDeliverySolution solution2 = buildSolution(XR);
+		//solution2.getStatistic().getIndicator().setDescription("Xen kẽ điểm đón - trả");
+		//reassignVehicleOptimizeLoadExternalVehicles(solution1);
+		//solutionCollection.add(solution2, input.getParams());
 
 		if (input.getParams().getInternalVehicleFirst().equals("Y")) {
 			if (solution1.getStatistic().getNumberInternalTrucks() == input
@@ -963,7 +986,8 @@ public class ShimanoMultiPickupDeliverySolver extends
 				solutionCollection.remove(0);
 			}
 		}
-
+		*/
+		
 		PickupDeliverySolution sol = solutionCollection.selectBest(input
 				.getParams());
 
