@@ -691,7 +691,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		ImportLadenRequests sel_imLadenReq = null;
 		Truck sel_truck  = null;
 		Mooc sel_mooc = null;
-		for(int i = 0; i < imLadenReq.length; i++){
+		for(int i = 0; i < nbImLadenReqs; i++){
 			if(imLadenReqScheduled[i])
 				continue;
 			for (String keyM : mDepot2MoocList.keySet()) {
@@ -734,7 +734,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		ImportEmptyRequests sel_imEmptyReq = null;
 		Truck sel_truck  = null;
 		Mooc sel_mooc = null;
-		for(int i = 0; i < imEmptyReq.length; i++){
+		for(int i = 0; i < nbImEmptyReqs; i++){
 			if(imEmptyReqScheduled[i]) continue;
 			
 			for(int j = 0; j < trucks.length; j++){
@@ -787,7 +787,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		ExportEmptyRequests sel_exEmptyReq = null;
 		Truck sel_truck  = null;
 		Mooc sel_mooc = null;
-		for(int i = 0; i < exEmptyReq.length; i++){
+		for(int i = 0; i < nbExEmptyReqs; i++){
 			if(exEmptyReqScheduled[i]) continue;
 			
 			for (String keyC : mDepot2ContainerList.keySet()) {
@@ -837,7 +837,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		ExportLadenRequests sel_exLadenReq = null;
 		Truck sel_truck  = null;
 		Mooc sel_mooc = null;
-		for(int i = 0; i < exLadenReq.length; i++){
+		for(int i = 0; i < nbExLadenReqs; i++){
 			if(exLadenReqScheduled[i]) continue;
 			
 			for(int j = 0; j < trucks.length; j++){
