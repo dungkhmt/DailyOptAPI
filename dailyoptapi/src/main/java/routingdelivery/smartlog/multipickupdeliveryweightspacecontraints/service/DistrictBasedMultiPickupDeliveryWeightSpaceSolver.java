@@ -749,8 +749,15 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 					+ (XR.emptyRoute(k) ? "EMPTY" : "NOT_EMPTY"));
 		}
 
-		log(name() + "::AFTER INIT POINT, BEFORE HillClimbing");
-		// logVehicleRoutes(XR);
+		log(name() + "::computeVehicleSuggestion, AFTER INIT POINT, BEFORE HillClimbing");
+		logVehicleRoutes(XR);
+		log(name() + "::computeVehicleSuggestion, AFTER INIT POINT, BEFORE HillClimbing XR = " + toStringShort(XR));
+		log(name() + "::computeVehicleSuggestion, AFTER INIT POINT, BEFORE HillClimbing, logTrips = ");
+		logTrips(XR);
+		//VehicleTripCollection VTC = analyzeTrips(XR);
+		
+		boolean ok = mergeTripsGreedy();
+		
 
 		reassignVehiclePrioritizeInternalVehicles(XR);
 		reassignExternalVehicleOptimizeLoad(XR);
@@ -971,6 +978,8 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 				+ "::computeVehicleSuggestion, AFTER hillClimbingNewVehicle, logVehicleNotReachLocations");
 		// logVehicleNotReachedLocations();
 
+		
+		
 		reassignVehiclePrioritizeInternalVehicles(XR);
 		if (!checkAllSolution(XR)) {
 			log(name()
@@ -992,6 +1001,14 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		solution1.getStatistic().getIndicator().setDescription("Tối ưu tiếp số KM, có thể không ưu tiên sử dụng xe nhà trước");reassignVehicleOptimizeLoadExternalVehicles(solution1);
 		solutionCollection.add(solution1, input.getParams());
 
+		//boolean ok8 = hillClimbingMixPickupDeliveryPoints(true);
+		//hasChanged = hasChanged || ok8;
+		//PickupDeliverySolution solution2 = buildSolution(XR);
+		//solution2.getStatistic().getIndicator().setDescription("Xen kẽ điểm đón - trả");
+		//reassignVehicleOptimizeLoadExternalVehicles(solution1);
+		//solutionCollection.add(solution2, input.getParams());
+		
+		
 		if (input.getParams().getInternalVehicleFirst().equals("Y")) {
 			if (solution1.getStatistic().getNumberInternalTrucks() == input
 					.getVehicles().length) {
@@ -2953,27 +2970,7 @@ public class DistrictBasedMultiPickupDeliveryWeightSpaceSolver extends
 		return false;
 	}
 	*/
-	public boolean hillClimbingMixPickupDeliveryPoints(boolean loadConstraint){
-		// route likes: s - P1 - P2 - P3 - D2 - P4 - D1 - D4 - D3 - e
-		log(name() + "::hillClimbingMixPickupDeliveryPoints START XR = "
-				+ toStringShort(XR) + ", START-COST = " + cost.getValue());
-
-		boolean hasChanged = false;
-
-		while (true) {
-			double time = System.currentTimeMillis() - startExecutionTime;
-			if (time > input.getParams().getTimeLimit() * 60 * 1000) {
-				System.out
-						.println(name()
-								+ "::hillClimbingMerge4EachVehicle + TIME LIMIT EXPIRED, BREAK");
-				timeLimitExpired = true;
-				break;
-			}
-				
-			
-		}
-		return hasChanged;
-	}
+	
 	public boolean hillClimbingMerge4EachVehicle(boolean loadConstraint) {
 		log(name() + "::hillClimbingMerge4EachVehicle START XR = "
 				+ toStringShort(XR) + ", START-COST = " + cost.getValue());

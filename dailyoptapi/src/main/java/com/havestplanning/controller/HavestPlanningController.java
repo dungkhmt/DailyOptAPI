@@ -51,8 +51,9 @@ import com.google.gson.Gson;
 
 @RestController
 public class HavestPlanningController {
-	public static String ROOT = "C:/ezRoutingAPIROOT/havestplanning";
+	public static String ROOT = "C:/DungPQ/daily-opt/havestplanning/data";
 	//public static String ROOT = "/home/tmp";
+	//public static String ROOT = "/home/harvest";
 	
 	public String name() {
 		return "HavestPlanningController";
@@ -78,19 +79,19 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/start", method = RequestMethod.POST)
 	public ReturnStart start(HttpServletRequest request,
 			@RequestBody HavestPlanningInput input) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		return null;
 	}
 
 	@RequestMapping(value = "/havest-plan/get-fields", method = RequestMethod.POST)
 	public ReturnFields getFields(HttpServletRequest request) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/fields.json";
+		String path = ROOT + "/fields.json";
 		try {
 			String fieldFilename = path;
 			Gson gson = new Gson();
@@ -114,11 +115,11 @@ public class HavestPlanningController {
 
 	@RequestMapping(value = "/havest-plan/get-plant-standard", method = RequestMethod.POST)
 	public ReturnPlantStandard getPlantStandard(HttpServletRequest request) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/plant-standard.json";
+		String path = ROOT + "/plant-standard.json";
 		try {
 			String fieldFilename = path;
 			Gson gson = new Gson();
@@ -140,11 +141,11 @@ public class HavestPlanningController {
 
 	@RequestMapping(value = "/havest-plan/get-machine-setting", method = RequestMethod.POST)
 	public ReturnMachineSetting getMachineSetting(HttpServletRequest request) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/machine-setting.json";
+		String path = ROOT + "/machine-setting.json";
 		try {
 			String fieldFilename = path;
 			Gson gson = new Gson();
@@ -167,11 +168,11 @@ public class HavestPlanningController {
 
 	@RequestMapping(value = "/havest-plan/get-solution", method = RequestMethod.POST)
 	public HavestPlanningSolution getSolution(HttpServletRequest request) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/harvest-plan-solution.json";
+		String path = ROOT + "/harvest-plan-solution.json";
 		try {
 			String fieldFilename = path;
 			Gson gson = new Gson();
@@ -193,11 +194,11 @@ public class HavestPlanningController {
 	}
 	@RequestMapping(value = "/havest-plan/get-solution-vn", method = RequestMethod.POST)
 	public HavestPlanningSolutionVN getSolutionVN(HttpServletRequest request) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/harvest-plan-solution-vn.json";
+		String path = ROOT + "/harvest-plan-solution-vn.json";
 		try {
 			String fieldFilename = path;
 			Gson gson = new Gson();
@@ -219,11 +220,11 @@ public class HavestPlanningController {
 	}
 	@RequestMapping(value = "/havest-plan/get-fields-vn", method = RequestMethod.POST)
 	public ReturnAddFieldsVN getFieldsVN(HttpServletRequest request) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/fields-vn.json";
+		String path = ROOT + "/fields-vn.json";
 		try {
 			String fieldFilename = path;
 			Gson gson = new Gson();
@@ -254,11 +255,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/add-fields", method = RequestMethod.POST)
 	public ReturnAddFields addFields(HttpServletRequest request,
 			@RequestBody FieldList fieldList) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/fields.json";
+		String path = ROOT + "/fields.json";
 		try {
 			/*
 			 * JSONParser parser = new JSONParser(); Object obj =
@@ -354,11 +355,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/remove-fields", method = RequestMethod.POST)
 	public ReturnAddFields removeFields(HttpServletRequest request,
 			@RequestBody FieldCodeList fieldList) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/fields.json";
+		String path = ROOT + "/fields.json";
 		try {
 			String fieldFilename = path;
 			Gson gson = new Gson();
@@ -406,11 +407,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/add-fields-vn", method = RequestMethod.POST)
 	public ReturnAddFieldsVN addFields(HttpServletRequest request,
 			@RequestBody FieldListVN fieldList) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/fields-vn.json";
+		String path = ROOT + "/fields-vn.json";
 		try {
 			/*
 			 * JSONParser parser = new JSONParser(); Object obj =
@@ -506,11 +507,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/remove-fields-vn", method = RequestMethod.POST)
 	public ReturnAddFieldsVN removeFieldsVN(HttpServletRequest request,
 			@RequestBody FieldCodeList fieldList) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
-		path = ROOT + "/fields-vn.json";
+		String path = ROOT + "/fields-vn.json";
 		try {
 			String fieldFilename = path;
 			Gson gson = new Gson();
@@ -559,11 +560,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/set-fields", method = RequestMethod.POST)
 	public FieldList setFields(HttpServletRequest request,
 			@RequestBody FieldList input) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/plant-standard.json";
-		path = ROOT + "/fields.json";
+		String path = ROOT + "/fields.json";
 
 		if (input.getFields() == null) {
 			try {
@@ -597,11 +598,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/set-fields-vn", method = RequestMethod.POST)
 	public FieldListVN setFieldsVN(HttpServletRequest request,
 			@RequestBody FieldListVN input) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/plant-standard.json";
-		path = ROOT + "/fields-vn.json";
+		String path = ROOT + "/fields-vn.json";
 
 		if (input.getFields() == null) {
 			try {
@@ -640,11 +641,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/set-plant-standard", method = RequestMethod.POST)
 	public ReturnSetPlantStandard setPlantStandard(HttpServletRequest request,
 			@RequestBody PlantStandard input) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/plant-standard.json";
-		path = ROOT + "/plant-standard.json";
+		String path = ROOT + "/plant-standard.json";
 
 		try {
 			PrintWriter out = new PrintWriter(path);
@@ -661,11 +662,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/set-plant-standard-vn", method = RequestMethod.POST)
 	public ReturnSetPlantStandardVN setPlantStandardVN(HttpServletRequest request,
 			@RequestBody PlantStandardVN input) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/plant-standard.json";
-		path = ROOT + "/plant-standard-vn.json";
+		String path = ROOT + "/plant-standard-vn.json";
 
 		try {
 			PrintWriter out = new PrintWriter(path);
@@ -683,11 +684,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/set-machine", method = RequestMethod.POST)
 	public MachineSetting setMachine(HttpServletRequest request,
 			@RequestBody MachineSetting input) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/machine-setting.json";
-		path = ROOT + "/machine-setting.json";
+		String path = ROOT + "/machine-setting.json";
 
 		try {
 			System.out.println("set-machine to " + path);
@@ -705,11 +706,11 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/set-machine-vn", method = RequestMethod.POST)
 	public MachineSettingVN setMachineVN(HttpServletRequest request,
 			@RequestBody MachineSettingVN input) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		// path = "C:/ezRoutingAPIROOT/havestplanning/machine-setting.json";
-		path = ROOT + "/machine-setting-vn.json";
+		String path = ROOT + "/machine-setting-vn.json";
 
 		try {
 			PrintWriter out = new PrintWriter(path);
@@ -730,14 +731,14 @@ public class HavestPlanningController {
 	public HavestPlanningSolution compute(HttpServletRequest request
 	 , @RequestBody RunParameters param
 	) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		String fieldFilename = ROOT + "/fields.json";
 		String setPlatStandardFilename = ROOT + "/plant-standard.json";
 		String machineSettingFilename = ROOT + "/machine-setting.json";
 		// reset harvest-plan-solution.json
-		path = ROOT + "/harvest-plan-solution.json";
+		String path = ROOT + "/harvest-plan-solution.json";
 
 		try {
 			PrintWriter out = new PrintWriter(path);
@@ -813,14 +814,14 @@ public class HavestPlanningController {
 	public HavestPlanningSolutionVN computeVN(HttpServletRequest request
 	 , @RequestBody RunParametersVN param
 	) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		String fieldFilename = ROOT + "/fields-vn.json";
 		String setPlatStandardFilename = ROOT + "/plant-standard-vn.json";
 		String machineSettingFilename = ROOT + "/machine-setting-vn.json";
 		// reset harvest-plan-solution.json
-		path = ROOT + "/harvest-plan-solution-vn.json";
+		String path = ROOT + "/harvest-plan-solution-vn.json";
 
 		try {
 			PrintWriter out = new PrintWriter(path);
@@ -920,14 +921,14 @@ public class HavestPlanningController {
 	public InputAnalysisInfo analyzeInput(HttpServletRequest request
 	 
 	) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		String fieldFilename = ROOT + "/fields.json";
 		String setPlatStandardFilename = ROOT + "/plant-standard.json";
 		String machineSettingFilename = ROOT + "/machine-setting.json";
 		// reset harvest-plan-solution.json
-		path = ROOT + "/harvest-plan-solution.json";
+		String path = ROOT + "/harvest-plan-solution.json";
 
 		try {
 			PrintWriter out = new PrintWriter(path);
@@ -985,8 +986,8 @@ public class HavestPlanningController {
 	@RequestMapping(value = "/havest-plan/check-solution", method = RequestMethod.POST)
 	public HavestPlanningSolution checkSolution(HttpServletRequest request,
 			@RequestBody FieldSolutionList input_solution) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
+		//String path = request.getServletContext().getRealPath(
+		//		"ezRoutingAPIROOT");
 
 		String fieldFilename = ROOT + "/fields.json";
 		String setPlatStandardFilename = ROOT + "/plant-standard.json";

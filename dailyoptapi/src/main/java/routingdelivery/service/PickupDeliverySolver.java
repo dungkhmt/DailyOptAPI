@@ -5600,7 +5600,8 @@ public class PickupDeliverySolver {
 				// " > cap = " + cap[k-1] + ", violations = " + violations);
 				violations++;
 			}
-
+			
+			
 			// System.out.println("evaluateTimeViolationsAddTwoPoints, arrT(" +
 			// q.ID + ") = " + mPoint2ArrivalTime.get(q) +
 			// "(" +
