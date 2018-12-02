@@ -14,6 +14,7 @@ public class TruckRoute {
 	public static final String TANG_BO = "TANG_BO";
 	public static final String KEP_LECH = "KEP_LECH";
 	public static final String DOUBLE_IMPORT = "DOUBLE_IMPORT";
+	public static final String DOUBLE_EXPORT = "DOUBLE_EXPORT";
 	
 	private Truck truck;
 	private String type;

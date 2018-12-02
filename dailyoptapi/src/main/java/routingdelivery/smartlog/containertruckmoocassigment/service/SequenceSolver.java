@@ -167,6 +167,8 @@ public class SequenceSolver {
 			}
 			double d = 0;
 			for (int k = 0; k < lc.length-1; k++) {
+				if(lc[k] == null)
+					System.out.println("null" + k);
 				d = d + solver.getDistance(lc[k], lc[k + 1]);
 			}
 			if (d < minD) {
