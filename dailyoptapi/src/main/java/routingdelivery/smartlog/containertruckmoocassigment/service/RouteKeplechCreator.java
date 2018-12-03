@@ -111,8 +111,8 @@ public class RouteKeplechCreator {
 			travelTime = solver.getTravelTime(lastLocationCode, wh.getLocationCode());
 			arrivalTime = departureTime + travelTime;
 			// check time
-			if (er.getLateDateTimeLoadAtWarehouse() != null && arrivalTime > DateTimeUtils.dateTime2Int(er
-					.getLateDateTimeLoadAtWarehouse()))
+			if (er.getLateDateTimeLoadAtWarehouse() != null &&
+					arrivalTime > DateTimeUtils.dateTime2Int(er.getLateDateTimeLoadAtWarehouse()))
 				return Integer.MAX_VALUE;
 
 			startServiceTime = solver.MAX(arrivalTime,
@@ -307,11 +307,11 @@ public class RouteKeplechCreator {
 			lastUsedIndex = tr.indexOf(combo.routeElement);
 		}
 
-		Port port = solver.getPortFromCode(sel_exReq_a.getPortCode());
+		Port port_a = solver.getPortFromCode(sel_exReq_a.getPortCode());
 
 		SequenceSolver SS = new SequenceSolver(solver);
 		SequenceSolution sol = SS.solve(lastElement.getLocationCode(),
-				departureTime, sel_exReq_a, port.getLocationCode());
+				departureTime, sel_exReq_a, port_a.getLocationCode());
 
 		if (sol == null)
 			return null;
@@ -354,12 +354,35 @@ public class RouteKeplechCreator {
 			lastLocationCode = re[idx].getWarehouse().getLocationCode();
 		}
 
+		Port port_b = solver.getPortFromCode(sel_imReq_b.getPortCode());
 		RouteElement e5 = new RouteElement();
 		L.add(e5);
 		e5.deriveFrom(lastElement);
-		e5.setAction(ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT);
-		e5.setPort(solver.mCode2Port.get(sel_exReq_a.getPortCode()));
-		arrivalTime = departureTime + solver.getTravelTime(lastElement, e5);
+		e5.setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_PORT);
+		e5.setPort(port_b);
+		Container import_container = solver.mCode2Container.get(sel_imReq_b
+				.getContainerCode());
+		e5.setContainer(import_container);
+		e5.setImportRequest(sel_imReq_b);
+		arrivalTime = departureTime
+				+ solver.getTravelTime(lastLocationCode, port_b.getLocationCode());
+		if (sel_imReq_b.getLateDateTimePickupAtPort() != null 
+				&& arrivalTime > DateTimeUtils.dateTime2Int(sel_imReq_b.getLateDateTimePickupAtPort()))
+			return null;
+
+		serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
+				.dateTime2Int(sel_imReq_b.getEarlyDateTimePickupAtPort()));
+		duration = sel_imReq_b.getLoadDuration();
+		departureTime = serviceTime + duration;
+		solver.mPoint2ArrivalTime.put(e5, arrivalTime);
+		solver.mPoint2DepartureTime.put(e5, departureTime);
+		
+		RouteElement e6 = new RouteElement();
+		L.add(e6);
+		e6.deriveFrom(e5);
+		e6.setAction(ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT);
+		e6.setPort(solver.mCode2Port.get(sel_exReq_a.getPortCode()));
+		arrivalTime = departureTime + solver.getTravelTime(e5, e6);
 		if (sel_exReq_a.getLateDateTimeUnloadAtPort() != null && arrivalTime > DateTimeUtils.dateTime2Int(sel_exReq_a
 				.getLateDateTimeUnloadAtPort()))
 			return null;
@@ -370,36 +393,14 @@ public class RouteKeplechCreator {
 				.dateTime2Int(sel_exReq_a.getEarlyDateTimeUnloadAtPort()));
 		duration = sel_exReq_a.getUnloadDuration();
 		departureTime = serviceTime + duration;
-		solver.mPoint2ArrivalTime.put(e5, arrivalTime);
-		solver.mPoint2DepartureTime.put(e5, departureTime);
+		solver.mPoint2ArrivalTime.put(e6, arrivalTime);
+		solver.mPoint2DepartureTime.put(e6, departureTime);
 		// solver.mContainer2LastDepot.put(container, null);
 		// solver.mContainer2LastTime.put(container, Integer.MAX_VALUE);
 		tri.setLastDepotContainer(sel_container, null);
 		tri.setLastTimeContainer(sel_container, Integer.MAX_VALUE);
 
-		port = solver.getPortFromCode(sel_imReq_b.getPortCode());
-		RouteElement e6 = new RouteElement();
-		L.add(e6);
-		e6.deriveFrom(e5);
-		e6.setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_PORT);
-		e6.setPort(port);
-		Container import_container = solver.mCode2Container.get(sel_imReq_b
-				.getContainerCode());
-		e6.setContainer(import_container);
-		e6.setImportRequest(sel_imReq_b);
-		arrivalTime = departureTime
-				+ solver.getTravelTime(e5.getPort().getLocationCode(), e6
-						.getPort().getLocationCode());
-		if (sel_imReq_b.getLateDateTimePickupAtPort() != null && arrivalTime > DateTimeUtils.dateTime2Int(sel_imReq_b
-				.getLateDateTimePickupAtPort()))
-			return null;
-
-		serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
-				.dateTime2Int(sel_imReq_b.getEarlyDateTimePickupAtPort()));
-		duration = sel_imReq_b.getLoadDuration();
-		departureTime = serviceTime + duration;
-		solver.mPoint2ArrivalTime.put(e6, arrivalTime);
-		solver.mPoint2DepartureTime.put(e6, departureTime);
+		
 
 		sol = SS.solve(e6.getLocationCode(), departureTime, sel_imReq_b, null);
 		seq = sol.seq;

@@ -203,7 +203,8 @@ public class RouteDoubleExportCreator {
 		// truck and mooc are possibly not REST at their depots
 		String header = name() + "::createRouteForExportRequest";
 		// truck, mooc, container are REST at their depots
-		if (solver.mContainer2LastDepot.get(sel_container_a) == null) {
+		if (solver.mContainer2LastDepot.get(sel_container_a) == null ||
+				solver.mContainer2LastDepot.get(sel_container_b) == null) {
 			return null;
 		}
 		TruckRoute r = new TruckRoute();
@@ -347,7 +348,7 @@ public class RouteDoubleExportCreator {
 		ee.setDepotContainer(solver.mContainer2LastDepot.get(sel_container_b));
 		ee.setAction(ActionEnum.TAKE_CONTAINER_AT_DEPOT);
 		ee.setContainer(sel_container_b);
-		if (solver.mContainer2LastDepot.get(sel_container_a) == null) {
+		if (solver.mContainer2LastDepot.get(sel_container_b) == null) {
 			System.out.println(header + ", container = "
 					+ sel_container_b.getCode() + " has no depot??????");
 		}

@@ -191,8 +191,8 @@ public class RouteDoubleImportCreator {
 		distance += solver.getDistance(lastLocationCode, depotContainer_a.getLocationCode());
 		lastLocationCode = depotContainer_a.getLocationCode();
 		
-		Container container_b = solver.mCode2Container.get(req_a.getContainerCode());
-		DepotContainer depotContainer_b = solver.findDepotContainer4Deposit(req_a,
+		Container container_b = solver.mCode2Container.get(req_b.getContainerCode());
+		DepotContainer depotContainer_b = solver.findDepotContainer4Deposit(req_b,
 				lastLocationCode, container_b);
 		distance += solver.getDistance(lastLocationCode, depotContainer_b.getLocationCode());
 		lastLocationCode = depotContainer_b.getLocationCode();
@@ -461,9 +461,10 @@ public class RouteDoubleImportCreator {
 		solver.mPoint2DepartureTime.put(e5, departureTime);
 		// mContainer2LastDepot.put(e5.getContainer(), e5.getDepotContainer());
 		// mContainer2LastTime.put(e5.getContainer(), departureTime);
-		tri.setLastDepotContainer(container_a, e5.getDepotContainer());
+		tri.setLastDepotContainer(container_a, depotContainer_a);
 		tri.setLastTimeContainer(container_a, departureTime);
-
+		lastElement = e5;
+		
 		RouteElement e55 = new RouteElement();
 		L.add(e55);
 		e55.deriveFrom(lastElement);
@@ -483,7 +484,7 @@ public class RouteDoubleImportCreator {
 		solver.mPoint2DepartureTime.put(e55, departureTime);
 		// mContainer2LastDepot.put(e5.getContainer(), e5.getDepotContainer());
 		// mContainer2LastTime.put(e5.getContainer(), departureTime);
-		tri.setLastDepotContainer(container_b, e55.getDepotContainer());
+		tri.setLastDepotContainer(container_b, depotContainer_b);
 		tri.setLastTimeContainer(container_b, departureTime);
 		
 		RouteElement e6 = new RouteElement();

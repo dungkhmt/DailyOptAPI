@@ -6749,7 +6749,7 @@ public class ContainerTruckMoocSolver {
 		return availableMoocList;
 	}
 	
-	public ArrayList<Mooc> getAvailableMoocAtDepotForKepLech(double wCont, String depot){
+	public ArrayList<Mooc> getAvailableMoocAtDepotForKep(double wCont, String depot){
 		ArrayList<Mooc> availableMoocList = new ArrayList<Mooc>();
 		ArrayList<Mooc> moocListAtDepot = mDepot2MoocList.get(depot);
 		if(!depot.equals("isScheduled")){
@@ -6804,24 +6804,22 @@ public class ContainerTruckMoocSolver {
 		return availableMoocList;
 	}
 	
-	public ArrayList<Truck> getAvailableTruckAtDepot(double wMooc, String depot){
+	public ArrayList<Truck> getAvailableTruckAtDepot(double wReq, String depot){
 		ArrayList<Truck> availableTruckList = new ArrayList<Truck>();
 		ArrayList<Truck> truckListAtDepot = mDepot2TruckList.get(depot);
 		if(!depot.equals("isScheduled")){
-			//for(int i = 0; i < truckListAtDepot.size(); i++){
-				//if(truckListAtDepot.get(i).getWeight() >= wMooc){
-			if(truckListAtDepot.size() != 0)		
-				availableTruckList.add(truckListAtDepot.get(0));
-					//break;
-				//}
-			//}
+			for(int i = 0; i < truckListAtDepot.size(); i++){
+				if(truckListAtDepot.get(i).getWeight() >= wReq){			
+					availableTruckList.add(truckListAtDepot.get(0));
+					break;
+				}
+			}
 		}
 		else{
-//			for(int i = 0; i < truckListAtDepot.size(); i++){
-//				if(truckListAtDepot.get(i).getWeight() >= wMooc)
-//					availableTruckList.add(truckListAtDepot.get(i));
-//			}
-			return truckListAtDepot;
+			for(int i = 0; i < truckListAtDepot.size(); i++){
+				if(truckListAtDepot.get(i).getWeight() >= wReq)
+					availableTruckList.add(truckListAtDepot.get(i));
+			}
 		}
 		return availableTruckList;
 	}

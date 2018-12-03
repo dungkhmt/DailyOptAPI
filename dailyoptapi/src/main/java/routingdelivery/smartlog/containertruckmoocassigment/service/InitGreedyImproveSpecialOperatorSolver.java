@@ -444,12 +444,12 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 							exReq[a].getContainerCategory(), keyC);
 					for(int q = 0; q < avaiContList.size(); q++){
 						for (String keyM : mDepot2MoocList.keySet()) {
-							ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepotForKepLech(
+							ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepotForKep(
 									exReq[a].getWeight() + imReq[b].getWeight(), keyM);
 							for(int k = 0; k < avaiMoocList.size(); k++){
 								for(String keyT : mDepot2TruckList.keySet()) {
 									ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
-											avaiMoocList.get(k).getWeight(), keyT);
+											exReq[a].getWeight() + imReq[b].getWeight(), keyT);
 									for(int j = 0; j < avaiTruckList.size(); j++){
 										double d = routeKeplechCreator.evaluateKeplechRoute(avaiTruckList.get(j),
 												avaiMoocList.get(k), avaiContList.get(q),
@@ -483,12 +483,12 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 				if (imReqScheduled[b] || !imReq[b].getContainerCategory().equals("20DC"))
 					continue;
 				for (String keyM : mDepot2MoocList.keySet()) {
-					ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(imReq[a].getWeight()
-							+imReq[b].getWeight(), imReq[b].getContainerCategory(), keyM);
+					ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepotForKep(imReq[a].getWeight()
+							+ imReq[b].getWeight(), keyM);
 					for(int k = 0; k < avaiMoocList.size(); k++){
 						for(String keyT : mDepot2TruckList.keySet()) {
 							ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
-									avaiMoocList.get(k).getWeight(), keyT);
+									imReq[a].getWeight() + imReq[b].getWeight(), keyT);
 							for(int j = 0; j < avaiTruckList.size(); j++){
 								double d = routeImImCreator.evaluateImportImportRequest(
 										imReq[a], imReq[b],
@@ -527,12 +527,12 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 									exReq[b].getContainerCategory(), keyC_b);
 							for(int qb = 0; qb < avaiContList_b.size(); qb++){
 								for (String keyM : mDepot2MoocList.keySet()) {
-									ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(exReq[a].getWeight()
-											+exReq[b].getWeight(), exReq[b].getContainerCategory(), keyM);
+									ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepotForKep(exReq[a].getWeight()
+											+ exReq[b].getWeight(), keyM);
 									for(int k = 0; k < avaiMoocList.size(); k++){
 										for(String keyT : mDepot2TruckList.keySet()) {
 											ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
-													avaiMoocList.get(k).getWeight(), keyT);
+													exReq[a].getWeight() + exReq[b].getWeight(), keyT);
 											for(int j = 0; j < avaiTruckList.size(); j++){
 												double d = routeExExCreator.evaluateExportExportRequest(
 														exReq[a], exReq[b],
@@ -565,15 +565,15 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		
 		double minDistanceKepImportReqs = Integer.MAX_VALUE;
 		double minDistanceKepExportReqs = Integer.MAX_VALUE;
-		double minDistanceKepLech = Integer.MAX_VALUE;
+		double minDistanceKepLech 		= Integer.MAX_VALUE;
 
-		RouteKeplechCreator routeKepLechCreator = new RouteKeplechCreator(this);
-		RouteDoubleImportCreator routeImImCreator = new RouteDoubleImportCreator(this);
-		RouteDoubleExportCreator routeExExCreator = new RouteDoubleExportCreator(this);
+		RouteKeplechCreator routeKepLechCreator 	= new RouteKeplechCreator(this);
+		RouteDoubleImportCreator routeImImCreator 	= new RouteDoubleImportCreator(this);
+		RouteDoubleExportCreator routeExExCreator 	= new RouteDoubleExportCreator(this);
 		
-		minDistanceKepImportReqs = evaluateKepImportRequests(routeImImCreator);
-		minDistanceKepExportReqs = evaluateKepExportRequests(routeExExCreator);
-		minDistanceKepLech = evaluateKepLech(routeKepLechCreator);
+		minDistanceKepImportReqs 	= evaluateKepImportRequests(routeImImCreator);
+		minDistanceKepExportReqs 	= evaluateKepExportRequests(routeExExCreator);
+		minDistanceKepLech 			= evaluateKepLech(routeKepLechCreator);
 		double min = minDistanceKepImportReqs < minDistanceKepExportReqs ?
 				minDistanceKepImportReqs : minDistanceKepExportReqs;
 		min = min < minDistanceKepLech ? min : minDistanceKepLech;
@@ -603,21 +603,21 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 					for(int q = 0; q < avaiContList.size(); q++){
 						for (String keyM : mDepot2MoocList.keySet()) {
 							ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(
-									avaiContList.get(q).getWeight(), 
+									routeKepLechCreator.sel_exReq_a.getWeight(), 
 									routeKepLechCreator.sel_exReq_a.getContainerCategory(), keyM);
 							for(int k = 0; k < avaiMoocList.size(); k++){
 								for(String keyT : mDepot2TruckList.keySet()) {
 									ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
-											avaiMoocList.get(k).getWeight(), keyT);
+											routeKepLechCreator.sel_exReq_a.getWeight(), keyT);
 									for(int j = 0; j < avaiTruckList.size(); j++){
 										for (String keyMIm : mDepot2MoocList.keySet()) {
 											ArrayList<Mooc> avaiMoocListIm = getAvailableMoocAtDepot(
-													avaiContList.get(q).getWeight(), 
+													routeKepLechCreator.sel_imReq_b.getWeight(), 
 													routeKepLechCreator.sel_imReq_b.getContainerCategory(), keyMIm);
 											for(int kI = 0; kI < avaiMoocListIm.size(); kI++){
 												for(String keyTIm : mDepot2TruckList.keySet()) {
 													ArrayList<Truck> avaiTruckListIm = getAvailableTruckAtDepot(
-															avaiMoocListIm.get(kI).getWeight(), keyTIm);
+															routeKepLechCreator.sel_imReq_b.getWeight(), keyTIm);
 													for(int jI = 0; jI < avaiTruckListIm.size(); jI++){
 														double dIm = evaluateImportRequest(
 																routeKepLechCreator.sel_imReq_b, avaiTruckListIm.get(jI), avaiMoocListIm.get(kI));
@@ -695,13 +695,14 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 									for(int kI = 0; kI < avaiMoocListIm.size(); kI++){
 										for(String keyTIm : mDepot2TruckList.keySet()) {
 											ArrayList<Truck> avaiTruckListIm = getAvailableTruckAtDepot(
-													avaiMoocListIm.get(kI).getWeight(), keyTIm);
+													routeImImCreator.sel_imReq_b.getWeight(), keyTIm);
 											for(int jI = 0; jI < avaiTruckListIm.size(); jI++){
 												double dIm1 = evaluateImportRequest(
 														routeImImCreator.sel_imReq_a, 
 														avaiTruckList.get(j), avaiMoocList.get(k));
 												double dIm2 = evaluateImportRequest(
-														routeImImCreator.sel_imReq_b, avaiTruckListIm.get(jI), avaiMoocListIm.get(kI));
+														routeImImCreator.sel_imReq_b, 
+														avaiTruckListIm.get(jI), avaiMoocListIm.get(kI));
 												
 												
 												double dis = dIm1 + dIm2;
@@ -744,7 +745,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			if(sel_tri != null){
 				DoubleExportRouteComposer kcp = new DoubleExportRouteComposer(this,
 						routeExExCreator.sel_truck, routeExExCreator.sel_mooc, sel_tri.route,
-						routeExExCreator.sel_exReq_a, routeExExCreator.sel_exReq_a,
+						routeExExCreator.sel_exReq_a, routeExExCreator.sel_exReq_b,
 						sel_tri, sel_tri.route.getDistance());
 
 				Truck sel_truck_ex1 = null;
@@ -782,7 +783,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 													for(int k2 = 0; k2 < avaiMoocList2.size(); k2++){
 														for(String keyT2 : mDepot2TruckList.keySet()) {
 															ArrayList<Truck> avaiTruckList2 = getAvailableTruckAtDepot(
-																	avaiMoocList2.get(k2).getWeight(), keyT2);
+																	routeExExCreator.sel_exReq_b.getWeight(), keyT2);
 															for(int j2 = 0; j2 < avaiTruckList2.size(); j2++){
 																double dEx1 = evaluateExportRoute(
 																		routeExExCreator.sel_exReq_a, 
