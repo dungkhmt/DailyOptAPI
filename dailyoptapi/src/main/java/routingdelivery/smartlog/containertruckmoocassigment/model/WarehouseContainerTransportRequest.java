@@ -30,6 +30,7 @@ public class WarehouseContainerTransportRequest {
 	private String lateDateTimePickupEmptyContainerToWarehouse;
 	private int attachEmptyMoocContainerDurationToWarehouse;
 	private String[] returnDepotContainerCodes;
+	private String customerCode;
 	
 	private String levelRequest;// "1": only 1st, "2": only 2nd segment, "3": only 3th segment
 								// "12": only 1st and 2nd, "23": only 2nd and 3th segments
@@ -66,7 +67,8 @@ public class WarehouseContainerTransportRequest {
 										String lateDateTimePickupEmptyContainerToWarehouse,
 										int attachEmptyMoocContainerDurationToWarehouse,
 										String[] returnDepotContainerCodes,
-										String levelRequest) {
+										String levelRequest,
+										String customerCode) {
 									super();
 									this.orderItemID = orderItemID;
 									this.containerCategory = containerCategory;
@@ -90,6 +92,7 @@ public class WarehouseContainerTransportRequest {
 									this.attachEmptyMoocContainerDurationToWarehouse = attachEmptyMoocContainerDurationToWarehouse;
 									this.returnDepotContainerCodes = returnDepotContainerCodes;
 									this.levelRequest = levelRequest;
+									this.customerCode = customerCode;
 								}
 
 
@@ -324,6 +327,13 @@ public class WarehouseContainerTransportRequest {
 
 	public void setLevelRequest(String levelRequest) {
 		this.levelRequest = levelRequest;
+	}
+	
+	public String getCustomerCode() {
+		return customerCode;
+	}
+	public void setCustomerCode(String customerCode) {
+		this.customerCode = customerCode;
 	}
 	
 	

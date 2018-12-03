@@ -14,6 +14,7 @@ public class ImportContainerRequest {
 	private String earlyDateTimePickupAtPort;
 	private String lateDateTimePickupAtPort;
 	private int loadDuration;
+	private String customerCode;
 	
 	
 	//private String wareHouseCode;
@@ -47,7 +48,7 @@ public class ImportContainerRequest {
 			String earlyDateTimePickupAtPort, String lateDateTimePickupAtPort,
 			int loadDuration, DeliveryWarehouseInfo[] deliveryWarehouses,
 			String earlyDateTimeDeliveryAtDepot,
-			String lateDateTimeDeliveryAtDepot) {
+			String lateDateTimeDeliveryAtDepot, String customerCode) {
 		super();
 		this.orderItemID = orderItemID;
 		this.shipCompanyCode = shipCompanyCode;
@@ -62,6 +63,7 @@ public class ImportContainerRequest {
 		this.deliveryWarehouses = deliveryWarehouses;
 		this.earlyDateTimeDeliveryAtDepot = earlyDateTimeDeliveryAtDepot;
 		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
+		this.customerCode = customerCode;
 	}
 
 	public String getOrderItemID() {
@@ -184,6 +186,12 @@ public class ImportContainerRequest {
 		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
 	}
 	
+	public String getCustomerCode(){
+		return this.customerCode;
+	}
 	
+	public void setCustomerCode(String customerCode){
+		this.customerCode = customerCode;
+	}
 	
 }
