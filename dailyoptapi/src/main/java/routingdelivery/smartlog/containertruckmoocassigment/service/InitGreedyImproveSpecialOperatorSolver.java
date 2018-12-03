@@ -9,6 +9,7 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.CandidateRoute
 import routingdelivery.smartlog.containertruckmoocassigment.model.CandidateSolution;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ComboContainerMoocTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Container;
+import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerCategoryEnum;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocInput;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ContainerTruckMoocSolution;
 import routingdelivery.smartlog.containertruckmoocassigment.model.DeliveryWarehouseInfo;
@@ -434,10 +435,12 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 	public double evaluateKepLech(RouteKeplechCreator routeKeplechCreator){
 		double minDistance = Integer.MAX_VALUE;
 		for (int a = 0; a < nbExReqs; a++) {
-			if (exReqScheduled[a] || !exReq[a].getContainerCategory().equals("20DC"))
+			if (exReqScheduled[a] || !exReq[a].getContainerCategory()
+					.contains(ContainerCategoryEnum.CATEGORY20))
 				continue;
 			for (int b = 0; b < nbImReqs; b++) {
-				if (imReqScheduled[b] || !imReq[b].getContainerCategory().equals("20DC"))
+				if (imReqScheduled[b] || !imReq[b].getContainerCategory()
+						.contains(ContainerCategoryEnum.CATEGORY20))
 					continue;
 				for (String keyC : mDepot2ContainerList.keySet()) {
 					ArrayList<Container> avaiContList = getAvailableContainerAtDepot(exReq[a].getWeight(), 
@@ -477,10 +480,12 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		double minDistance = Integer.MAX_VALUE;
 		
 		for (int a = 0; a < nbImReqs; a++) {
-			if (imReqScheduled[a] || !imReq[a].getContainerCategory().equals("20DC"))
+			if (imReqScheduled[a] || !imReq[a].getContainerCategory()
+					.contains(ContainerCategoryEnum.CATEGORY20))
 				continue;
 			for (int b = 0; b < nbImReqs && b != a; b++) {
-				if (imReqScheduled[b] || !imReq[b].getContainerCategory().equals("20DC"))
+				if (imReqScheduled[b] || !imReq[b].getContainerCategory()
+						.contains(ContainerCategoryEnum.CATEGORY20))
 					continue;
 				for (String keyM : mDepot2MoocList.keySet()) {
 					ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepotForKep(imReq[a].getWeight()
@@ -513,10 +518,12 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		double minDistance = Integer.MAX_VALUE;
 		
 		for (int a = 0; a < nbExReqs; a++) {
-			if (exReqScheduled[a] || !exReq[a].getContainerCategory().equals("20DC"))
+			if (exReqScheduled[a] || !exReq[a].getContainerCategory()
+					.contains(ContainerCategoryEnum.CATEGORY20))
 				continue;
 			for (int b = 0; b < nbExReqs && b != a; b++) {
-				if (exReqScheduled[b] || !exReq[b].getContainerCategory().equals("20DC"))
+				if (exReqScheduled[b] || !exReq[b].getContainerCategory()
+						.contains(ContainerCategoryEnum.CATEGORY20))
 					continue;
 				for (String keyC_a : mDepot2ContainerList.keySet()) {
 					ArrayList<Container> avaiContList_a = getAvailableContainerAtDepot(exReq[a].getWeight(), 
