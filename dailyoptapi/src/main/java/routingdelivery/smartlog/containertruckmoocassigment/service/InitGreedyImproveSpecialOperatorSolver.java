@@ -676,7 +676,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 			if(sel_tri != null){
 				DoubleImportRouteComposer kcp = new DoubleImportRouteComposer(this,
 						routeImImCreator.sel_truck, routeImImCreator.sel_mooc, sel_tri.route,
-						routeImImCreator.sel_imReq_a, routeImImCreator.sel_imReq_a,
+						routeImImCreator.sel_imReq_a, routeImImCreator.sel_imReq_b,
 						sel_tri, sel_tri.route.getDistance());
 
 				Truck sel_truck_im1 = null;
