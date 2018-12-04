@@ -4,11 +4,14 @@ public class TransportContainerRequest {
 	private String orderID;
 	private String containerCode;
 	private String containerCategory;
+	private String containerNo;
 	private double weight;
 
 	private int attachContainerDuration;// time duration for attaching the truck-mooc to the container at first location
 	private TransportContainerLocationInfo[] locations;// list of location the container have to be passed
 	private int detachContainerDuration;// time duration for detaching the container from truck-mooc at last location
+	private String customerCode;
+	private String customerName;
 	//private String originLocationCode;
 	//private String earlyArrivalDateTimeOrigin;
 	//private String lateArrivalDateTimeOrigin;
@@ -30,6 +33,12 @@ public class TransportContainerRequest {
 	}
 	public void setContainerCategory(String containerCategory) {
 		this.containerCategory = containerCategory;
+	}
+	public String getContainerNo() {
+		return containerNo;
+	}
+	public void setContainerNo(String containerNo) {
+		this.containerNo = containerNo;
 	}
 	public double getWeight() {
 		return weight;
@@ -55,19 +64,37 @@ public class TransportContainerRequest {
 	public void setDetachContainerDuration(int detachContainerDuration) {
 		this.detachContainerDuration = detachContainerDuration;
 	}
+	public String getCustomerCode(){
+		return this.customerCode;
+	}
+	
+	public void setCustomerCode(String customerCode){
+		this.customerCode = customerCode;
+	}
+	
+	public String getCustomerName(){
+		return this.customerName;
+	}
+	
+	public void setCustomerName(String customerName){
+		this.customerName = customerName;
+	}
 	public TransportContainerRequest(String orderID, String containerCode,
-			String containerCategory, double weight,
+			String containerCategory, String containerNo, double weight,
 			int attachContainerDuration,
 			TransportContainerLocationInfo[] locations,
-			int detachContainerDuration) {
+			int detachContainerDuration, String customerCode, String customerName) {
 		super();
 		this.orderID = orderID;
 		this.containerCode = containerCode;
 		this.containerCategory = containerCategory;
+		this.containerNo = containerNo;
 		this.weight = weight;
 		this.attachContainerDuration = attachContainerDuration;
 		this.locations = locations;
 		this.detachContainerDuration = detachContainerDuration;
+		this.customerCode = customerCode;
+		this.customerName = customerName;
 	}
 	public TransportContainerRequest() {
 		super();

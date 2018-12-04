@@ -9,6 +9,8 @@ public class ExportContainerRequest {
 	private String shipCompanyCode;
 	private String depotContainerCode;// depotContainer
 	private String containerCategory;// 20, 40, 45
+	private String containerCode;
+	private String containerNo;
 	private double weight;
 	private String earlyDateTimePickupAtDepot;
 	private String lateDateTimePickupAtDepot;
@@ -29,6 +31,7 @@ public class ExportContainerRequest {
 	private String lateDateTimeUnloadAtPort;
 	private int unloadDuration;
 	private String customerCode;
+	private String customerName;
 	
 	//private String planSegment;// "1","2","12","13","123",...
 	
@@ -46,17 +49,20 @@ public class ExportContainerRequest {
 	}
 
 	public ExportContainerRequest(String orderItemID, String shipCompanyCode,
-			String depotContainerCode, String containerCategory, double weight,
+			String depotContainerCode, String containerCategory, 
+			String containerCode, String containerNo, double weight,
 			String earlyDateTimePickupAtDepot,
 			String lateDateTimePickupAtDepot,
 			PickupWarehouseInfo[] pickupWarehouses, String portCode,
 			String earlyDateTimeUnloadAtPort, String lateDateTimeUnloadAtPort,
-			int unloadDuration, String customerCode) {
+			int unloadDuration, String customerCode, String customerName) {
 		super();
 		this.orderItemID = orderItemID;
 		this.shipCompanyCode = shipCompanyCode;
 		this.depotContainerCode = depotContainerCode;
 		this.containerCategory = containerCategory;
+		this.containerCode = containerCode;
+		this.containerNo = containerNo;
 		this.weight = weight;
 		this.earlyDateTimePickupAtDepot = earlyDateTimePickupAtDepot;
 		this.lateDateTimePickupAtDepot = lateDateTimePickupAtDepot;
@@ -66,6 +72,7 @@ public class ExportContainerRequest {
 		this.lateDateTimeUnloadAtPort = lateDateTimeUnloadAtPort;
 		this.unloadDuration = unloadDuration;
 		this.customerCode = customerCode;
+		this.customerName = customerName;
 	}
 
 	public String getOrderItemID() {
@@ -116,6 +123,18 @@ public class ExportContainerRequest {
 		this.containerCategory = containerCategory;
 	}
 
+	public String getContainerCode() {
+		return containerCode;
+	}
+	public void setContainerCode(String containerCode) {
+		this.containerCode = containerCode;
+	}
+	public String getContainerNo() {
+		return containerNo;
+	}
+	public void setContainerNo(String containerNo) {
+		this.containerNo = containerNo;
+	}
 	public double getWeight() {
 		return weight;
 	}
@@ -186,6 +205,14 @@ public class ExportContainerRequest {
 	
 	public void setCustomerCode(String customerCode){
 		this.customerCode = customerCode;
+	}
+	
+	public String getCustomerName(){
+		return this.customerName;
+	}
+	
+	public void setCustomerName(String customerName){
+		this.customerName = customerName;
 	}
 	
 	

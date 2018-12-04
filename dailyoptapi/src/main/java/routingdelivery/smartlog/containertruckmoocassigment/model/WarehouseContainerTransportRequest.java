@@ -5,6 +5,8 @@ public class WarehouseContainerTransportRequest {
 	
 	// 1st segment (Depot to warehouse: empty)
 	private String containerCategory;
+	private String containerCode;
+	private String containerNo;
 	private double weight;
 	
 	private String shipCompanyCode;
@@ -31,6 +33,7 @@ public class WarehouseContainerTransportRequest {
 	private int attachEmptyMoocContainerDurationToWarehouse;
 	private String[] returnDepotContainerCodes;
 	private String customerCode;
+	private String customerName;
 	
 	private String levelRequest;// "1": only 1st, "2": only 2nd segment, "3": only 3th segment
 								// "12": only 1st and 2nd, "23": only 2nd and 3th segments
@@ -48,6 +51,8 @@ public class WarehouseContainerTransportRequest {
 	public WarehouseContainerTransportRequest(
 										String orderItemID,
 										String containerCategory,
+										String containerCode,
+										String containerNo,
 										double weight,
 										String shipCompanyCode,
 										String fromWarehouseCode,
@@ -68,10 +73,13 @@ public class WarehouseContainerTransportRequest {
 										int attachEmptyMoocContainerDurationToWarehouse,
 										String[] returnDepotContainerCodes,
 										String levelRequest,
-										String customerCode) {
+										String customerCode,
+										String customerName) {
 									super();
 									this.orderItemID = orderItemID;
 									this.containerCategory = containerCategory;
+									this.containerCode = containerCode;
+									this.containerNo = containerNo;
 									this.weight = weight;
 									this.shipCompanyCode = shipCompanyCode;
 									this.fromWarehouseCode = fromWarehouseCode;
@@ -93,6 +101,7 @@ public class WarehouseContainerTransportRequest {
 									this.returnDepotContainerCodes = returnDepotContainerCodes;
 									this.levelRequest = levelRequest;
 									this.customerCode = customerCode;
+									this.customerName = customerName;
 								}
 
 
@@ -131,6 +140,18 @@ public class WarehouseContainerTransportRequest {
 		this.containerCategory = containerCategory;
 	}
 
+	public String getContainerCode() {
+		return containerCode;
+	}
+	public void setContainerCode(String containerCode) {
+		this.containerCode = containerCode;
+	}
+	public String getContainerNo() {
+		return containerNo;
+	}
+	public void setContainerNo(String containerNo) {
+		this.containerNo = containerNo;
+	}
 
 	public double getWeight() {
 		return weight;
@@ -336,6 +357,12 @@ public class WarehouseContainerTransportRequest {
 		this.customerCode = customerCode;
 	}
 	
+	public String getCustomerName(){
+		return this.customerName;
+	}
 	
+	public void setCustomerName(String customerName){
+		this.customerName = customerName;
+	}
 	
 }

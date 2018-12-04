@@ -7,10 +7,12 @@ public class ImportEmptyRequests {
 	private String containerNo;
 	private String orderCode;
 	private String customerCode;
+	private String customerName;
 	private String requestDate;
 	private String lateDateTimeAttachAtWarehouse;
 	private String lateDateTimeReturnEmptyAtDepot;
 	private String moocCode;
+	private double weight;
 	private String wareHouseCode;
 	private String depotContainerCode;
 	private int linkContainerDuration;// thoi gian dat cont. len mooc
@@ -18,9 +20,9 @@ public class ImportEmptyRequests {
 
 	public ImportEmptyRequests(boolean isBreakRomooc, String containerCategory,
 			String containerCode, String containerNo, String orderCode, String customerCode,
-			String requestDate, String lateDateTimeAttachAtWarehouse,
+			String customerName, String requestDate, String lateDateTimeAttachAtWarehouse,
 			String lateDateTimeReturnEmptyAtDepot, String moocCode,
-			String wareHouseCode, String depotContainerCode,
+			double weight, String wareHouseCode, String depotContainerCode,
 			int linkContainerDuration) {
 		super();
 		this.isBreakRomooc = isBreakRomooc;
@@ -29,10 +31,12 @@ public class ImportEmptyRequests {
 		this.containerNo = containerNo;
 		this.orderCode = orderCode;
 		this.customerCode = customerCode;
+		this.customerName = customerName;
 		this.requestDate = requestDate;
 		this.lateDateTimeAttachAtWarehouse = lateDateTimeAttachAtWarehouse;
 		this.lateDateTimeReturnEmptyAtDepot = lateDateTimeReturnEmptyAtDepot;
 		this.moocCode = moocCode;
+		this.weight = weight;
 		this.wareHouseCode = wareHouseCode;
 		this.depotContainerCode = depotContainerCode;
 		this.linkContainerDuration = linkContainerDuration;
@@ -96,6 +100,13 @@ public class ImportEmptyRequests {
 		this.customerCode = customerCode;
 	}
 
+	public String getCustomerName(){
+		return this.customerName;
+	}
+	
+	public void setCustomerName(String customerName){
+		this.customerName = customerName;
+	}
 
 	public String getRequestDate() {
 		return requestDate;
@@ -138,6 +149,13 @@ public class ImportEmptyRequests {
 		this.moocCode = moocCode;
 	}
 
+	public double getWeight() {
+		return weight;
+	}
+
+	public void setWeight(double weight) {
+		this.weight = weight;
+	}
 
 	public String getWareHouseCode() {
 		return wareHouseCode;

@@ -6,11 +6,16 @@ public class EmptyContainerFromDepotRequest {
 	private String shipCompanyCode;
 	private String[] depotContainerCode; //select a container from one of these depots
 	private String containerCategory;// 20, 40, 45
+	private String containerCode;
+	private String containerNo;
+	private double weight;
 	
 	private String toLocationCode;// destination location
 	private String earlyArrivalDateTime;
 	private String lateArrivalDateTime;// early and late arrival time to toLocationCode
 	private int detachLoadedMoocContainerDuration;
+	private String customerCode;
+	private String customerName;
 	
 	
 	public String getOrderID() {
@@ -64,24 +69,64 @@ public class EmptyContainerFromDepotRequest {
 	}
 	public EmptyContainerFromDepotRequest(String orderID,
 			String shipCompanyCode, String[] depotContainerCode,
-			String containerCategory, String toLocationCode,
+			String containerCategory, String containerCode, String containerNo, 
+			double weight, String toLocationCode,
 			String earlyArrivalDateTime, String lateArrivalDateTime,
-			int detachLoadedMoocContainerDuration) {
+			int detachLoadedMoocContainerDuration, String customerCode, String customerNo) {
 		super();
 		this.orderID = orderID;
 		this.shipCompanyCode = shipCompanyCode;
 		this.depotContainerCode = depotContainerCode;
 		this.containerCategory = containerCategory;
+		this.containerCode = containerCode;
+		this.containerNo = containerNo;
+		this.weight = weight;
 		this.toLocationCode = toLocationCode;
 		this.earlyArrivalDateTime = earlyArrivalDateTime;
 		this.lateArrivalDateTime = lateArrivalDateTime;
 		this.detachLoadedMoocContainerDuration = detachLoadedMoocContainerDuration;
+		this.customerCode = customerCode;
+		this.containerNo = customerNo;
 	}
 	public EmptyContainerFromDepotRequest() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 	
+	public String getContainerCode() {
+		return containerCode;
+	}
+	public void setContainerCode(String containerCode) {
+		this.containerCode = containerCode;
+	}
+	public String getContainerNo() {
+		return containerNo;
+	}
+	public void setContainerNo(String containerNo) {
+		this.containerNo = containerNo;
+	}
+	public double getWeight() {
+		return weight;
+	}
+
+	public void setWeight(double weight) {
+		this.weight = weight;
+	}
 	
+	public String getCustomerCode(){
+		return this.customerCode;
+	}
+	
+	public void setCustomerCode(String customerCode){
+		this.customerCode = customerCode;
+	}
+	
+	public String getCustomerName(){
+		return this.customerName;
+	}
+	
+	public void setCustomerName(String customerName){
+		this.customerName = customerName;
+	}
 	
 }

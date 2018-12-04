@@ -7,12 +7,14 @@ public class ExportEmptyRequests {
 	private String containerNo;
 	private String orderCode;
 	private String customerCode;
+	private String customerName;
 	private String requestDate;
 	private String earlyDateTimePickupAtDepot;
 	private String lateDateTimePickupAtDepot;
 	private String earlyDateTimeLoadAtWarehouse;
 	private String lateDateTimeLoadAtWarehouse;
 	private String moocCode;
+	private double weight;
 	private String depotContainerCode;
 	private String wareHouseCode;
 	private int linkContainerDuration;// thoi gian de dua cont. rong len mooc
@@ -20,10 +22,10 @@ public class ExportEmptyRequests {
 	
 	public ExportEmptyRequests(boolean isBreakRomooc, String containerCategory,
 			String containerCode, String containerNo, String orderCode, String customerCode,
-			String requestDate, String earlyDateTimePickupAtDepot,
+			String customerName, String requestDate, String earlyDateTimePickupAtDepot,
 			String lateDateTimePickupAtDepot,
 			String earlyDateTimeLoadAtWarehouse,
-			String lateDateTimeLoadAtWarehouse, String moocCode,
+			String lateDateTimeLoadAtWarehouse, String moocCode, double weight,
 			String depotContainerCode, String wareHouseCode,
 			int linkContainerDuration) {
 		super();
@@ -33,12 +35,14 @@ public class ExportEmptyRequests {
 		this.containerNo = containerNo;
 		this.orderCode = orderCode;
 		this.customerCode = customerCode;
+		this.customerName = customerName;
 		this.requestDate = requestDate;
 		this.earlyDateTimePickupAtDepot = earlyDateTimePickupAtDepot;
 		this.lateDateTimePickupAtDepot = lateDateTimePickupAtDepot;
 		this.earlyDateTimeLoadAtWarehouse = earlyDateTimeLoadAtWarehouse;
 		this.lateDateTimeLoadAtWarehouse = lateDateTimeLoadAtWarehouse;
 		this.moocCode = moocCode;
+		this.weight = weight;
 		this.depotContainerCode = depotContainerCode;
 		this.wareHouseCode = wareHouseCode;
 		this.linkContainerDuration = linkContainerDuration;
@@ -85,6 +89,13 @@ public class ExportEmptyRequests {
 	public void setCustomerCode(String customerCode) {
 		this.customerCode = customerCode;
 	}
+	public String getCustomerName(){
+		return this.customerName;
+	}
+	
+	public void setCustomerName(String customerName){
+		this.customerName = customerName;
+	}
 	public String getRequestDate() {
 		return requestDate;
 	}
@@ -120,6 +131,12 @@ public class ExportEmptyRequests {
 	}
 	public void setMoocCode(String moocCode) {
 		this.moocCode = moocCode;
+	}
+	public double getWeight() {
+		return weight;
+	}
+	public void setWeight(double weight) {
+		this.weight = weight;
 	}
 	public String getDepotContainerCode() {
 		return depotContainerCode;

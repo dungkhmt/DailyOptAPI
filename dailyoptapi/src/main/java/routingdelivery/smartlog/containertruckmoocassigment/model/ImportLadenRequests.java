@@ -7,6 +7,7 @@ public class ImportLadenRequests {
 	private String containerNo;
 	private String orderCode;
 	private String customerCode;
+	private String customerName;
 	private String requestDate;
 	private String earlyDateTimePickupAtPort;
 	private String lateDateTimePickupAtPort;
@@ -22,7 +23,7 @@ public class ImportLadenRequests {
 	
 	public ImportLadenRequests(boolean isBreakRomooc, String containerCategory,
 			String containerCode, String containerNo, String orderCode, String customerCode,
-			String requestDate, String earlyDateTimePickupAtPort,
+			String customerName, String requestDate, String earlyDateTimePickupAtPort,
 			String lateDateTimePickupAtPort,
 			String earlyDateTimeUnloadAtWarehouse,
 			String lateDateTimeUnloadAtWarehouse, String moocCode,
@@ -35,6 +36,7 @@ public class ImportLadenRequests {
 		this.containerNo = containerNo;
 		this.orderCode = orderCode;
 		this.customerCode = customerCode;
+		this.customerName = customerName;
 		this.requestDate = requestDate;
 		this.earlyDateTimePickupAtPort = earlyDateTimePickupAtPort;
 		this.lateDateTimePickupAtPort = lateDateTimePickupAtPort;
@@ -113,7 +115,13 @@ public class ImportLadenRequests {
 		this.customerCode = customerCode;
 	}
 
-
+	public String getCustomerName(){
+		return this.customerName;
+	}
+	
+	public void setCustomerName(String customerName){
+		this.customerName = customerName;
+	}
 
 	public String getRequestDate() {
 		return requestDate;

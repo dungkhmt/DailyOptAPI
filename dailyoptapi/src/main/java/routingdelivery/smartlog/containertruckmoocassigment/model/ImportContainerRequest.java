@@ -9,12 +9,14 @@ public class ImportContainerRequest {
 	private String[] depotContainerCode;
 	private String containerCategory;// 20, 40, 45
 	private String containerCode;
+	private String containerNo;
 	private double weight;
 	private String portCode;
 	private String earlyDateTimePickupAtPort;
 	private String lateDateTimePickupAtPort;
 	private int loadDuration;
 	private String customerCode;
+	private String customerName;
 	
 	
 	//private String wareHouseCode;
@@ -44,17 +46,18 @@ public class ImportContainerRequest {
 
 	public ImportContainerRequest(String orderItemID, String shipCompanyCode,
 			String[] depotContainerCode, String containerCategory,
-			String containerCode, double weight, String portCode,
+			String containerCode, String containerNo, double weight, String portCode,
 			String earlyDateTimePickupAtPort, String lateDateTimePickupAtPort,
 			int loadDuration, DeliveryWarehouseInfo[] deliveryWarehouses,
 			String earlyDateTimeDeliveryAtDepot,
-			String lateDateTimeDeliveryAtDepot, String customerCode) {
+			String lateDateTimeDeliveryAtDepot, String customerCode, String customerName) {
 		super();
 		this.orderItemID = orderItemID;
 		this.shipCompanyCode = shipCompanyCode;
 		this.depotContainerCode = depotContainerCode;
 		this.containerCategory = containerCategory;
 		this.containerCode = containerCode;
+		this.containerNo = containerNo;
 		this.weight = weight;
 		this.portCode = portCode;
 		this.earlyDateTimePickupAtPort = earlyDateTimePickupAtPort;
@@ -64,6 +67,7 @@ public class ImportContainerRequest {
 		this.earlyDateTimeDeliveryAtDepot = earlyDateTimeDeliveryAtDepot;
 		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
 		this.customerCode = customerCode;
+		this.customerName = customerName;
 	}
 
 	public String getOrderItemID() {
@@ -122,6 +126,12 @@ public class ImportContainerRequest {
 		this.containerCode = containerCode;
 	}
 
+	public String getContainerNo() {
+		return containerNo;
+	}
+	public void setContainerNo(String containerNo) {
+		this.containerNo = containerNo;
+	}
 	public double getWeight() {
 		return weight;
 	}
@@ -194,4 +204,11 @@ public class ImportContainerRequest {
 		this.customerCode = customerCode;
 	}
 	
+	public String getCustomerName(){
+		return this.customerName;
+	}
+	
+	public void setCustomerName(String customerName){
+		this.customerName = customerName;
+	}
 }

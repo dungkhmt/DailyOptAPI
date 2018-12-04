@@ -340,6 +340,7 @@ public class RouteDoubleImportCreator {
 			re[idx].deriveFrom(lastElement);
 			re[idx].setWarehouse(solver.getWarehouseFromCode(dwi.getWareHouseCode()));
 			re[idx].setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
+			re[idx].setImportRequest(sel_imReq_a);
 			travelTime = solver.getTravelTime(lastElement, re[idx]);
 			arrivalTime = departureTime + travelTime;
 			startServiceTime = solver.MAX(arrivalTime,
@@ -399,6 +400,7 @@ public class RouteDoubleImportCreator {
 			re[idx].deriveFrom(lastElement);
 			re[idx].setWarehouse(solver.getWarehouseFromCode(dwi.getWareHouseCode()));
 			re[idx].setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
+			re[idx].setImportRequest(sel_imReq_b);
 			travelTime = solver.getTravelTime(lastElement, re[idx]);
 			arrivalTime = departureTime + travelTime;
 			startServiceTime = solver.MAX(arrivalTime,

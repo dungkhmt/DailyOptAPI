@@ -7,6 +7,7 @@ public class ExportLadenRequests {
 	private String containerNo;
 	private String orderCode;
 	private String customerCode;
+	private String customerName;
 	private String requestDate;
 	private String lateDateTimeAttachAtWarehouse;
 	private String earlyDateTimeUnloadAtPort;
@@ -21,7 +22,7 @@ public class ExportLadenRequests {
 
 	public ExportLadenRequests(boolean isBreakRomooc, String containerCategory,
 			String containerCode, String containerNo, String orderCode, String customerCode,
-			String requestDate, String lateDateTimeAttachAtWarehouse,
+			String customerName, String requestDate, String lateDateTimeAttachAtWarehouse,
 			String earlyDateTimeUnloadAtPort, String lateDateTimeUnloadAtPort,
 			String moocCode, double weight, String wareHouseCode,
 			String portCode, int linkContainerAtWarehouseDuration,
@@ -33,6 +34,7 @@ public class ExportLadenRequests {
 		this.containerNo = containerNo;
 		this.orderCode = orderCode;
 		this.customerCode = customerCode;
+		this.customerName = customerName;
 		this.requestDate = requestDate;
 		this.lateDateTimeAttachAtWarehouse = lateDateTimeAttachAtWarehouse;
 		this.earlyDateTimeUnloadAtPort = earlyDateTimeUnloadAtPort;
@@ -103,6 +105,13 @@ public class ExportLadenRequests {
 		this.customerCode = customerCode;
 	}
 
+	public String getCustomerName(){
+		return this.customerName;
+	}
+	
+	public void setCustomerName(String customerName){
+		this.customerName = customerName;
+	}
 
 	public String getRequestDate() {
 		return requestDate;
