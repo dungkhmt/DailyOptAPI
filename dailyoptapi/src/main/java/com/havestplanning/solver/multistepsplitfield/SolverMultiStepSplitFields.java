@@ -73,9 +73,9 @@ public class SolverMultiStepSplitFields extends Solver {
 	 * }
 	 */
 
-	public PrintWriter getLog() {
-		return log;
-	}
+//	public PrintWriter getLog() {
+//		return log;
+//	}
 
 	public HavestPlanningInput getInput() {
 		return input;
@@ -140,8 +140,8 @@ public class SolverMultiStepSplitFields extends Solver {
 		int startDatePlan = mDate2Slot.get(sdp);
 		
 		logDateSequence();
-		log.println(name() + "::search, startDatePlanStr = " + startDatePlanStr);
-		log.println(name() + "::search, sdp = " + sdp.toString() + ", startDatePlan = " + startDatePlan);
+//		log.println(name() + "::search, startDatePlanStr = " + startDatePlanStr);
+//		log.println(name() + "::search, sdp = " + sdp.toString() + ", startDatePlan = " + startDatePlan);
 
 		
 		int n = input.getFields().length;
@@ -181,10 +181,10 @@ public class SolverMultiStepSplitFields extends Solver {
 					f.getPlantType());
 			expected_dates[i] = plantStart + p;
 			// if(i == 0){
-			log.println(name() + "::search, field " + fields[i].getCode()
-					+ ", plantStart = " + plantStart + ", bestPeriod = " + p
-					+ ", expectedDate = " + expected_dates[i] + ", minDate = "
-					+ minDate[i] + ", maxDate = " + maxDate[i]);
+//			log.println(name() + "::search, field " + fields[i].getCode()
+//					+ ", plantStart = " + plantStart + ", bestPeriod = " + p
+//					+ ", expectedDate = " + expected_dates[i] + ", minDate = "
+//					+ minDate[i] + ", maxDate = " + maxDate[i]);
 			// }
 			if (minDate[i] < expected_dates[i] - delta_left) {
 				minDate[i] = expected_dates[i] - delta_left;
@@ -193,11 +193,11 @@ public class SolverMultiStepSplitFields extends Solver {
 				maxDate[i] = expected_dates[i] + delta_right;
 			}
 
-			log.println(name() + "::search, field[" + i + "], plantStart = "
-					+ plantStart + ", category = " + f.getCategory()
-					+ ", plantType = " + f.getPlantType()
-					+ ", minDate - planStart = " + (minDate[i] - plantStart)
-					+ ", maxDate - planStart = " + (maxDate[i] - plantStart));
+//			log.println(name() + "::search, field[" + i + "], plantStart = "
+//					+ plantStart + ", category = " + f.getCategory()
+//					+ ", plantType = " + f.getPlantType()
+//					+ ", minDate - planStart = " + (minDate[i] - plantStart)
+//					+ ", maxDate - planStart = " + (maxDate[i] - plantStart));
 
 			// System.out.println(name() + "::search, plantStandard = "
 			// + input.getPlantStandard());
@@ -344,10 +344,10 @@ public class SolverMultiStepSplitFields extends Solver {
 				// }
 				String msg = "TRUETRUE";
 				// if(delta > 50) msg = "FALSEFALSE";
-				log.println(name() + "::search, xd[" + i + "] = " + xd[i]
-						+ ", expected_date[" + i + "] = " + expected_dates[i]
-						+ ", minDate = " + minDate[i] + ", maxDate = "
-						+ maxDate[i] + ", MSGMSG = " + msg);
+//				log.println(name() + "::search, xd[" + i + "] = " + xd[i]
+//						+ ", expected_date[" + i + "] = " + expected_dates[i]
+//						+ ", minDate = " + minDate[i] + ", maxDate = "
+//						+ maxDate[i] + ", MSGMSG = " + msg);
 			}
 
 			for (int i = 0; i < xd.length; i++)
@@ -412,30 +412,30 @@ public class SolverMultiStepSplitFields extends Solver {
 			ArrayList<Integer> L = mDate2ListFields.get(d);
 			if (L == null)
 				L = new ArrayList<Integer>();
-			if (L.size() > 0) {
-				// System.out.print("date " + i + "(" +
-				// DateTimeUtils.date2YYYYMMDD(d) + "), sz = " + L.size() +
-				// " : ");
-				if (getDEBUG())
-					log.print("date " + i + "("
-							+ DateTimeUtils.date2YYYYMMDD(d) + "), sz = "
-							+ L.size() + ", total = " + mDate2Quantity.get(d)
-							+ " : ");
-				// for(int j: L){
-				// log.print(j + "(" + fields[j].getQuantity() + ") ");
-				// System.out.print(j + " ");
-				// }
-				// System.out.println();
-				if (getDEBUG())
-					log.println();
-			}
+//			if (L.size() > 0) {
+//				// System.out.print("date " + i + "(" +
+//				// DateTimeUtils.date2YYYYMMDD(d) + "), sz = " + L.size() +
+//				// " : ");
+//				if (getDEBUG())
+//					log.print("date " + i + "("
+//							+ DateTimeUtils.date2YYYYMMDD(d) + "), sz = "
+//							+ L.size() + ", total = " + mDate2Quantity.get(d)
+//							+ " : ");
+//				// for(int j: L){
+//				// log.print(j + "(" + fields[j].getQuantity() + ") ");
+//				// System.out.print(j + " ");
+//				// }
+//				// System.out.println();
+//				if (getDEBUG())
+//					log.println();
+//			}
 		}
 		
 	}
 	public HavestPlanningSolution solve(HavestPlanningInput input,
 			int maxNbSteps, int timeLimit, int delta_left, int delta_right,
 			String startDatePlan) {
-		initLog();
+		//initLog();
 
 		this.input = input;
 		// this.DURATION = input.getGrowthDuration();
@@ -496,9 +496,9 @@ public class SolverMultiStepSplitFields extends Solver {
 				// if(Math.abs(delta) > 50) msg = "FALSE";
 				String hd = DateTimeUtils.date2YYYYMMDD(date_sequence[xd[j]]);
 				String bhd = DateTimeUtils.date2YYYYMMDD(date_sequence[bd]);
-				log.println(name() + "::solve, RESULT xd[" + j + "] = " + xd[j]
-						+ " = " + hd + ", field " + f.getCode()
-						+ ", bestDate = " + bd + " = " + bhd + ", MSG = " + msg);
+//				log.println(name() + "::solve, RESULT xd[" + j + "] = " + xd[j]
+//						+ " = " + hd + ", field " + f.getCode()
+//						+ ", bestDate = " + bd + " = " + bhd + ", MSG = " + msg);
 
 			}
 
@@ -639,7 +639,7 @@ public class SolverMultiStepSplitFields extends Solver {
 
 		solution.setClusters(a_cluster);
 
-		finalize();
+		//finalize();
 
 		return solution;
 	}

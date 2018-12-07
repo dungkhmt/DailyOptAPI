@@ -121,14 +121,14 @@ public class GreedyConstrainedMultiKnapsackSolver extends ConstrainedMultiKnapsa
 		System.out
 				.println(name() + "::solve start.... n = " + n + ", m = " + m + ", max_range = " + max_range);
 
-		getSolver().getLog().println(name() + "::solve, EXP_DATE[0] = " + expected_date[0]);
+		//getSolver().getLog().println(name() + "::solve, EXP_DATE[0] = " + expected_date[0]);
 		
 		stateModel();
 		search(startDatePlan);
 		
 		
-		if (getSolver().getDEBUG())
-			getSolver().getLog().println("SOLUTION:");
+//		if (getSolver().getDEBUG())
+//			getSolver().getLog().println("SOLUTION:");
 
 		for (int i = 0; i < m; i++) {
 
@@ -147,14 +147,14 @@ public class GreedyConstrainedMultiKnapsackSolver extends ConstrainedMultiKnapsa
 						+ ", violations_packing = " + violations_packing[i]
 						+ ", des = " + des);
 
-				if (getSolver().getDEBUG()) {
-					getSolver().getLog().print(name() + "::solve, date " + i + " : ");
-					getSolver().getLog().println(
-							"sz = " + sz + ", load = " + load[i]
-									+ ", violations_packing = "
-									+ violations_packing[i] + ", des = ");// +
-																			// des);
-				}
+//				if (getSolver().getDEBUG()) {
+//					getSolver().getLog().print(name() + "::solve, date " + i + " : ");
+//					getSolver().getLog().println(
+//							"sz = " + sz + ", load = " + load[i]
+//									+ ", violations_packing = "
+//									+ violations_packing[i] + ", des = ");// +
+//																			// des);
+//				}
 
 			}
 		}

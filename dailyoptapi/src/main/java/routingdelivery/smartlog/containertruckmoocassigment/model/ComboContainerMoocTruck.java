@@ -10,12 +10,15 @@ public class ComboContainerMoocTruck {
 	public Mooc mooc;
 	public Container container;
 	public String lastLocationCode;// location where these 3 components are together
+	public int startTimeOfTruck;
+	public int startTimeOfMooc;
 	public int startTime;// startTime where these combo can work
 	public RouteElement routeElement;// (if not-null) the element of service route
 	public TruckRoute truckRoute;// (if not-null) the route of truck in service
 	public double extraDistance;// extra distance raised to obtain the combo
 	public ComboContainerMoocTruck(ContainerTruckMoocSolver solver, Truck truck, Mooc mooc, Container container,
-			String lastLocationCode, int startTime, RouteElement routeElement,
+			String lastLocationCode, int startTimeOfTruck, int startTimeOfMooc,
+			int startTime, RouteElement routeElement,
 			TruckRoute truckRoute, double extraDistance) {
 		super();
 		this.solver = solver;
@@ -23,6 +26,8 @@ public class ComboContainerMoocTruck {
 		this.mooc = mooc;
 		this.container = container;
 		this.lastLocationCode = lastLocationCode;
+		this.startTimeOfTruck = startTimeOfTruck;
+		this.startTimeOfMooc = startTimeOfMooc;
 		this.startTime = startTime;
 		this.routeElement = routeElement;
 		this.truckRoute = truckRoute;

@@ -10,10 +10,10 @@ public class Truck {
 	private String endWorkingTime;
 	private String status;
 	private String[] returnDepotCodes;// possible depots when finishing services
-	
+	private Intervals[] intervals;
 	
 	public Truck(String code, double weight, String driverCode, String driverName, String depotTruckCode, String startWorkingTime,
-			String endWorkingTime, String status, String[] returnDepotCodes) {
+			String endWorkingTime, String status, String[] returnDepotCodes, Intervals[] intervals) {
 		super();
 		this.code = code;
 		this.weight = weight;
@@ -24,6 +24,7 @@ public class Truck {
 		this.endWorkingTime = endWorkingTime;
 		this.status = status;
 		this.returnDepotCodes = returnDepotCodes;
+		this.intervals = intervals;
 	}
 	public String[] getReturnDepotCodes() {
 		return returnDepotCodes;
@@ -82,6 +83,12 @@ public class Truck {
 	}
 	public void setStatus(String status){
 		this.status = status;
+	}
+	public Intervals[] getIntervals() {
+		return intervals;
+	}
+	public void setIntervals(Intervals[] intervals) {
+		this.intervals = intervals;
 	}
 	public Truck() {
 		super();

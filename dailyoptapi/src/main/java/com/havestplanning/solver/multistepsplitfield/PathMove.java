@@ -63,15 +63,15 @@ public class PathMove {
 		
 		System.out.println(name() + "::findOptimalMovePath(" + maxLength + "), start date = " + d + 
 				", load[" + d + "] = " + solver.load[d] + ", violations = " + solver.violations_packing[d]);
-		solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + maxLength + "), start date = " + d + 
-				", load[" + d + "] = " + solver.load[d] + ", violations = " + solver.violations_packing[d]);
+//		solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + maxLength + "), start date = " + d + 
+//				", load[" + d + "] = " + solver.load[d] + ", violations = " + solver.violations_packing[d]);
 		
 			int inc = 1;
 			findOptimalMovePathPrivate(d, inc, maxLength);
 			if(global_best > local_best){
 				global_best = local_best;
 				//System.out.println(name() + "::findOptimalMovePath(" + maxLength + "), inc = 1, UPDATE global_best = " + global_best);
-				solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + maxLength + "), inc = 1, UPDATE global_best = " + global_best);
+				//solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + maxLength + "), inc = 1, UPDATE global_best = " + global_best);
 				global_final_date = local_final_date;
 				moved_items.clear();
 				for(int i: local_moved_items)
@@ -83,7 +83,7 @@ public class PathMove {
 			if(global_best > local_best){
 				global_best = local_best;
 				//System.out.println(name() + "::findOptimalMovePath(" + maxLength + "), inc = -1, UPDATE global_best = " + global_best);
-				solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + maxLength + "), inc = -1, UPDATE global_best = " + global_best);
+				//solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + maxLength + "), inc = -1, UPDATE global_best = " + global_best);
 				
 				global_final_date = local_final_date;
 				moved_items.clear();
@@ -138,7 +138,7 @@ public class PathMove {
 			//	solver.getSolver().getLog().println(name() + "::findOptimalMovePath, f[2746] = " + f[2746]);
 			//}
 			p[i] = -1;
-			solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + ", init p[" + i + "] = -1, f[" + i + "] = " + f[i]);
+			//solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + ", init p[" + i + "] = -1, f[" + i + "] = " + f[i]);
 		}
 		ArrayList<Integer> L1;
 		int d1 = d;
@@ -172,8 +172,8 @@ public class PathMove {
 					if(fd[d1] > delta){
 						fd[d1] = delta;
 						pd[d1] = i; 
-						solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + 
-								"), update pd[" + d1 + "] = " + pd[d1]);
+//						solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + 
+//								"), update pd[" + d1 + "] = " + pd[d1]);
 					}
 				}
 			}
@@ -182,8 +182,8 @@ public class PathMove {
 				if(maxLength){
 					sel_date = D.get(D.size()-1);
 					best = fd[sel_date];
-					solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + "), fd[" + 
-					d1 + "] = " + fd[d1] + ", BREAK");
+//					solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + "), fd[" + 
+//					d1 + "] = " + fd[d1] + ", BREAK");
 				}
 				break;
 			}
@@ -192,8 +192,8 @@ public class PathMove {
 			D.add(d1);
 			
 			
-			solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + "," + maxLength
-					+ "), FIX fd[" + d1 + "] = " + fd[d1] + ", L.sz = " + L.size());
+//			solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + "," + maxLength
+//					+ "), FIX fd[" + d1 + "] = " + fd[d1] + ", L.sz = " + L.size());
 			
 			// compute f[i] forall i in d1
 			for(int i1: L1){
@@ -232,8 +232,8 @@ public class PathMove {
 					if(fd[d1] < best){
 						best = fd[d1];
 						sel_date = d1;
-						solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + 
-								"), final update sel_date = " + sel_date);
+//						solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + 
+//								"), final update sel_date = " + sel_date);
 					}	
 				}
 			}
@@ -268,10 +268,10 @@ public class PathMove {
 				//System.out.println(name()+ "::findOptimalMovePath, establish moves, sel_d = " + sel_date + 
 				//		", continue di = " + di);
 				
-				if(inormal){
-					solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + "), establish moves, sel_d = " + sel_date + 
-							", inormal cc = " + cc + "  continue di = " + di);
-				}
+//				if(inormal){
+//					solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + "), establish moves, sel_d = " + sel_date + 
+//							", inormal cc = " + cc + "  continue di = " + di);
+//				}
 				if(cc >= count_inormal) break;
 			}
 		}		

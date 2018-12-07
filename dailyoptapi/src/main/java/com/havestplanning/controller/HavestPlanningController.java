@@ -51,9 +51,9 @@ import com.google.gson.Gson;
 
 @RestController
 public class HavestPlanningController {
-	public static String ROOT = "C:/DungPQ/daily-opt/havestplanning/data";
+	//public static String ROOT = "C:/DungPQ/daily-opt/havestplanning/data";
 	//public static String ROOT = "/home/tmp";
-	//public static String ROOT = "/home/harvest";
+	public static String ROOT = "/home/harvest";
 	
 	public String name() {
 		return "HavestPlanningController";

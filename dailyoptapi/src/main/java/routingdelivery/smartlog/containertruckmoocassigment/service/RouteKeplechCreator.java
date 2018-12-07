@@ -220,16 +220,39 @@ public class RouteKeplechCreator {
 		DepotContainer depotContainer = solver.findDepotContainer4Deposit(ir,
 				lastLocationCode, import_container);
 		distance += solver.getDistance(lastLocationCode, depotContainer.getLocationCode());
+		travelTime = solver.getTravelTime(lastLocationCode, depotContainer.getLocationCode());
+		arrivalTime = departureTime + travelTime;
+		startServiceTime = arrivalTime;
+		duration = depotContainer.getDeliveryContainerDuration();
+		departureTime = startServiceTime + duration;
+		lastLocationCode = depotContainer.getLocationCode();
 		
 		DepotMooc depotMooc = solver.findDepotMooc4Deposit(
 				depotContainer.getLocationCode(), mooc);
 		distance += solver.getDistance(depotContainer.getLocationCode(),
 				depotMooc.getLocationCode());
-
+		travelTime = solver.getTravelTime(lastLocationCode, depotMooc.getLocationCode());
+		arrivalTime = departureTime + travelTime;
+		startServiceTime = arrivalTime;
+		duration = depotMooc.getDeliveryMoocDuration();
+		departureTime = startServiceTime + duration;
+		if(!solver.checkAvailableIntervalsMooc(mooc, combo.startTimeOfMooc, departureTime))
+			return Integer.MAX_VALUE;
+		lastLocationCode = depotMooc.getLocationCode();
+		
 		DepotTruck depotTruck = solver.findDepotTruck4Deposit(
 				depotMooc.getLocationCode(), truck);
 		distance += solver.getDistance(depotMooc.getLocationCode(),
 				depotTruck.getLocationCode());
+		travelTime = solver.getTravelTime(lastLocationCode, depotTruck.getLocationCode());
+		arrivalTime = departureTime + travelTime;
+		startServiceTime = arrivalTime;
+		duration = 0;
+		departureTime = startServiceTime + duration;
+		if(!solver.checkAvailableIntervalsTruck(truck, 
+				combo.startTimeOfTruck, departureTime))
+			return Integer.MAX_VALUE;
+		
 		return distance;
 	}
 	

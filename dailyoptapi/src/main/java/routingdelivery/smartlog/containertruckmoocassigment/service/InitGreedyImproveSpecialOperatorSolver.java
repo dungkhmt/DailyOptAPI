@@ -303,133 +303,132 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 
 	}
 	*/
+	public double evaluateSwapImportExport(RouteSwapImportExportCreator routeSwapImportExportCreator){
+		double minDistance = Integer.MAX_VALUE;
+
+		for (int a = 0; a < nbExReqs; a++) {
+			if (exReqScheduled[a])
+				continue;
+			for (int b = 0; b < nbImReqs; b++) {
+				if (imReqScheduled[b])
+					continue;
+				double maxW = imReq[b].getWeight() > exReq[a].getWeight() ?
+						imReq[b].getWeight() : exReq[a].getWeight();
+				for (String keyM : mDepot2MoocList.keySet()) {
+					ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(maxW, 
+							imReq[b].getContainerCategory(), keyM);
+					for(int k = 0; k < avaiMoocList.size(); k++){
+						for(String keyT : mDepot2TruckList.keySet()) {
+							ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
+									maxW, keyT);
+							for(int j = 0; j < avaiTruckList.size(); j++){
+								double d = routeSwapImportExportCreator.evaluateSwapImportExport(
+										avaiTruckList.get(j), avaiMoocList.get(k), imReq[b], exReq[a]);
+								if(d < minDistance){
+									minDistance = d;
+									routeSwapImportExportCreator.sel_truck = avaiTruckList.get(j);
+									routeSwapImportExportCreator.sel_mooc = avaiMoocList.get(k);
+									routeSwapImportExportCreator.sel_exReq_a = exReq[a];
+									routeSwapImportExportCreator.sel_imReq_b = imReq[b];
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return minDistance;
+	}
 	
 	public void exploreSwapImportExport(
 			CandidateRouteComposer candidateRouteComposer) {
 		RouteSwapImportExportCreator routeSwapImportExportCreator = new RouteSwapImportExportCreator(
 				this);
-		double minDistance = Integer.MAX_VALUE;
-		Truck sel_truck = null;
-		Mooc sel_mooc = null;
-		ImportContainerRequest sel_imReq_k = null;
-		ExportContainerRequest sel_exReq_q = null;
-		TruckRouteInfo4Request sel_tri = null;
+		double minDistanceSwap = Integer.MAX_VALUE;
+		minDistanceSwap = evaluateSwapImportExport(routeSwapImportExportCreator);
+		if(routeSwapImportExportCreator.sel_truck != null){
+			TruckRouteInfo4Request tri = routeSwapImportExportCreator
+					.createSwapImportExport();
+			if(tri != null){
+				SwapImportExportRouteComposer cp = new SwapImportExportRouteComposer(
+						this, routeSwapImportExportCreator.sel_truck, 
+						routeSwapImportExportCreator.sel_mooc, 
+						routeSwapImportExportCreator.sel_exReq_a, 
+						routeSwapImportExportCreator.sel_imReq_b,
+						tri, minDistanceSwap);
 
-		for (int i = 0; i < trucks.length; i++) {
-			for (int j = 0; j < moocs.length; j++) {
-				for (int k = 0; k < imReq.length; k++) {
-					for (int q = 0; q < exReq.length; q++) {
-						if (imReqScheduled[k] || exReqScheduled[q])
-							continue;
-
-						backup();
-						TruckRouteInfo4Request tri = routeSwapImportExportCreator
-								.createSwapImportExport(trucks[i], moocs[j],
-										imReq[k], exReq[q]);
-						if (tri == null) {
-							// System.out.println(name() +
-							// "::solve, cannot find routeSwapImportExport for ("
-							// + i + "," + j + "," + k + "," + q + ")");
-							logln(name()
-									+ "::solve, cannot find routeSwapImportExport for ("
-									+ i + "," + j + "," + k + "," + q + ")");
-						} else {
-							TruckRoute tr = tri.route;
-							// System.out.println(name() +
-							// "::solve, FOUND routeSwapImportExport for (" + i
-							// + "," + j + "," + k + "," + q + "), route = " +
-							// tr.toString() + ", distance = " +
-							// tr.getDistance());
-							logln(name()
-									+ "::solve, FOUND routeSwapImportExport for ("
-									+ i + "," + j + "," + k + "," + q
-									+ "), route = " + tr.toString()
-									+ ", distance = " + tr.getDistance());
-							if (minDistance > tr.getDistance()) {
-								minDistance = tr.getDistance();
-								sel_truck = trucks[i];
-								sel_mooc = moocs[j];
-								sel_imReq_k = imReq[k];
-								sel_exReq_q = exReq[q];
-								sel_tri = tri;
-							}
-						}
-						restore();
-					}
-				}
-			}
-		}
-		if (sel_truck != null) {
-			SwapImportExportRouteComposer cp = new SwapImportExportRouteComposer(
-					this, sel_truck, sel_mooc, sel_exReq_q, sel_imReq_k,
-					sel_tri, minDistance);
-			System.out
-					.println(name()
-							+ "::exploreSwapImportExport, minDistance = "
-							+ minDistance);
-
-			TruckRoute sel_tr_k = null;
-			TruckRoute sel_tr_q = null;
-			TruckRouteInfo4Request sel_tri_k = null;
-			TruckRouteInfo4Request sel_tri_q = null;
-			double minDistance1 = Integer.MAX_VALUE;
-			for (int i = 0; i < trucks.length; i++) {
-				for (int j = 0; j < moocs.length; j++) {
-					for (int i1 = 0; i1 < trucks.length; i1++) {
-						for (int j1 = 0; j1 < moocs.length; j1++) {
-							for (int k = 0; k < containers.length; k++) {
-								if (containers[k].getCode().startsWith("A"))
-									continue;// imported container
-								backup();
-								TruckRouteInfo4Request tri_k = createRouteForImportRequest(
-										sel_imReq_k, trucks[i], moocs[j]);
-								if (tri_k == null) {
-									restore();
-									continue;
+				Truck sel_truck_ex = null;
+				Truck sel_truck_im = null;
+				Mooc sel_mooc_ex = null;
+				Mooc sel_mooc_im = null;
+				Container sel_cont = null;
+				double minDistance1 = Integer.MAX_VALUE;
+				for (String keyC : mDepot2ContainerList.keySet()) {
+					ArrayList<Container> avaiContList = getAvailableContainerAtDepot(
+							routeSwapImportExportCreator.sel_exReq_a.getWeight(), 
+							routeSwapImportExportCreator.sel_exReq_a.getContainerCategory(), keyC);
+					for(int q = 0; q < avaiContList.size(); q++){
+						for (String keyM : mDepot2MoocList.keySet()) {
+							ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(
+									routeSwapImportExportCreator.sel_exReq_a.getWeight(), 
+									routeSwapImportExportCreator.sel_exReq_a.getContainerCategory(), keyM);
+							for(int k = 0; k < avaiMoocList.size(); k++){
+								for(String keyT : mDepot2TruckList.keySet()) {
+									ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
+											routeSwapImportExportCreator.sel_exReq_a.getWeight(), keyT);
+									for(int j = 0; j < avaiTruckList.size(); j++){
+										for (String keyMIm : mDepot2MoocList.keySet()) {
+											ArrayList<Mooc> avaiMoocListIm = getAvailableMoocAtDepot(
+													routeSwapImportExportCreator.sel_imReq_b.getWeight(), 
+													routeSwapImportExportCreator.sel_imReq_b.getContainerCategory(), keyMIm);
+											for(int kI = 0; kI < avaiMoocListIm.size(); kI++){
+												for(String keyTIm : mDepot2TruckList.keySet()) {
+													ArrayList<Truck> avaiTruckListIm = getAvailableTruckAtDepot(
+															routeSwapImportExportCreator.sel_imReq_b.getWeight(), keyTIm);
+													for(int jI = 0; jI < avaiTruckListIm.size(); jI++){
+														double dIm = evaluateImportRequest(
+																routeSwapImportExportCreator.sel_imReq_b, avaiTruckListIm.get(jI), avaiMoocListIm.get(kI));
+														double dEx = evaluateExportRoute(
+																routeSwapImportExportCreator.sel_exReq_a, 
+																avaiTruckList.get(j), avaiMoocList.get(k), avaiContList.get(q));
+														
+														double dis = dEx + dIm;
+														if (dis < minDistance1) {
+															minDistance1 = dis;
+															sel_truck_ex = avaiTruckList.get(j);
+															sel_truck_im = avaiTruckListIm.get(jI);
+															sel_mooc_ex = avaiMoocList.get(k);
+															sel_mooc_im = avaiMoocListIm.get(kI);
+															sel_cont = avaiContList.get(q);
+														}
+													}
+												}
+											}
+										}
+									}
 								}
-								TruckRouteInfo4Request tri_q = createRouteForExportRequest(
-										sel_exReq_q, trucks[i1], moocs[j1],
-										containers[k]);
-								if (tri_q == null) {
-									restore();
-									continue;
-								}
-								TruckRoute tr_k = tri_k.route;
-								TruckRoute tr_q = tri_q.route;
-								// compute additional distance when creating
-								// these routes
-								double dis = tr_k.getDistance()
-										- tr_k.getReducedDistance()
-										+ tr_q.getDistance()
-										- tr_q.getReducedDistance();
-								if (dis < minDistance1) {
-									minDistance1 = dis;
-									System.out
-											.println(name()
-													+ "::exploreSwapImportExport, update minDistance1 = "
-													+ minDistance1);
-									sel_tr_k = tr_k;
-									sel_tr_q = tr_q;
-									sel_tri_k = tri_k;
-									sel_tri_q = tri_q;
-								}
-								restore();
 							}
 						}
 					}
 				}
+				if(sel_truck_ex != null && sel_truck_im != null && minDistance1 < minDistanceSwap){
+					TruckRouteInfo4Request tri_im = createRouteForImportRequest(
+							routeSwapImportExportCreator.sel_imReq_b, sel_truck_im, sel_mooc_im);
+					TruckRouteInfo4Request tri_ex = createRouteForExportRequest(
+							routeSwapImportExportCreator.sel_exReq_a, sel_truck_ex, sel_mooc_ex,	sel_cont);
+					if (tri_im != null && tri_ex != null) {
+						IndividualImportExportRoutesComposer icp = new IndividualImportExportRoutesComposer(
+								this, tri_im.route, tri_ex.route, 
+								routeSwapImportExportCreator.sel_imReq_b, routeSwapImportExportCreator.sel_exReq_a,
+								tri_im, tri_ex, minDistance1);
+						candidateRouteComposer.add(icp);
+					}
+				}
+				else{
+					candidateRouteComposer.add(cp);
+				}
 			}
-			if (minDistance1 < minDistance) {
-				IndividualImportExportRoutesComposer icp = new IndividualImportExportRoutesComposer(
-						this, sel_tr_k, sel_tr_q, sel_imReq_k, sel_exReq_q,
-						sel_tri_k, sel_tri_q, minDistance1);
-				candidateRouteComposer.add(icp);
-			} else {
-				candidateRouteComposer.add(cp);
-			}
-
 		}
-
 	}
 
 	public double evaluateKepLech(RouteKeplechCreator routeKeplechCreator){
@@ -573,10 +572,20 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		double minDistanceKepImportReqs = Integer.MAX_VALUE;
 		double minDistanceKepExportReqs = Integer.MAX_VALUE;
 		double minDistanceKepLech 		= Integer.MAX_VALUE;
+		
+		double minDistanceKepImEmptyReqs = Integer.MAX_VALUE;
+		double minDistanceKepImLadenReqs = Integer.MAX_VALUE;
+		double minDistanceKepExEmptyReqs = Integer.MAX_VALUE;
+		double minDistanceKepExLadenReqs = Integer.MAX_VALUE;
 
 		RouteKeplechCreator routeKepLechCreator 	= new RouteKeplechCreator(this);
 		RouteDoubleImportCreator routeImImCreator 	= new RouteDoubleImportCreator(this);
 		RouteDoubleExportCreator routeExExCreator 	= new RouteDoubleExportCreator(this);
+		
+		RouteDoubleImportEmptyCreator routeDoubleImEmptyCreator 	= new RouteDoubleImportEmptyCreator(this);
+		RouteDoubleImportLadenCreator routeDoubleImLadenCreator 	= new RouteDoubleImportLadenCreator(this);
+		RouteDoubleExportEmptyCreator routeDoubleExEmptyCreator 	= new RouteDoubleExportEmptyCreator(this);
+		RouteDoubleExportLadenCreator routeDoubleExLadenCreator 	= new RouteDoubleExportLadenCreator(this);
 		
 		minDistanceKepImportReqs 	= evaluateKepImportRequests(routeImImCreator);
 		minDistanceKepExportReqs 	= evaluateKepExportRequests(routeExExCreator);
@@ -842,138 +851,151 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		}
 	}
 
-	public void exploreTangBo(CandidateRouteComposer candidateRouteComposer) {
+	public double evaluateTangbo(RouteTangboWarehouseExport routeTangboWarehouseExport){
 		double minDistance = Integer.MAX_VALUE;
-		Truck sel_truck = null;
-		Mooc sel_mooc = null;
-		Container sel_container = null;
-		WarehouseContainerTransportRequest sel_whReq_a = null;
-		ExportContainerRequest sel_exReq_b = null;
-		TruckRoute sel_route = null;
-		TruckRouteInfo4Request sel_tri = null;
+		for (int a = 0; a < nbWhReqs; a++) {
+			if(whReqScheduled[a])
+				continue;
+			for (int b = 0; b < nbExReqs; b++) {
+				if (exReqScheduled[b])
+					continue;
+				double maxW = whReq[a].getWeight() > exReq[b].getWeight() ?
+						whReq[a].getWeight() : exReq[b].getWeight();
+				for (String keyC : mDepot2ContainerList.keySet()) {
+					ArrayList<Container> avaiContList = getAvailableContainerAtDepot(maxW, 
+							exReq[b].getContainerCategory(), keyC);
+					for(int q = 0; q < avaiContList.size(); q++){
+						for (String keyM : mDepot2MoocList.keySet()) {
+							ArrayList<Mooc> avaiMoocList = getAvailableMoocAtDepot(maxW, 
+									avaiContList.get(q).getCategoryCode(), keyM);
+							for(int k = 0; k < avaiMoocList.size(); k++){
+								for(String keyT : mDepot2TruckList.keySet()) {
+									ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
+											maxW, keyT);
+									for(int j = 0; j < avaiTruckList.size(); j++){
+										double d = routeTangboWarehouseExport.evaluateTangboWarehouseExport(
+												avaiTruckList.get(j), avaiMoocList.get(k), 
+												avaiContList.get(q), whReq[a], exReq[b]);
+										if(d < minDistance){
+											minDistance = d;
+											routeTangboWarehouseExport.sel_truck = avaiTruckList.get(j);
+											routeTangboWarehouseExport.sel_mooc = avaiMoocList.get(k);
+											routeTangboWarehouseExport.sel_container = avaiContList.get(q);
+											routeTangboWarehouseExport.sel_whReq = whReq[a];
+											routeTangboWarehouseExport.sel_exReq = exReq[b];
+										}
+
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return minDistance;
+	}
+	
+	public void exploreTangBo(CandidateRouteComposer candidateRouteComposer) {
+		
 		RouteTangboWarehouseExport routeTangboWarehouseExport = new RouteTangboWarehouseExport(
 				this);
+		double minDistanceTangbo = evaluateTangbo(routeTangboWarehouseExport);
+		if(routeTangboWarehouseExport.sel_truck != null){
+			TruckRouteInfo4Request tri = routeTangboWarehouseExport
+					.createTangboWarehouseExport();
+			if(tri != null){
+				TangboWarehouseExportRouteComposer tcp = new TangboWarehouseExportRouteComposer(
+						this, routeTangboWarehouseExport.sel_truck,
+						routeTangboWarehouseExport.sel_mooc,
+						routeTangboWarehouseExport.sel_container,
+						tri.route, routeTangboWarehouseExport.sel_whReq,
+						routeTangboWarehouseExport.sel_exReq,
+						tri, minDistanceTangbo);
 
-		for (int i = 0; i < trucks.length; i++) {
-			for (int j = 0; j < moocs.length; j++) {
-				for (int k = 0; k < containers.length; k++) {
-					for (int a = 0; a < whReq.length; a++) {
-						for (int b = 0; b < exReq.length; b++) {
-							if (whReqScheduled[a] || exReqScheduled[b])
-								continue;
-							backup();
-							TruckRouteInfo4Request tri = routeTangboWarehouseExport
-									.createTangboWarehouseExport(trucks[i],
-											moocs[j], containers[k], whReq[a],
-											exReq[b]);
-							if (tri == null) {
-								// System.out.println(name() +
-								// "::solve, cannot find routeTangboWarehouseExport for ("
-								// + i + "," + j + "," + k + "," + a + "," + b +
-								// ")");
-								logln(name()
-										+ "::solve, cannot find routeTangboWarehouseExport for ("
-										+ i + "," + j + "," + k + "," + a + ","
-										+ b + ")");
-							} else {
-								TruckRoute tr = tri.route;
-								// System.out.println(name() +
-								// "::solve, FOUND routeTangboWarehouseExport for ("
-								// + i + "," + j + "," + k + "," + a + "," + b +
-								// "), route = " + tr.toString() +
-								// ", distance = " + tr.getDistance());
-								logln(name()
-										+ "::solve, FOUND routeTangboWarehouseExport for ("
-										+ i + "," + j + "," + k + "," + a + ","
-										+ b + "), route = " + tr.toString()
-										+ ", distance = " + tr.getDistance());
-								if (minDistance > tr.getDistance()) {
-									sel_truck = trucks[i];
-									sel_mooc = moocs[j];
-									sel_container = containers[k];
-									sel_whReq_a = whReq[a];
-									sel_exReq_b = exReq[b];
-									sel_route = tr;
-									sel_tri = tri;
-								}
-							}
-							restore();
-						}
-					}
-				}
-			}
-		}
-		if (sel_truck != null) {
-			TangboWarehouseExportRouteComposer tcp = new TangboWarehouseExportRouteComposer(
-					this, sel_truck, sel_mooc, sel_container, sel_route,
-					sel_whReq_a, sel_exReq_b, sel_tri, minDistance);
-
-			TruckRoute sel_tr_k = null;
-			TruckRoute sel_tr_q = null;
-			TruckRouteInfo4Request sel_tri_k = null;
-			TruckRouteInfo4Request sel_tri_q = null;
-			double minDistance1 = Integer.MAX_VALUE;
-			for (int i1 = 0; i1 < trucks.length; i1++) {
-				for (int j1 = 0; j1 < moocs.length; j1++) {
-					for (int k1 = 0; k1 < containers.length; k1++) {
-						for (int i2 = 0; i2 < trucks.length; i2++) {
-							for (int j2 = 0; j2 < moocs.length; j2++) {
-								for (int k2 = 0; k2 < containers.length; k2++) {
-									if (containers[k2].getCode()
-											.startsWith("A")
-											|| containers[k1].getCode()
-													.startsWith("A"))
-										continue;// imported container
-									backup();
-									TruckRouteInfo4Request tri_k = createRouteForWarehouseWarehouseRequest(
-											sel_whReq_a, trucks[i1], moocs[j1],
-											containers[k1]);
-									if (tri_k == null) {
-										restore();
-										continue;
+				Truck sel_truck_ex1 = null;
+				Truck sel_truck_ex2 = null;
+				Mooc sel_mooc_ex1 = null;
+				Mooc sel_mooc_ex2 = null;
+				Container sel_container_ex1 = null;
+				Container sel_container_ex2 = null;
+				double minDistance1 = Integer.MAX_VALUE;
+				for (String keyC1 : mDepot2ContainerList.keySet()) {
+					ArrayList<Container> avaiContList1 = getAvailableContainerAtDepot(
+							routeTangboWarehouseExport.sel_exReq.getWeight(), 
+							routeTangboWarehouseExport.sel_exReq.getContainerCategory(), keyC1);
+					for(int q1 = 0; q1 < avaiContList1.size(); q1++){
+						for (String keyM1 : mDepot2MoocList.keySet()) {
+							ArrayList<Mooc> avaiMoocList1 = getAvailableMoocAtDepot(
+									routeTangboWarehouseExport.sel_exReq.getWeight(), 
+									routeTangboWarehouseExport.sel_exReq.getContainerCategory(), keyM1);
+							for(int k1 = 0; k1 < avaiMoocList1.size(); k1++){
+								for(String keyT1 : mDepot2TruckList.keySet()) {
+									ArrayList<Truck> avaiTruckList1 = getAvailableTruckAtDepot(
+											routeTangboWarehouseExport.sel_exReq.getWeight(), keyT1);
+									for(int j1 = 0; j1 < avaiTruckList1.size(); j1++){
+										for (String keyC2 : mDepot2ContainerList.keySet()) {
+											ArrayList<Container> avaiContList2 = getAvailableContainerAtDepot(
+													routeTangboWarehouseExport.sel_whReq.getWeight(), 
+													routeTangboWarehouseExport.sel_whReq.getContainerCategory(), keyC2);
+											for(int q2 = 0; q2 < avaiContList2.size(); q2++){
+												for (String keyM2 : mDepot2MoocList.keySet()) {
+													ArrayList<Mooc> avaiMoocList2 = getAvailableMoocAtDepot(
+															routeTangboWarehouseExport.sel_whReq.getWeight(), 
+															routeTangboWarehouseExport.sel_whReq.getContainerCategory(), keyM2);
+													for(int k2 = 0; k2 < avaiMoocList2.size(); k2++){
+														for(String keyT2 : mDepot2TruckList.keySet()) {
+															ArrayList<Truck> avaiTruckList2 = getAvailableTruckAtDepot(
+																	routeTangboWarehouseExport.sel_whReq.getWeight(), keyT2);
+															for(int j2 = 0; j2 < avaiTruckList2.size(); j2++){
+																double dEx = evaluateExportRoute(
+																		routeTangboWarehouseExport.sel_exReq, 
+																		avaiTruckList1.get(j1), avaiMoocList1.get(k1),
+																		avaiContList1.get(q1));
+																double dWh = evaluateWarehouseWarehouseRequest(
+																		routeTangboWarehouseExport.sel_whReq,
+																		avaiTruckList2.get(j2), avaiMoocList2.get(k2),
+																		avaiContList2.get(q2));
+																double dis = dEx + dWh;
+																if (dis < minDistance1) {
+																	minDistance1 = dis;
+																	sel_truck_ex1 = avaiTruckList1.get(j1);
+																	sel_truck_ex2 = avaiTruckList2.get(j2);
+																	sel_mooc_ex1 = avaiMoocList1.get(k1);
+																	sel_mooc_ex2 = avaiMoocList2.get(k2);
+																	sel_container_ex1 = avaiContList1.get(q1);
+																	sel_container_ex2 = avaiContList2.get(q2);
+																}
+															}
+														}
+													}
+												}
+											}
+										}
 									}
-
-									TruckRouteInfo4Request tri_q = createRouteForExportRequest(
-											sel_exReq_b, trucks[i2], moocs[j2],
-											containers[k2]);
-
-									if (tri_q == null) {
-										restore();
-										continue;
-									}
-
-									TruckRoute tr_k = tri_k.route;
-									TruckRoute tr_q = tri_q.route;
-
-									double dis = tr_k.getDistance()
-											- tr_k.getReducedDistance()
-											+ tr_q.getDistance()
-											- tr_q.getReducedDistance();
-									if (dis < minDistance1) {
-										minDistance1 = dis;
-										sel_tr_k = tr_k;
-										sel_tr_q = tr_q;
-										sel_tri_k = tri_k;
-										sel_tri_q = tri_q;
-									}
-
-									restore();
 								}
 							}
 						}
 					}
 				}
-			}
-			if (minDistance1 < minDistance) {
-				IndividualWarehouseExportRoutesComposer icp = new IndividualWarehouseExportRoutesComposer(
-						this, sel_tr_k, sel_tr_q, sel_whReq_a, sel_exReq_b,
-						sel_tri_k, sel_tri_q, minDistance1);
-				candidateRouteComposer.add(icp);
-			} else {
-				candidateRouteComposer.add(tcp);
+				if(sel_truck_ex1 != null && sel_truck_ex2 != null && minDistance1 < minDistanceTangbo){
+					TruckRouteInfo4Request tri_ex = createRouteForExportRequest(
+							routeTangboWarehouseExport.sel_exReq, sel_truck_ex1, sel_mooc_ex1, sel_container_ex1);
+					TruckRouteInfo4Request tri_wh = createRouteForWarehouseWarehouseRequest(
+							routeTangboWarehouseExport.sel_whReq, sel_truck_ex2, sel_mooc_ex2, sel_container_ex2);
+					if (tri_wh != null && tri_ex != null) {
+						IndividualWarehouseExportRoutesComposer icp = new IndividualWarehouseExportRoutesComposer(
+								this, tri_wh.route, tri_ex.route, routeTangboWarehouseExport.sel_whReq, routeTangboWarehouseExport.sel_exReq,
+								tri_wh, tri_ex, minDistance1);
+						candidateRouteComposer.add(icp);
+					}
+				}
+				else{
+					candidateRouteComposer.add(tcp);
+				}
 			}
 		}
-
+		
 	}
 	public void exploreDirectRouteImportLadenRequest(CandidateRouteComposer candidateRouteComposer){
 		double minDistance = Integer.MAX_VALUE;
@@ -991,7 +1013,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 				for(int k = 0; k < avaiMoocList.size(); k++){
 					for(String keyT : mDepot2TruckList.keySet()) {
 						ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
-								avaiMoocList.get(k).getWeight(), keyT);
+								imLadenReq[i].getWeight(), keyT);
 						for(int j = 0; j < avaiTruckList.size(); j++){
 							double d = evaluateImportLadenRequest(imLadenReq[i], avaiTruckList.get(j), avaiMoocList.get(k));
 							if(d < minDistance){
@@ -1091,7 +1113,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 						for(int k = 0; k < avaiMoocList.size(); k++){
 							for(String keyT : mDepot2TruckList.keySet()) {
 								ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
-										avaiMoocList.get(k).getWeight(), keyT);
+										0, keyT);
 								for(int j = 0; j < avaiTruckList.size(); j++){
 									double d = evaluateExportEmptyRequest(exEmptyReq[i], 
 											avaiTruckList.get(j), avaiMoocList.get(k));
@@ -1330,7 +1352,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 						for(int k = 0; k < avaiMoocList.size(); k++){
 							for(String keyT : mDepot2TruckList.keySet()) {
 								ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
-										avaiMoocList.get(k).getWeight(), keyT);
+										exReq[i].getWeight(), keyT);
 								for(int j = 0; j < avaiTruckList.size(); j++){
 									double d = evaluateExportRoute(exReq[i], avaiTruckList.get(j), avaiMoocList.get(k), avaiContList.get(q));
 									if(d < minDistance){
@@ -1387,7 +1409,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 				for(int k = 0; k < avaiMoocList.size(); k++){
 					for(String keyT : mDepot2TruckList.keySet()) {
 						ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
-								avaiMoocList.get(k).getWeight(), keyT);
+								imReq[i].getWeight(), keyT);
 						for(int j = 0; j < avaiTruckList.size(); j++){
 							double d = evaluateImportRequest(
 									imReq[i], avaiTruckList.get(j), avaiMoocList.get(k));
@@ -1448,7 +1470,7 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 						for(int k = 0; k < avaiMoocList.size(); k++){
 							for(String keyT : mDepot2TruckList.keySet()) {
 								ArrayList<Truck> avaiTruckList = getAvailableTruckAtDepot(
-										avaiMoocList.get(k).getWeight(), keyT);
+										whReq[i].getWeight(), keyT);
 								for(int j = 0; j < avaiTruckList.size(); j++){
 									double d = evaluateWarehouseWarehouseRequest(whReq[i],
 											avaiTruckList.get(j), avaiMoocList.get(k), avaiContList.get(q));
@@ -1640,15 +1662,6 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 		mTruck2Route = new HashMap<Truck, TruckRoute>();
 		mTruck2Itinerary = new HashMap<Truck, TruckItinerary>();
 
-		ArrayList<TruckRoute> lst_truckRoutes = new ArrayList<TruckRoute>();
-
-		RouteDoubleImportCreator routeDoubleImportCreator = new RouteDoubleImportCreator(
-				this);
-		RouteKeplechCreator routeKeplechCreator = new RouteKeplechCreator(this);
-		RouteSwapImportExportCreator routeSwapImportExportCreator = new RouteSwapImportExportCreator(
-				this);
-		RouteTangboWarehouseExport routeTangboWarehouseExport = new RouteTangboWarehouseExport(
-				this);
 		trucks = input.getTrucks();
 		moocs = input.getMoocs();
 		containers = input.getContainers();
@@ -1767,9 +1780,9 @@ public class InitGreedyImproveSpecialOperatorSolver extends
 
 			//exploreDoubleImport(candidate_routes);
 			
-			//exploreSwapImportExport(candidate_routes);
+			exploreSwapImportExport(candidate_routes);
 			exploreKep(candidate_routes);
-			//exploreTangBo(candidate_routes);
+			exploreTangBo(candidate_routes);
 			System.out.println(name()
 					+ "::solve, special operators, candidates_routes.sz = "
 					+ candidate_routes.size());

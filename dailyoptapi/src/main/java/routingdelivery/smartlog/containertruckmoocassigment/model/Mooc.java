@@ -7,9 +7,10 @@ public class Mooc {
 	private String status;
 	private String depotMoocCode;
 	private String[] returnDepotCodes;// possible depots when finishing services
+	private Intervals[] intervals;
 	
 	public Mooc(String code, String category, double weight, String status,
-			String depotMoocCode, String[] returnDepotCodes) {
+			String depotMoocCode, String[] returnDepotCodes, Intervals[] intervals) {
 		super();
 		this.code = code;
 		this.category = category;
@@ -17,6 +18,7 @@ public class Mooc {
 		this.status = status;
 		this.depotMoocCode = depotMoocCode;
 		this.returnDepotCodes = returnDepotCodes;
+		this.intervals = intervals;
 	}
 	public String[] getReturnDepotCodes() {
 		return returnDepotCodes;
@@ -53,6 +55,13 @@ public class Mooc {
 	}
 	public void setDepotMoocCode(String depotMoocCode) {
 		this.depotMoocCode = depotMoocCode;
+	}
+	
+	public Intervals[] getIntervals() {
+		return intervals;
+	}
+	public void setIntervals(Intervals[] intervals) {
+		this.intervals = intervals;
 	}
 	
 	public Mooc() {

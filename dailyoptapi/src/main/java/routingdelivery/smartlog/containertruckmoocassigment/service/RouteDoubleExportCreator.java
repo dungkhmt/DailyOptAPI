@@ -69,8 +69,6 @@ public class RouteDoubleExportCreator {
 		int lastUsedIndex = -1;
 		int travelTime = -1;
 		String lastLocationCode = combo.lastLocationCode;
-		DepotTruck depotTruck = solver.mTruck2LastDepot.get(truck);
-		DepotMooc depotMooc = solver.mMooc2LastDepot.get(mooc);
 		DepotContainer depotContainer_a = solver.mCode2DepotContainer.get(req_a.getDepotContainerCode());
 		DepotContainer depotContainer_b = solver.mCode2DepotContainer.get(req_b.getDepotContainerCode());
 		
@@ -183,19 +181,44 @@ public class RouteDoubleExportCreator {
 		
 		
 		distance += solver.getDistance(lastLocationCode, port_a.getLocationCode());
+		travelTime = solver.getTravelTime(lastLocationCode, port_a.getLocationCode());
+		arrivalTime = departureTime + travelTime;
+		startServiceTime = arrivalTime;
+		duration = sel_exReq_a.getUnloadDuration();
+		departureTime = startServiceTime + duration;
 		lastLocationCode = port_a.getLocationCode();
 		
 		distance += solver.getDistance(lastLocationCode, port_b.getLocationCode());
+		travelTime = solver.getTravelTime(lastLocationCode, port_b.getLocationCode());
+		arrivalTime = departureTime + travelTime;
+		startServiceTime = arrivalTime;
+		duration = sel_exReq_b.getUnloadDuration();
+		departureTime = startServiceTime + duration;
 		lastLocationCode = port_b.getLocationCode();
+		
 		
 		DepotMooc returnDepotMooc = solver.findDepotMooc4Deposit(lastLocationCode, mooc);
 		distance += solver.getDistance(lastLocationCode, returnDepotMooc.getLocationCode());
+		travelTime = solver.getTravelTime(lastLocationCode, returnDepotMooc.getLocationCode());
+		arrivalTime = departureTime + travelTime;
+		startServiceTime = arrivalTime;
+		duration = returnDepotMooc.getDeliveryMoocDuration();
+		departureTime = startServiceTime + duration;
+		if(!solver.checkAvailableIntervalsMooc(mooc, combo.startTimeOfMooc, departureTime))
+			return Integer.MAX_VALUE;
 		lastLocationCode = returnDepotMooc.getLocationCode();
 		
-		//from mooc depot to truck depot
 		DepotTruck returnDepotTruck = solver.findDepotTruck4Deposit(lastLocationCode, truck);
 		distance += solver.getDistance(lastLocationCode, returnDepotTruck.getLocationCode());		
-
+		travelTime = solver.getTravelTime(lastLocationCode, returnDepotTruck.getLocationCode());
+		arrivalTime = departureTime + travelTime;
+		startServiceTime = arrivalTime;
+		duration = 0;
+		departureTime = startServiceTime + duration;
+		if(!solver.checkAvailableIntervalsTruck(truck, 
+				combo.startTimeOfTruck, departureTime))
+			return Integer.MAX_VALUE;
+		
 		return distance;
 	}
 	

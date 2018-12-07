@@ -65,23 +65,23 @@ public class Solver {
 	// end of computed statistic information
 	protected boolean DEBUG = true;
 	
-	protected PrintWriter log = null;
+	//protected PrintWriter log = null;
 	public String name(){
 		return "api.solver.solve";
 	}
 	public boolean getDEBUG(){
 		return DEBUG;
 	}
-	public void initLog(){
-		try{
-			log = new PrintWriter("C:/tmp/havest-planning-log.txt");
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}
-	}
-	public void finalize(){
-		log.close();
-	}
+//	public void initLog(){
+//		try{
+//			log = new PrintWriter("C:/tmp/havest-planning-log.txt");
+//		}catch(Exception ex){
+//			ex.printStackTrace();
+//		}
+//	}
+//	public void finalize(){
+//		log.close();
+//	}
 	public void analyze(){
 		totalQuantity = 0;
 		fields = new MField[input.getFields().length];
@@ -163,8 +163,8 @@ public class Solver {
 	public void mapDates() {
 		System.out.println(name() + "::mapDates, dates.length = " + dates.length + ", dates[0] = " + 
 	Utility.dateMonthYear(dates[0]) + ", dates[" + (dates.length-1) + "] = " + Utility.dateMonthYear(dates[dates.length-1]));
-		log.println(name() + "::mapDates, dates.length = " + dates.length + ", dates[0] = " + 
-				Utility.dateMonthYear(dates[0]) + ", dates[" + (dates.length-1) + "] = " + Utility.dateMonthYear(dates[dates.length-1]));
+//		log.println(name() + "::mapDates, dates.length = " + dates.length + ", dates[0] = " + 
+//				Utility.dateMonthYear(dates[0]) + ", dates[" + (dates.length-1) + "] = " + Utility.dateMonthYear(dates[dates.length-1]));
 					
 		Date lastDate = Utility.next(dates[dates.length-1],input.getPlantStandard().getMaxPeriod() + 1);
 		ArrayList<Date> dateList = new ArrayList<Date>();

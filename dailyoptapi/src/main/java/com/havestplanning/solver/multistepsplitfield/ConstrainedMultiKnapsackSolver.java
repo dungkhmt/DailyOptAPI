@@ -159,13 +159,13 @@ public class ConstrainedMultiKnapsackSolver {
 		System.out
 				.println(name() + "::solve start.... n = " + n + ", m = " + m + ", max_range = " + max_range);
 
-		getSolver().getLog().println(name() + "::solve, EXP_DATE[0] = " + expected_date[0]);
+		//getSolver().getLog().println(name() + "::solve, EXP_DATE[0] = " + expected_date[0]);
 		
 		stateModel();
 		search(timeLimit);
 
-		if (getSolver().getDEBUG())
-			getSolver().getLog().println("SOLUTION:");
+//		if (getSolver().getDEBUG())
+//			getSolver().getLog().println("SOLUTION:");
 
 		for (int i = 0; i < m; i++) {
 
@@ -184,14 +184,14 @@ public class ConstrainedMultiKnapsackSolver {
 						+ ", violations_packing = " + violations_packing[i]
 						+ ", des = " + des);
 
-				if (getSolver().getDEBUG()) {
-					getSolver().getLog().print(name() + "::solve, date " + i + " : ");
-					getSolver().getLog().println(
-							"sz = " + sz + ", load = " + load[i]
-									+ ", violations_packing = "
-									+ violations_packing[i] + ", des = ");// +
-																			// des);
-				}
+//				if (getSolver().getDEBUG()) {
+//					getSolver().getLog().print(name() + "::solve, date " + i + " : ");
+//					getSolver().getLog().println(
+//							"sz = " + sz + ", load = " + load[i]
+//									+ ", violations_packing = "
+//									+ violations_packing[i] + ", des = ");// +
+//																			// des);
+//				}
 
 			}
 		}
@@ -616,15 +616,15 @@ public class ConstrainedMultiKnapsackSolver {
 			int ob = x[i];
 			assign(i, j);
 
-			if (getSolver().getDEBUG())
-				getSolver().getLog().println(
-						name() + "::performMoveSequence, assign(" + i
-								+ "(code-"
-								+ solver.getInput().getFields()[i].getCode()
-								+ ", qtt-" + qtt[i] + ")  from " + ob + " -> "
-								+ j + ") " + "eval = " + eval() + ", load[" + j
-								+ "] = " + load[j] + ", violations_packing["
-								+ j + "] = " + violations_packing[j]);
+//			if (getSolver().getDEBUG())
+//				getSolver().getLog().println(
+//						name() + "::performMoveSequence, assign(" + i
+//								+ "(code-"
+//								+ solver.getInput().getFields()[i].getCode()
+//								+ ", qtt-" + qtt[i] + ")  from " + ob + " -> "
+//								+ j + ") " + "eval = " + eval() + ", load[" + j
+//								+ "] = " + load[j] + ", violations_packing["
+//								+ j + "] = " + violations_packing[j]);
 		}
 	}
 
@@ -643,21 +643,21 @@ public class ConstrainedMultiKnapsackSolver {
 			// if (best >= 0) break;
 			// System.out.print(name() + "::moveSequence, step " + count +
 			// ", d = " + d + ", moves = ");
-			if (getSolver().getDEBUG())
-				getSolver().getLog().print(
-						name() + "::moveSequence, step " + count + ", d = " + d
-								+ ", moves = ");
+//			if (getSolver().getDEBUG())
+//				getSolver().getLog().print(
+//						name() + "::moveSequence, step " + count + ", d = " + d
+//								+ ", moves = ");
 			for (int k = moves.size() - 1; k >= 0; k--) {
 				int i = moves.get(k);
 				int bi = x[i];
 				// System.out.print(i + "[q-" + qtt[i] + ", d-" + bi + "], ");
-				if (getSolver().getDEBUG())
-					getSolver().getLog().print(
-							i + "[q-" + qtt[i] + ", d-" + bi + "], ");
+//				if (getSolver().getDEBUG())
+//					getSolver().getLog().print(
+//							i + "[q-" + qtt[i] + ", d-" + bi + "], ");
 			}
 			// System.out.println();
-			if (getSolver().getDEBUG())
-				getSolver().getLog().println();
+//			if (getSolver().getDEBUG())
+//				getSolver().getLog().println();
 			/*
 			 * for (int k = moves.size() - 1; k >= 0; k--) { int i =
 			 * moves.get(k); int j = d; if (k > 0) { j = x[moves.get(k - 1)]; }
@@ -674,16 +674,16 @@ public class ConstrainedMultiKnapsackSolver {
 			// System.out.println(name() +
 			// "::moveSequence FINISH A LOOP best = "
 			// + best + " -------------------------");
-			if (getSolver().getDEBUG())
-				getSolver().getLog().println(
-						name() + "::moveSequence FINISH A LOOP best = " + best
-								+ " -------------------------");
+//			if (getSolver().getDEBUG())
+//				getSolver().getLog().println(
+//						name() + "::moveSequence FINISH A LOOP best = " + best
+//								+ " -------------------------");
 			count++;
 			if (count >= maxIter)
 				break;
 		}
-		if (getSolver().getDEBUG())
-			getSolver().getLog().println(name() + "::moveSequence, POST");
+//		if (getSolver().getDEBUG())
+//			getSolver().getLog().println(name() + "::moveSequence, POST");
 		for (int i = 1; i <= 50; i++) {
 			PM.findOptimalMovePath(20, -1, false);
 			performMoveSequence(PM.getMovedItems(), PM.getGlobalFinalDate());
@@ -937,17 +937,17 @@ public class ConstrainedMultiKnapsackSolver {
 							+ load[m.v] + ", eval = " + eval() + ", delta_violations_packing = "
 							+ min_delta_violations_packing + ", delta_violations_havest = " + min_delta_violations_havest);
 
-					if (getSolver().getDEBUG())
-						getSolver().getLog().println(
-								name() + "::searchReducePackingViolations, Step "
-										+ it + " -> move(" + m.i + " q(" + qtt[m.i]
-										+ "  from " + o + " -> " + m.v
-										+ "), old_load[" + o + "] = " + l1
-										+ ", old_load[" + m.v + "] = " + l2
-										+ ", load[" + o + "] = " + load[o]
-										+ ", load[" + m.v + "] = " + load[m.v]
-										+ ", eval = " + eval() + ", delta_violations_packing = "
-										+ min_delta_violations_packing + ", delta_violations_havest = " + min_delta_violations_havest);
+//					if (getSolver().getDEBUG())
+//						getSolver().getLog().println(
+//								name() + "::searchReducePackingViolations, Step "
+//										+ it + " -> move(" + m.i + " q(" + qtt[m.i]
+//										+ "  from " + o + " -> " + m.v
+//										+ "), old_load[" + o + "] = " + l1
+//										+ ", old_load[" + m.v + "] = " + l2
+//										+ ", load[" + o + "] = " + load[o]
+//										+ ", load[" + m.v + "] = " + load[m.v]
+//										+ ", eval = " + eval() + ", delta_violations_packing = "
+//										+ min_delta_violations_packing + ", delta_violations_havest = " + min_delta_violations_havest);
 				} else {
 					SwapMove m = swap_moves.get(R.nextInt(swap_moves.size()));
 					int pi = x[m.j];
@@ -967,15 +967,15 @@ public class ConstrainedMultiKnapsackSolver {
 							+ load[pi] + ", eval = " + eval() + ", delta_swap_violations_packing = "
 							+ min_swap_delta_violations_packing + ", delta_swap_violations_havest = " + min_swap_delta_violations_havest);
 
-					if (getSolver().getDEBUG())
-						getSolver().getLog().println(name()
-								+ "::searchReducePackingViolations, Step " + it
-								+ " -> swap(" + m.i + " q(" + qtt[m.i] + ") at " + pj + "  , " + m.j
-								+ " " + qtt[m.j] + " at " + pi + "), old_load[" + pj + "] = " + old_load_i
-								+ ", old_load[" + pi + "] = " + old_load_j + ", load[" + pj
-								+ "] = " + load[pj] + ", load[" + pi + "] = "
-								+ load[pi] + ", eval = " + eval() + ", delta_swap_violations_packing = "
-								+ min_swap_delta_violations_packing + ", delta_swap_violations_havest = " + min_swap_delta_violations_havest);
+//					if (getSolver().getDEBUG())
+//						getSolver().getLog().println(name()
+//								+ "::searchReducePackingViolations, Step " + it
+//								+ " -> swap(" + m.i + " q(" + qtt[m.i] + ") at " + pj + "  , " + m.j
+//								+ " " + qtt[m.j] + " at " + pi + "), old_load[" + pj + "] = " + old_load_i
+//								+ ", old_load[" + pi + "] = " + old_load_j + ", load[" + pj
+//								+ "] = " + load[pj] + ", load[" + pi + "] = "
+//								+ load[pi] + ", eval = " + eval() + ", delta_swap_violations_packing = "
+//								+ min_swap_delta_violations_packing + ", delta_swap_violations_havest = " + min_swap_delta_violations_havest);
 	
 				}
 
@@ -1094,17 +1094,17 @@ public class ConstrainedMultiKnapsackSolver {
 							+ load[m.v] + ", eval = " + eval() + ", delta_violations_packing = "
 							+ min_delta_violations_packing + ", delta_sugar_havest = " + min_delta_sugar_harvest);
 
-					if (getSolver().getDEBUG())
-						getSolver().getLog().println(
-								name() + "::searchReducePackingViolations, Step "
-										+ it + " -> move(" + m.i + " q(" + qtt[m.i]
-										+ "  from " + o + " -> " + m.v
-										+ "), old_load[" + o + "] = " + l1
-										+ ", old_load[" + m.v + "] = " + l2
-										+ ", load[" + o + "] = " + load[o]
-										+ ", load[" + m.v + "] = " + load[m.v]
-										+ ", eval = " + eval() + ", delta_violations_packing = "
-										+ min_delta_violations_packing + ", delta_sugar_havest = " + min_delta_sugar_harvest);
+//					if (getSolver().getDEBUG())
+//						getSolver().getLog().println(
+//								name() + "::searchReducePackingViolations, Step "
+//										+ it + " -> move(" + m.i + " q(" + qtt[m.i]
+//										+ "  from " + o + " -> " + m.v
+//										+ "), old_load[" + o + "] = " + l1
+//										+ ", old_load[" + m.v + "] = " + l2
+//										+ ", load[" + o + "] = " + load[o]
+//										+ ", load[" + m.v + "] = " + load[m.v]
+//										+ ", eval = " + eval() + ", delta_violations_packing = "
+//										+ min_delta_violations_packing + ", delta_sugar_havest = " + min_delta_sugar_harvest);
 				} else {
 					SwapMove m = swap_moves.get(R.nextInt(swap_moves.size()));
 					int pi = x[m.j];
@@ -1135,16 +1135,16 @@ public class ConstrainedMultiKnapsackSolver {
 							+ min_swap_delta_violations_packing + ", delta_swap_sugar_havest = " + 
 							min_swap_delta_sugar_havest);
 
-					if (getSolver().getDEBUG())
-						getSolver().getLog().println(name()
-								+ "::searchReducePackingViolations, Step " + it
-								+ " -> swap(" + m.i + " q(" + qtt[m.i] + ") at " + pj + "  , " + m.j
-								+ " " + qtt[m.j] + " at " + pi + "), old_load[" + pj + "] = " + old_load_i
-								+ ", old_load[" + pi + "] = " + old_load_j + ", load[" + pj
-								+ "] = " + load[pj] + ", load[" + pi + "] = "
-								+ load[pi] + ", eval = " + eval() + ", delta_swap_violations_packing = "
-								+ min_swap_delta_violations_packing + ", delta_swap_sugar_havest = " + 
-								min_swap_delta_sugar_havest);
+//					if (getSolver().getDEBUG())
+//						getSolver().getLog().println(name()
+//								+ "::searchReducePackingViolations, Step " + it
+//								+ " -> swap(" + m.i + " q(" + qtt[m.i] + ") at " + pj + "  , " + m.j
+//								+ " " + qtt[m.j] + " at " + pi + "), old_load[" + pj + "] = " + old_load_i
+//								+ ", old_load[" + pi + "] = " + old_load_j + ", load[" + pj
+//								+ "] = " + load[pj] + ", load[" + pi + "] = "
+//								+ load[pi] + ", eval = " + eval() + ", delta_swap_violations_packing = "
+//								+ min_swap_delta_violations_packing + ", delta_swap_sugar_havest = " + 
+//								min_swap_delta_sugar_havest);
 	
 				}
 
@@ -1218,14 +1218,14 @@ public class ConstrainedMultiKnapsackSolver {
 						// getSolver().getLog().println();
 					}
 
-					if (getSolver().getDEBUG())
-						getSolver().getLog().println(
-								name() + "::searchAggregateDates, iter " + it
-										+ ", move aggregate, eval = " + eval()
-										+ ", load[" + sel_date + "] = "
-										+ load[sel_date] + ", delta = "
-										+ minDelta + ", dates.sz = "
-										+ sel_move.getDates().size());
+//					if (getSolver().getDEBUG())
+//						getSolver().getLog().println(
+//								name() + "::searchAggregateDates, iter " + it
+//										+ ", move aggregate, eval = " + eval()
+//										+ ", load[" + sel_date + "] = "
+//										+ load[sel_date] + ", delta = "
+//										+ minDelta + ", dates.sz = "
+//										+ sel_move.getDates().size());
 
 					System.out.println(name() + "::searchAggregateDates, iter "
 							+ it + ", move aggregate, eval = " + eval()
