@@ -1,8 +1,10 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class Truck {
+	private int id;
 	private String code;
 	private double weight;
+	private int driverID;
 	private String driverCode;
 	private String driverName;
 	private String depotTruckCode;
@@ -12,11 +14,16 @@ public class Truck {
 	private String[] returnDepotCodes;// possible depots when finishing services
 	private Intervals[] intervals;
 	
-	public Truck(String code, double weight, String driverCode, String driverName, String depotTruckCode, String startWorkingTime,
-			String endWorkingTime, String status, String[] returnDepotCodes, Intervals[] intervals) {
+	public Truck(int id, String code, double weight,
+			int driverID, String driverCode, String driverName,
+			String depotTruckCode, String startWorkingTime,
+			String endWorkingTime, String status,
+			String[] returnDepotCodes, Intervals[] intervals) {
 		super();
+		this.id = id;
 		this.code = code;
 		this.weight = weight;
+		this.driverID = driverID;
 		this.driverCode = driverCode;
 		this.driverName = driverName;
 		this.depotTruckCode = depotTruckCode;
@@ -25,6 +32,18 @@ public class Truck {
 		this.status = status;
 		this.returnDepotCodes = returnDepotCodes;
 		this.intervals = intervals;
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getCode() {
+		return code;
+	}
+	public void setCode(String code) {
+		this.code = code;
 	}
 	public String[] getReturnDepotCodes() {
 		return returnDepotCodes;
@@ -38,7 +57,12 @@ public class Truck {
 	public void setWeight(double weight) {
 		this.weight = weight;
 	}
-	
+	public int getDriverID(){
+		return this.driverID;
+	}
+	public void setDriverID(int driverID){
+		this.driverID = driverID;
+	}
 	public String getDriverCode() {
 		return driverCode;
 	}
@@ -51,13 +75,6 @@ public class Truck {
 	}
 	public void setDriverName(String driverName) {
 		this.driverName = driverName;
-	}
-	
-	public String getCode() {
-		return code;
-	}
-	public void setCode(String code) {
-		this.code = code;
 	}
 	
 	public String getDepotTruckCode() {

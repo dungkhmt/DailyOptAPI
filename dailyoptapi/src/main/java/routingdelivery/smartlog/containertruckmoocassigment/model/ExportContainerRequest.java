@@ -18,7 +18,7 @@ public class ExportContainerRequest {
 	//private String wareHouseCode;
 	//private String earlyDateTimeLoadAtWarehouse;
 	//private String lateDateTimeLoadAtWarehouse;
-	//private int loadDuration;
+	private int loadDuration;
 	//private int detachEmptyMoocContainerDuration;
 	
 	//private String earlyDateTimePickupLoadedContainerAtWarehouse;
@@ -53,6 +53,7 @@ public class ExportContainerRequest {
 			String containerCode, String containerNo, double weight,
 			String earlyDateTimePickupAtDepot,
 			String lateDateTimePickupAtDepot,
+			int loadDuration,
 			PickupWarehouseInfo[] pickupWarehouses, String portCode,
 			String earlyDateTimeUnloadAtPort, String lateDateTimeUnloadAtPort,
 			int unloadDuration, String customerCode, String customerName) {
@@ -66,6 +67,7 @@ public class ExportContainerRequest {
 		this.weight = weight;
 		this.earlyDateTimePickupAtDepot = earlyDateTimePickupAtDepot;
 		this.lateDateTimePickupAtDepot = lateDateTimePickupAtDepot;
+		this.loadDuration = loadDuration;
 		this.pickupWarehouses = pickupWarehouses;
 		this.portCode = portCode;
 		this.earlyDateTimeUnloadAtPort = earlyDateTimeUnloadAtPort;
@@ -157,6 +159,14 @@ public class ExportContainerRequest {
 
 	public void setLateDateTimePickupAtDepot(String lateDateTimePickupAtDepot) {
 		this.lateDateTimePickupAtDepot = lateDateTimePickupAtDepot;
+	}
+	
+	public int getLoadDuration() {
+		return loadDuration;
+	}
+
+	public void setLoadDuration(int loadDuration) {
+		this.loadDuration = loadDuration;
 	}
 
 	public PickupWarehouseInfo[] getPickupWarehouses() {

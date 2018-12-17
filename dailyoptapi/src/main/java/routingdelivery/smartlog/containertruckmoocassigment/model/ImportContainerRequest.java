@@ -22,7 +22,7 @@ public class ImportContainerRequest {
 	//private String wareHouseCode;
 	//private String earlyDateTimeUnloadAtWarehouse;
 	//private String lateDateTimeUnloadAtWarehouse;
-	//private int unloadDuration;
+	private int unloadDuration;
 	//private int detachLoadedMoocContainerDuration;
 	
 	// 2nd segment (Warehouse -> depot, Empty)
@@ -194,6 +194,14 @@ public class ImportContainerRequest {
 
 	public void setLateDateTimeDeliveryAtDepot(String lateDateTimeDeliveryAtDepot) {
 		this.lateDateTimeDeliveryAtDepot = lateDateTimeDeliveryAtDepot;
+	}
+	
+	public int getUnloadDuration() {
+		return unloadDuration;
+	}
+
+	public void setUnloadDuration(int unloadDuration) {
+		this.unloadDuration = unloadDuration;
 	}
 	
 	public String getCustomerCode(){

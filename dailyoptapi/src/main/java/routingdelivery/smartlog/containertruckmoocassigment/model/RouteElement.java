@@ -8,6 +8,7 @@ public class RouteElement {
 	private Port port;
 	private Mooc mooc;
 	private Container container;
+	private Container containerKep;
 	private Truck truck;
 	
 	private String locationCode;
@@ -16,7 +17,10 @@ public class RouteElement {
 						// 
 	private ExportContainerRequest exportRequest;
 	private ImportContainerRequest importRequest;
+	private ExportContainerRequest exportRequestKep;
+	private ImportContainerRequest importRequestKep;
 	private WarehouseContainerTransportRequest warehouseRequest;
+	private WarehouseContainerTransportRequest warehouseRequestKep;
 	private EmptyContainerFromDepotRequest emptyContainerFromDepotRequest;
 	private EmptyContainerToDepotRequest emptyContainerToDepotRequest;
 	private TransportContainerRequest transportContainerRequest;
@@ -24,11 +28,15 @@ public class RouteElement {
 	private ExportEmptyRequests exportEmptyRequest;
 	private ImportLadenRequests importLadenRequest;
 	private ImportEmptyRequests importEmptyRequest;
+	private ExportLadenRequests exportLadenRequestKep;
+	private ExportEmptyRequests exportEmptyRequestKep;
+	private ImportLadenRequests importLadenRequestKep;
+	private ImportEmptyRequests importEmptyRequestKep;
 	
 	
 	public RouteElement(DepotTruck depotTruck, DepotMooc depotMooc,
 			DepotContainer depotContainer, Warehouse warehouse, Port port,
-			Mooc mooc, Container container, Truck truck, String locationCode,
+			Mooc mooc, Container container, Container containerKep, Truck truck, String locationCode,
 			String action, ExportContainerRequest exportRequest,
 			ImportContainerRequest importRequest,
 			WarehouseContainerTransportRequest warehouseRequest,
@@ -48,6 +56,7 @@ public class RouteElement {
 		this.port = port;
 		this.mooc = mooc;
 		this.container = container;
+		this.containerKep = containerKep;
 		this.truck = truck;
 		this.locationCode = locationCode;
 		this.action = action;
@@ -88,6 +97,31 @@ public class RouteElement {
 	}
 	public void setImportEmptyRequest(ImportEmptyRequests importEmptyRequest) {
 		this.importEmptyRequest = importEmptyRequest;
+	}
+
+	public ExportLadenRequests getExportLadenRequestKep() {
+		return exportLadenRequestKep;
+	}
+	public void setExportLadenRequestKep(ExportLadenRequests exportLadenRequestKep) {
+		this.exportLadenRequestKep = exportLadenRequestKep;
+	}
+	public ExportEmptyRequests getExportEmptyRequestKep() {
+		return exportEmptyRequestKep;
+	}
+	public void setExportEmptyRequestKep(ExportEmptyRequests exportEmptyRequestKep) {
+		this.exportEmptyRequestKep = exportEmptyRequestKep;
+	}
+	public ImportLadenRequests getImportLadenRequestKep() {
+		return importLadenRequestKep;
+	}
+	public void setImportLadenRequestKep(ImportLadenRequests importLadenRequestKep) {
+		this.importLadenRequestKep = importLadenRequestKep;
+	}
+	public ImportEmptyRequests getImportEmptyRequestKep() {
+		return importEmptyRequestKep;
+	}
+	public void setImportEmptyRequestKep(ImportEmptyRequests importEmptyRequestKep) {
+		this.importEmptyRequestKep = importEmptyRequestKep;
 	}
 	public EmptyContainerFromDepotRequest getEmptyContainerFromDepotRequest() {
 		return emptyContainerFromDepotRequest;
@@ -131,6 +165,7 @@ public class RouteElement {
 		//this.port = e.port;
 		this.mooc = e.mooc;
 		this.container = e.container;
+		this.containerKep = e.containerKep;
 		this.truck = e.truck;
 		this.exportRequest = e.exportRequest;
 		this.importRequest = e.importRequest;
@@ -148,7 +183,7 @@ public class RouteElement {
 	}
 	public RouteElement(DepotTruck depotTruck, DepotMooc depotMooc,
 			DepotContainer depotContainer, Warehouse warehouse, Port port,
-			Mooc mooc, Container container, String action,
+			Mooc mooc, Container container, Container containerKep, String action,
 			ExportContainerRequest exportRequest,
 			ImportContainerRequest importRequest,
 			WarehouseContainerTransportRequest warehouseRequest,
@@ -161,6 +196,7 @@ public class RouteElement {
 		this.port = port;
 		this.mooc = mooc;
 		this.container = container;
+		this.containerKep = containerKep;
 		this.action = action;
 		this.exportRequest = exportRequest;
 		this.importRequest = importRequest;
@@ -180,6 +216,12 @@ public class RouteElement {
 	}
 	public void setContainer(Container container) {
 		this.container = container;
+	}
+	public Container getContainerKep() {
+		return containerKep;
+	}
+	public void setContainerKep(Container containerKep) {
+		this.containerKep = containerKep;
 	}
 	public RouteElement(DepotTruck depotTruck, DepotMooc depotMooc,
 			DepotContainer depotContainer, Warehouse warehouse, Port port,

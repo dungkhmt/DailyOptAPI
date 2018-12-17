@@ -12,6 +12,8 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.DepotMooc;
 import routingdelivery.smartlog.containertruckmoocassigment.model.DepotTruck;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ExportContainerRequest;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ImportContainerRequest;
+import routingdelivery.smartlog.containertruckmoocassigment.model.Intervals;
+import routingdelivery.smartlog.containertruckmoocassigment.model.Measure;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Mooc;
 import routingdelivery.smartlog.containertruckmoocassigment.model.MoocCategoryEnum;
 import routingdelivery.smartlog.containertruckmoocassigment.model.PickupWarehouseInfo;
@@ -67,7 +69,7 @@ public class RouteKeplechCreator {
 		return ok;
 	}
 
-	public double evaluateKeplechRoute(Truck truck, Mooc mooc,
+	public Measure evaluateKeplechRoute(Truck truck, Mooc mooc,
 			Container container, ExportContainerRequest er,
 			ImportContainerRequest ir) {
 		// truck-mooc-container -> warehouse(er) -> port(ir) -> port(er) ->
@@ -75,13 +77,13 @@ public class RouteKeplechCreator {
 
 		if (solver.mContainer2LastDepot.get(container) == null) {
 			// this is imported container, thus does not has depot
-			return Integer.MAX_VALUE;
+			return null;
 		}
 
 		ComboContainerMoocTruck combo = solver.findLastAvailable(truck, mooc,
 				container);
 		if (combo == null)
-			return Integer.MAX_VALUE;
+			return null;
 
 		RouteElement lastElement = combo.routeElement;
 		int departureTime = combo.startTime;
@@ -91,6 +93,7 @@ public class RouteKeplechCreator {
 		int duration = -1;
 		String lastLocationCode = combo.lastLocationCode;
 		double distance = combo.extraDistance;
+		int extraTime = 0;
 		
 		Port portEr = solver.getPortFromCode(er.getPortCode());
 
@@ -99,7 +102,7 @@ public class RouteKeplechCreator {
 				departureTime, er, portEr.getLocationCode());
 
 		if (sol == null)
-			return Integer.MAX_VALUE;
+			return null;
 		int[] seq = sol.seq;
 		RouteElement[] re = new RouteElement[2 * seq.length];
 		for (int i = 0; i < re.length; i++)
@@ -113,32 +116,110 @@ public class RouteKeplechCreator {
 			// check time
 			if (er.getLateDateTimeLoadAtWarehouse() != null &&
 					arrivalTime > DateTimeUtils.dateTime2Int(er.getLateDateTimeLoadAtWarehouse()))
-				return Integer.MAX_VALUE;
+				return null;
 
 			startServiceTime = solver.MAX(arrivalTime,
 					(int) DateTimeUtils.dateTime2Int(pwi
 							.getEarlyDateTimeLoadAtWarehouse()));
+			extraTime += solver.MAX(0, (int) DateTimeUtils.dateTime2Int(pwi
+					.getEarlyDateTimeLoadAtWarehouse()) - arrivalTime);
+			if(wh.getBreaktimes() != null){
+				for(int k = 0; k < wh.getBreaktimes().length; k++){
+					Intervals interval = wh.getBreaktimes()[k];
+					if(startServiceTime >= (int)DateTimeUtils.dateTime2Int(interval.getDateStart())
+						&& startServiceTime < (int)DateTimeUtils.dateTime2Int(interval.getDateEnd())){
+						extraTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd()) - startServiceTime;
+						startServiceTime = (int)DateTimeUtils.
+								dateTime2Int(interval.getDateEnd());
+					}
+				}
+			}
 			distance += solver.getDistance(lastLocationCode, wh.getLocationCode());
 			int finishedServiceTime = startServiceTime
-					+ pwi.getDetachEmptyMoocContainerDuration();// req.getLoadDuration();
-			// duration = 0;
+					+ er.getLoadDuration();
+			if(wh.getBreaktimes() != null){
+				for(int k = 0; k < wh.getBreaktimes().length; k++){
+					Intervals interval = wh.getBreaktimes()[k];
+					if(finishedServiceTime > (int)DateTimeUtils
+						.dateTime2Int(interval.getDateStart())
+						&& startServiceTime < (int)DateTimeUtils
+						.dateTime2Int(interval.getDateStart())){
+						extraTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd())
+								- (int)DateTimeUtils
+								.dateTime2Int(interval.getDateStart());
+						finishedServiceTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd())
+								- (int)DateTimeUtils
+								.dateTime2Int(interval.getDateStart());
+					}
+				}
+			}
 			departureTime = finishedServiceTime;// startServiceTime + duration;
 			arrivalTime = departureTime;
 			if (pwi.getLateDateTimePickupLoadedContainerAtWarehouse() != null)
 				if (arrivalTime > DateTimeUtils.dateTime2Int(pwi
 						.getLateDateTimePickupLoadedContainerAtWarehouse()))
-					return Integer.MAX_VALUE;
+					return null;
 
-			if (pwi.getEarlyDateTimePickupLoadedContainerAtWarehouse() != null)
+			if (pwi.getEarlyDateTimePickupLoadedContainerAtWarehouse() != null){
 				startServiceTime = solver.MAX(
 						arrivalTime,
 						(int) DateTimeUtils.dateTime2Int(pwi
 								.getEarlyDateTimePickupLoadedContainerAtWarehouse()));
-			else
+				extraTime += solver.MAX(0, (int) DateTimeUtils.dateTime2Int(pwi
+						.getEarlyDateTimePickupLoadedContainerAtWarehouse()) - arrivalTime);
+				if(wh.getBreaktimes() != null){
+					for(int k = 0; k < wh.getBreaktimes().length; k++){
+						Intervals interval = wh.getBreaktimes()[k];
+						if(startServiceTime >= (int)DateTimeUtils.dateTime2Int(interval.getDateStart())
+							&& startServiceTime < (int)DateTimeUtils.dateTime2Int(interval.getDateEnd())){
+							extraTime += (int)DateTimeUtils
+									.dateTime2Int(interval.getDateEnd()) - startServiceTime;
+							startServiceTime = (int)DateTimeUtils.
+									dateTime2Int(interval.getDateEnd());
+						}
+					}
+				}
+			}
+			else{
 				startServiceTime = arrivalTime;
+				if(wh.getBreaktimes() != null){
+					for(int k = 0; k < wh.getBreaktimes().length; k++){
+						Intervals interval = wh.getBreaktimes()[k];
+						if(startServiceTime >= (int)DateTimeUtils.dateTime2Int(interval.getDateStart())
+							&& startServiceTime < (int)DateTimeUtils.dateTime2Int(interval.getDateEnd())){
+							extraTime += (int)DateTimeUtils
+									.dateTime2Int(interval.getDateEnd()) - startServiceTime;
+							startServiceTime = (int)DateTimeUtils.
+									dateTime2Int(interval.getDateEnd());
+						}
+					}
+				}
+			}
 
 			finishedServiceTime = startServiceTime
 					+ pwi.getAttachLoadedMoocContainerDuration();
+			if(wh.getBreaktimes() != null){
+				for(int k = 0; k < wh.getBreaktimes().length; k++){
+					Intervals interval = wh.getBreaktimes()[k];
+					if(finishedServiceTime > (int)DateTimeUtils
+						.dateTime2Int(interval.getDateStart())
+						&& startServiceTime < (int)DateTimeUtils
+						.dateTime2Int(interval.getDateStart())){
+						extraTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd())
+								- (int)DateTimeUtils
+								.dateTime2Int(interval.getDateStart());
+						finishedServiceTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd())
+								- (int)DateTimeUtils
+								.dateTime2Int(interval.getDateStart());
+					}
+				}
+			}
+			departureTime = finishedServiceTime;
 			lastLocationCode = wh.getLocationCode();
 		}
 
@@ -148,10 +229,12 @@ public class RouteKeplechCreator {
 
 		if (ir.getLateDateTimePickupAtPort() != null && arrivalTime > DateTimeUtils.dateTime2Int(ir
 				.getLateDateTimePickupAtPort()))
-			return Integer.MAX_VALUE;
+			return null;
 
 		startServiceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
 				.dateTime2Int(ir.getEarlyDateTimePickupAtPort()));
+		extraTime += solver.MAX(0, (int) DateTimeUtils.dateTime2Int(ir
+				.getEarlyDateTimePickupAtPort()) - arrivalTime);
 		duration = ir.getLoadDuration();
 		departureTime = startServiceTime + duration;
 		distance += solver.getDistance(lastLocationCode, portIr.getLocationCode());
@@ -161,10 +244,12 @@ public class RouteKeplechCreator {
 				+ solver.getTravelTime(lastLocationCode, portEr.getLocationCode());
 		if (er.getLateDateTimeUnloadAtPort() != null && arrivalTime > DateTimeUtils.dateTime2Int(er
 				.getLateDateTimeUnloadAtPort()))
-			return Integer.MAX_VALUE;
+			return null;
 
 		startServiceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
 				.dateTime2Int(er.getEarlyDateTimeUnloadAtPort()));
+		extraTime += solver.MAX(0, (int) DateTimeUtils.dateTime2Int(er
+				.getEarlyDateTimeUnloadAtPort()) - arrivalTime);
 		duration = er.getUnloadDuration();
 		departureTime = startServiceTime + duration;
 		distance += solver.getDistance(lastLocationCode, portEr.getLocationCode());
@@ -183,9 +268,40 @@ public class RouteKeplechCreator {
 			startServiceTime = solver.MAX(arrivalTime,
 					(int) DateTimeUtils.dateTime2Int(dwi
 							.getEarlyDateTimeUnloadAtWarehouse()));
+			extraTime += solver.MAX(0, (int) DateTimeUtils.dateTime2Int(dwi
+					.getEarlyDateTimeUnloadAtWarehouse()) - arrivalTime);
+			if(wh.getBreaktimes() != null){
+				for(int k = 0; k < wh.getBreaktimes().length; k++){
+					Intervals interval = wh.getBreaktimes()[k];
+					if(startServiceTime >= (int)DateTimeUtils.dateTime2Int(interval.getDateStart())
+						&& startServiceTime < (int)DateTimeUtils.dateTime2Int(interval.getDateEnd())){
+						extraTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd()) - startServiceTime;
+						startServiceTime = (int)DateTimeUtils.
+								dateTime2Int(interval.getDateEnd());
+					}
+				}
+			}
 			int finishedServiceTime = startServiceTime
-					+ dwi.getDetachLoadedMoocContainerDuration();// req.getUnloadDuration();
-			duration = 0;
+					+ ir.getUnloadDuration();
+			if(wh.getBreaktimes() != null){
+				for(int k = 0; k < wh.getBreaktimes().length; k++){
+					Intervals interval = wh.getBreaktimes()[k];
+					if(finishedServiceTime > (int)DateTimeUtils
+						.dateTime2Int(interval.getDateStart())
+						&& startServiceTime < (int)DateTimeUtils
+						.dateTime2Int(interval.getDateStart())){
+						extraTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd())
+								- (int)DateTimeUtils
+								.dateTime2Int(interval.getDateStart());
+						finishedServiceTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd())
+								- (int)DateTimeUtils
+								.dateTime2Int(interval.getDateStart());
+					}
+				}
+			}
 			departureTime = finishedServiceTime;// startServiceTime + duration;
 			lastLocationCode= wh.getLocationCode();
 
@@ -194,18 +310,63 @@ public class RouteKeplechCreator {
 			if (dwi.getLatePickupEmptyContainerAtWarehouse() != null)
 				if (arrivalTime > DateTimeUtils.dateTime2Int(dwi
 						.getLatePickupEmptyContainerAtWarehouse()))
-					return Integer.MAX_VALUE;
+					return null;
 
-			if (dwi.getEarlyPickupEmptyContainerAtWarehouse() != null)
+			if (dwi.getEarlyPickupEmptyContainerAtWarehouse() != null){
 				startServiceTime = solver.MAX(arrivalTime,
 						(int) DateTimeUtils.dateTime2Int(dwi
 								.getEarlyPickupEmptyContainerAtWarehouse()));
+				extraTime += solver.MAX(0, (int) DateTimeUtils.dateTime2Int(dwi
+						.getEarlyPickupEmptyContainerAtWarehouse()) - arrivalTime);
+				if(wh.getBreaktimes() != null){
+					for(int k = 0; k < wh.getBreaktimes().length; k++){
+						Intervals interval = wh.getBreaktimes()[k];
+						if(startServiceTime >= (int)DateTimeUtils.dateTime2Int(interval.getDateStart())
+							&& startServiceTime < (int)DateTimeUtils.dateTime2Int(interval.getDateEnd())){
+							extraTime += (int)DateTimeUtils
+									.dateTime2Int(interval.getDateEnd()) - startServiceTime;
+							startServiceTime = (int)DateTimeUtils.
+									dateTime2Int(interval.getDateEnd());
+						}
+					}
+				}
+			}
 			else {
 				startServiceTime = arrivalTime;
+				if(wh.getBreaktimes() != null){
+					for(int k = 0; k < wh.getBreaktimes().length; k++){
+						Intervals interval = wh.getBreaktimes()[k];
+						if(startServiceTime >= (int)DateTimeUtils.dateTime2Int(interval.getDateStart())
+							&& startServiceTime < (int)DateTimeUtils.dateTime2Int(interval.getDateEnd())){
+							extraTime += (int)DateTimeUtils
+									.dateTime2Int(interval.getDateEnd()) - startServiceTime;
+							startServiceTime = (int)DateTimeUtils.
+									dateTime2Int(interval.getDateEnd());
+						}
+					}
+				}
 			}
-			duration = 0;
-			departureTime = startServiceTime
-					+ dwi.getAttachEmptyMoocContainerDuration();// duration;
+			finishedServiceTime = startServiceTime
+					+ dwi.getAttachEmptyMoocContainerDuration();
+			if(wh.getBreaktimes() != null){
+				for(int k = 0; k < wh.getBreaktimes().length; k++){
+					Intervals interval = wh.getBreaktimes()[k];
+					if(finishedServiceTime > (int)DateTimeUtils
+						.dateTime2Int(interval.getDateStart())
+						&& startServiceTime < (int)DateTimeUtils
+						.dateTime2Int(interval.getDateStart())){
+						extraTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd())
+								- (int)DateTimeUtils
+								.dateTime2Int(interval.getDateStart());
+						finishedServiceTime += (int)DateTimeUtils
+								.dateTime2Int(interval.getDateEnd())
+								- (int)DateTimeUtils
+								.dateTime2Int(interval.getDateStart());
+					}
+				}
+			}
+			departureTime = finishedServiceTime;// duration;
 		}
 
 		/*
@@ -222,6 +383,10 @@ public class RouteKeplechCreator {
 		distance += solver.getDistance(lastLocationCode, depotContainer.getLocationCode());
 		travelTime = solver.getTravelTime(lastLocationCode, depotContainer.getLocationCode());
 		arrivalTime = departureTime + travelTime;
+		if(ir.getLateDateTimeDeliveryAtDepot() != null){
+			if(arrivalTime > DateTimeUtils.dateTime2Int(ir.getLateDateTimeDeliveryAtDepot()))
+				return null;
+		}
 		startServiceTime = arrivalTime;
 		duration = depotContainer.getDeliveryContainerDuration();
 		departureTime = startServiceTime + duration;
@@ -237,7 +402,7 @@ public class RouteKeplechCreator {
 		duration = depotMooc.getDeliveryMoocDuration();
 		departureTime = startServiceTime + duration;
 		if(!solver.checkAvailableIntervalsMooc(mooc, combo.startTimeOfMooc, departureTime))
-			return Integer.MAX_VALUE;
+			return null;
 		lastLocationCode = depotMooc.getLocationCode();
 		
 		DepotTruck depotTruck = solver.findDepotTruck4Deposit(
@@ -251,9 +416,9 @@ public class RouteKeplechCreator {
 		departureTime = startServiceTime + duration;
 		if(!solver.checkAvailableIntervalsTruck(truck, 
 				combo.startTimeOfTruck, departureTime))
-			return Integer.MAX_VALUE;
+			return null;
 		
-		return distance;
+		return new Measure(distance, extraTime);
 	}
 	
 	public TruckRouteInfo4Request createKeplech() {
@@ -289,6 +454,7 @@ public class RouteKeplechCreator {
 			e0.setAction(ActionEnum.DEPART_FROM_DEPOT);
 			e0.setDepotTruck(solver.mTruck2LastDepot.get(sel_truck));
 			departureTime = solver.mTruck2LastTime.get(sel_truck);
+			e0.setTruck(sel_truck);
 			solver.mPoint2DepartureTime.put(e0, departureTime);
 
 			RouteElement e1 = new RouteElement();
@@ -296,6 +462,7 @@ public class RouteKeplechCreator {
 			e1.deriveFrom(e0);
 			e1.setAction(ActionEnum.TAKE_MOOC_AT_DEPOT);
 			e1.setDepotMooc(solver.mMooc2LastDepot.get(sel_mooc));
+			e1.setMooc(sel_mooc);
 			arrivalTime = departureTime
 					+ solver.getTravelTime(
 							e0.getDepotTruck().getLocationCode(), e1
@@ -305,13 +472,14 @@ public class RouteKeplechCreator {
 			duration = e1.getDepotMooc().getPickupMoocDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e1, arrivalTime);
-			solver.mPoint2DepartureTime.put(e1, departureTime);
+			solver.mPoint2DepartureTime.put(e1, combo.startTimeOfMooc);
 
 			RouteElement e2 = new RouteElement();
 			L.add(e2);
 			e2.deriveFrom(e1);
 			e2.setAction(ActionEnum.TAKE_CONTAINER_AT_DEPOT);
 			e2.setDepotContainer(solver.mContainer2LastDepot.get(sel_container));
+			e2.setContainer(sel_container);
 			arrivalTime = departureTime
 					+ solver.getTravelTime(e1.getDepotMooc().getLocationCode(),
 							e2.getDepotContainer().getLocationCode());
@@ -320,7 +488,7 @@ public class RouteKeplechCreator {
 			duration = e2.getDepotContainer().getPickupContainerDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(e2, arrivalTime);
-			solver.mPoint2DepartureTime.put(e2, departureTime);
+			solver.mPoint2DepartureTime.put(e2, combo.startTime);
 
 			lastElement = e2;
 			lastLocationCode = e2.getDepotContainer().getLocationCode();
@@ -328,7 +496,61 @@ public class RouteKeplechCreator {
 			TruckItinerary I = solver.getItinerary(sel_truck);
 			TruckRoute tr = I.getLastTruckRoute();
 			lastUsedIndex = tr.indexOf(combo.routeElement);
+			if(combo.mooc == null){
+				departureTime = solver.mPoint2DepartureTime.get(lastElement);
+				RouteElement e0 = new RouteElement();
+				L.add(e0);
+				e0.deriveFrom(lastElement);
+				DepotMooc depotMooc = solver.mMooc2LastDepot.get(sel_mooc);
+				e0.setDepotMooc(depotMooc);
+				e0.setAction(ActionEnum.TAKE_MOOC_AT_DEPOT);
+				e0.setMooc(sel_mooc);
+
+				arrivalTime = departureTime + solver.getTravelTime(lastElement, e0);
+				int timeMooc = solver.mMooc2LastTime.get(sel_mooc);
+				serviceTime = solver.MAX(arrivalTime, timeMooc);
+				duration = e0.getDepotMooc().getPickupMoocDuration();
+				departureTime = serviceTime + duration;
+				solver.mPoint2ArrivalTime.put(e0, arrivalTime);
+				solver.mPoint2DepartureTime.put(e0, departureTime);
+				
+				RouteElement e1 = new RouteElement();
+				L.add(e1);
+				e1.deriveFrom(e1);
+				e1.setDepotContainer(solver.mContainer2LastDepot.get(sel_container));
+				e1.setAction(ActionEnum.TAKE_CONTAINER_AT_DEPOT);
+				e1.setContainer(sel_container);
+				arrivalTime = departureTime + solver.getTravelTime(e0, e1);
+				int timeContainer = solver.mContainer2LastTime.get(sel_container);
+				serviceTime = solver.MAX(arrivalTime, timeContainer);
+				duration = e1.getDepotContainer().getPickupContainerDuration();
+				departureTime = serviceTime + duration;
+				solver.mPoint2ArrivalTime.put(e1, arrivalTime);
+				solver.mPoint2DepartureTime.put(e1, departureTime);
+				lastElement = e1;
+				lastLocationCode = e1.getLocationCode();
+			}
+			else if(combo.mooc != null && combo.container == null){
+				departureTime = solver.mPoint2DepartureTime.get(lastElement);
+				RouteElement e0 = new RouteElement();
+				L.add(e0);
+				e0.deriveFrom(lastElement);
+				e0.setDepotContainer(solver.mContainer2LastDepot.get(sel_container));
+				e0.setAction(ActionEnum.TAKE_CONTAINER_AT_DEPOT);
+				e0.setContainer(sel_container);
+
+				arrivalTime = departureTime + solver.getTravelTime(lastElement, e0);
+				int timeContainer = solver.mContainer2LastTime.get(sel_container);
+				serviceTime = solver.MAX(arrivalTime, timeContainer);
+				duration = e0.getDepotContainer().getPickupContainerDuration();
+				departureTime = serviceTime + duration;
+				solver.mPoint2ArrivalTime.put(e0, arrivalTime);
+				solver.mPoint2DepartureTime.put(e0, departureTime);
+				lastElement = e0;
+				lastLocationCode = e0.getLocationCode();
+			}
 		}
+		departureTime = combo.startTime;
 
 		Port port_a = solver.getPortFromCode(sel_exReq_a.getPortCode());
 
@@ -355,8 +577,15 @@ public class RouteKeplechCreator {
 			arrivalTime = departureTime
 					+ solver.getTravelTime(lastLocationCode, re[idx].getWarehouse()
 							.getLocationCode());
+			if (arrivalTime > DateTimeUtils.dateTime2Int(sel_exReq_a
+					.getLateDateTimeLoadAtWarehouse()))
+				return null;
 
-			duration = 0;
+			serviceTime = solver.MAX(arrivalTime,
+					(int) DateTimeUtils.dateTime2Int(pwi
+							.getEarlyDateTimeLoadAtWarehouse()));
+
+			duration = sel_exReq_a.getLoadDuration();
 			departureTime = serviceTime + duration;
 			solver.mPoint2ArrivalTime.put(re[idx], arrivalTime);
 			solver.mPoint2DepartureTime.put(re[idx], departureTime);
@@ -366,10 +595,25 @@ public class RouteKeplechCreator {
 			re[idx].deriveFrom(re[idx - 1]);
 			re[idx].setAction(ActionEnum.LINK_LOADED_CONTAINER_AT_WAREHOUSE);
 			re[idx].setWarehouse(re[idx - 1].getWarehouse());
-			arrivalTime = departureTime + pwi.getLoadDuration();
-			serviceTime = arrivalTime;
-			duration = 0;
-			departureTime = serviceTime + duration;
+			arrivalTime = departureTime;
+			if (pwi.getLateDateTimePickupLoadedContainerAtWarehouse() != null)
+				if (arrivalTime > DateTimeUtils.dateTime2Int(pwi
+						.getLateDateTimePickupLoadedContainerAtWarehouse()))
+					return null;
+
+			if (pwi.getEarlyDateTimePickupLoadedContainerAtWarehouse() != null)
+				serviceTime = solver.MAX(
+						arrivalTime,
+						(int) DateTimeUtils.dateTime2Int(pwi
+								.getEarlyDateTimePickupLoadedContainerAtWarehouse()));
+			else
+				serviceTime = arrivalTime;
+
+			int finishedServiceTime = serviceTime
+					+ pwi.getAttachLoadedMoocContainerDuration();
+
+			// duration = 0;
+			departureTime = finishedServiceTime;
 			solver.mPoint2ArrivalTime.put(re[idx], arrivalTime);
 			solver.mPoint2DepartureTime.put(re[idx], departureTime);
 
@@ -385,7 +629,7 @@ public class RouteKeplechCreator {
 		e5.setPort(port_b);
 		Container import_container = solver.mCode2Container.get(sel_imReq_b
 				.getContainerCode());
-		e5.setContainer(import_container);
+		e5.setContainerKep(import_container);
 		e5.setImportRequest(sel_imReq_b);
 		arrivalTime = departureTime
 				+ solver.getTravelTime(lastLocationCode, port_b.getLocationCode());
@@ -400,17 +644,21 @@ public class RouteKeplechCreator {
 		solver.mPoint2ArrivalTime.put(e5, arrivalTime);
 		solver.mPoint2DepartureTime.put(e5, departureTime);
 		
+		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 		RouteElement e6 = new RouteElement();
 		L.add(e6);
 		e6.deriveFrom(e5);
 		e6.setAction(ActionEnum.WAIT_RELEASE_LOADED_CONTAINER_AT_PORT);
 		e6.setPort(solver.mCode2Port.get(sel_exReq_a.getPortCode()));
+		e6.setExportRequest(null);
+		e6.setContainer(null);
 		arrivalTime = departureTime + solver.getTravelTime(e5, e6);
 		if (sel_exReq_a.getLateDateTimeUnloadAtPort() != null && arrivalTime > DateTimeUtils.dateTime2Int(sel_exReq_a
 				.getLateDateTimeUnloadAtPort()))
 			return null;
 
-		TruckRouteInfo4Request tri = new TruckRouteInfo4Request();
+		
 
 		serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
 				.dateTime2Int(sel_exReq_a.getEarlyDateTimeUnloadAtPort()));
@@ -422,8 +670,6 @@ public class RouteKeplechCreator {
 		// solver.mContainer2LastTime.put(container, Integer.MAX_VALUE);
 		tri.setLastDepotContainer(sel_container, null);
 		tri.setLastTimeContainer(sel_container, Integer.MAX_VALUE);
-
-		
 
 		sol = SS.solve(e6.getLocationCode(), departureTime, sel_imReq_b, null);
 		seq = sol.seq;
@@ -438,13 +684,22 @@ public class RouteKeplechCreator {
 			re[idx].deriveFrom(e6);
 			re[idx].setAction(ActionEnum.WAIT_UNLOAD_CONTAINER_AT_WAREHOUSE);
 			re[idx].setWarehouse(solver.mCode2Warehouse.get(dwi.getWareHouseCode()));
+			re[idx].setImportRequest(sel_imReq_b);
 			arrivalTime = departureTime
 					+ solver.getTravelTime(e6, re[idx]);
 
-			serviceTime = Utils.MAX(arrivalTime, (int) DateTimeUtils
-					.dateTime2Int(dwi.getEarlyDateTimeUnloadAtWarehouse()));
-			duration = 0;// ir.getLoadDuration();
-			departureTime = serviceTime + duration;
+			if(dwi.getLateDateTimeUnloadAtWarehouse() != null){
+				if(arrivalTime > DateTimeUtils.dateTime2Int(dwi.
+						getLateDateTimeUnloadAtWarehouse()))
+					return null;
+			}
+			serviceTime = solver.MAX(arrivalTime,
+					(int) DateTimeUtils.dateTime2Int(dwi
+							.getEarlyDateTimeUnloadAtWarehouse()));
+			int finishedServiceTime = serviceTime
+					+ sel_imReq_b.getUnloadDuration();
+			departureTime = finishedServiceTime;
+			
 			solver.mPoint2ArrivalTime.put(re[idx], arrivalTime);
 			solver.mPoint2DepartureTime.put(re[idx], departureTime);
 
@@ -454,7 +709,8 @@ public class RouteKeplechCreator {
 			re[idx].deriveFrom(re[idx-1]);
 			re[idx].setAction(ActionEnum.LINK_EMPTY_CONTAINER_AT_WAREHOUSE);
 			re[idx].setWarehouse(re[idx-1].getWarehouse());
-			arrivalTime = departureTime + dwi.getUnloadDuration();
+			re[idx].setImportRequest(null);
+			arrivalTime = departureTime;
 
 			serviceTime = arrivalTime;
 			duration = 0;// ir.getLoadDuration();
@@ -479,9 +735,15 @@ public class RouteKeplechCreator {
 		e9.deriveFrom(lastElement);
 		e9.setAction(ActionEnum.RELEASE_CONTAINER_AT_DEPOT);
 		e9.setDepotContainer(depotContainer);
+		e9.setContainerKep(null);
 		arrivalTime = departureTime
 				+ solver.getTravelTime(lastElement.getWarehouse().getLocationCode(), e9
 						.getDepotContainer().getLocationCode());
+		if(sel_imReq_b.getLateDateTimeDeliveryAtDepot() != null){
+			if(arrivalTime > DateTimeUtils.dateTime2Int(sel_imReq_b.
+					getLateDateTimeDeliveryAtDepot()))
+				return null;
+		}
 		serviceTime = arrivalTime;
 		duration = e9.getDepotContainer().getDeliveryContainerDuration();
 		departureTime = serviceTime + duration;
@@ -536,6 +798,7 @@ public class RouteKeplechCreator {
 		solver.updateTruckAtDepot(sel_truck);
 		solver.updateMoocAtDepot(sel_mooc);
 		solver.updateContainerAtDepot(sel_container);
+		solver.updateContainerAtDepot(import_container);
 
 		tri.route = r;
 		tri.lastUsedIndex = lastUsedIndex;
