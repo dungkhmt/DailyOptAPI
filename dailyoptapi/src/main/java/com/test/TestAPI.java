@@ -8,6 +8,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 
 import javax.servlet.http.HttpServletRequest;
@@ -72,10 +74,60 @@ public class TestAPI {
 			@RequestBody AccessPermissionInput input) {
 		if(input.getA().equals("DailyOptAPI")
 			&& input.getB().equals("sml")){
-			AccessPermissionResult apr = new AccessPermissionResult("OK");
+			AccessPermissionResult apr = new AccessPermissionResult();
+			apr.setResult("OK");
 			return apr;
 		}
 		return null;
+	}
+	
+	@RequestMapping(value = "/distanceMatrix", method = RequestMethod.POST)
+	public DistanceMatrixElement distanceMatrix(HttpServletRequest request,
+			@RequestBody DistanceElementList input) {
+		HashSet<Integer> s_pointId = new HashSet<Integer>();
+		for (int i = 0; i < input.getDistanceElement().length; i++) {
+			DistanceElement e = input.getDistanceElement()[i];
+			int srcId = e.getSrcCode();
+			int destId = e.getDestCode();
+			s_pointId.add(srcId);
+			s_pointId.add(destId);
+		}
+		
+		HashMap<Integer, Integer> mPointId2Index = new HashMap<Integer, Integer>();
+		int idx = -1;
+		for (int id : s_pointId) {
+			idx++;
+			mPointId2Index.put(id, idx);
+		}
+		double[][] distance = new double[s_pointId.size()][s_pointId.size()];
+		double[][] travelTime = new double[s_pointId.size()][s_pointId.size()];
+		int[][] roadBlock = new int[s_pointId.size()][s_pointId.size()];
+		
+		for (int i = 0; i < input.getDistanceElement().length; i++) {
+			DistanceElement e = input.getDistanceElement()[i];
+			int srcId = e.getSrcCode();
+			int destId = e.getDestCode();
+			int is = mPointId2Index.get(srcId);
+			int id = mPointId2Index.get(destId);
+			double d = e.getDistance();
+			//d = (double)(d + (input.getConfigParams().getTimeScale() * d)/100);
+			distance[is][id] = d;
+			double t = e.getTravelTime();
+			int scale = input.getScale();
+			scale = scale - (int)scale/5;
+			t = (double)(t + (double)(scale * t)/100);
+			travelTime[is][id] = t;
+			int r = e.getRoadBlock();
+			roadBlock[is][id] = r;
+		}
+		
+		DistanceMatrixElement dme = new DistanceMatrixElement();
+		dme.setS_pointId(s_pointId);
+		dme.setDistance(distance);
+		dme.setmPointId2Index(mPointId2Index);
+		dme.setRoadBlock(roadBlock);
+		dme.setTravelTime(travelTime);
+		return dme;
 	}
 
 	public void writeGlobalRequest(SEMPickupDeliveryInput input) {
