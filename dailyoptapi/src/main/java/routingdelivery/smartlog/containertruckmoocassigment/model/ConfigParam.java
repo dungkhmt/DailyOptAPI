@@ -16,6 +16,7 @@ public class ConfigParam {
 	private int unlinkLoadedContainerDuration;
 	private int linkEmptyContainerDuration;
 	private int linkLoadedContainerDuration;
+	private String currentTime;
 	
 	
 	public ConfigParam(int cutMoocDuration, int linkMoocDuration,
@@ -30,7 +31,8 @@ public class ConfigParam {
 			int unlinkEmptyContainerDuration,
 			int unlinkLoadedContainerDuration,
 			int linkEmptyContainerDuration,
-			int linkLoadedContainerDuration ) {
+			int linkLoadedContainerDuration,
+			String currentTime) {
 		super();
 		this.cutMoocDuration = cutMoocDuration;
 		this.linkMoocDuration = linkMoocDuration;
@@ -47,6 +49,7 @@ public class ConfigParam {
 		this.unlinkLoadedContainerDuration = unlinkLoadedContainerDuration;
 		this.linkEmptyContainerDuration = linkEmptyContainerDuration;
 		this.linkLoadedContainerDuration = linkLoadedContainerDuration;
+		this.currentTime = currentTime;
 	}
 	public String getStrategy() {
 		return strategy;
@@ -144,6 +147,12 @@ public class ConfigParam {
 		this.linkLoadedContainerDuration = linkLoadedContainerDuration;
 	}
 
+	public String getCurrentTime() {
+		return currentTime;
+	}
+	public void setCurrentTime(String currentTime) {
+		this.currentTime = currentTime;
+	}
 	public ConfigParam() {
 		super();
 		// TODO Auto-generated constructor stub

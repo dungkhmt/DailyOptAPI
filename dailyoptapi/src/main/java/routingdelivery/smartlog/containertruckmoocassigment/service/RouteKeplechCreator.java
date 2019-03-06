@@ -135,6 +135,14 @@ public class RouteKeplechCreator {
 					}
 				}
 			}
+			if(i == 0 && combo.routeElement == null){
+				int mooc2cont = combo.startTime - combo.startTimeOfMooc;
+				int truck2moocdepot = combo.startTimeOfMooc - combo.startTimeOfTruck;
+				combo.startTime = startServiceTime - travelTime;
+				combo.startTimeOfMooc = combo.startTime - mooc2cont;
+				combo.startTimeOfTruck = combo.startTimeOfMooc - truck2moocdepot;
+				extraTime = 0;
+			}
 			distance += solver.getDistance(lastLocationCode, wh.getLocationCode());
 			int finishedServiceTime = startServiceTime
 					+ er.getLoadDuration();
@@ -577,7 +585,8 @@ public class RouteKeplechCreator {
 			arrivalTime = departureTime
 					+ solver.getTravelTime(lastLocationCode, re[idx].getWarehouse()
 							.getLocationCode());
-			if (arrivalTime > DateTimeUtils.dateTime2Int(sel_exReq_a
+			if (sel_exReq_a.getLateDateTimeLoadAtWarehouse() != null
+				&& arrivalTime > DateTimeUtils.dateTime2Int(sel_exReq_a
 					.getLateDateTimeLoadAtWarehouse()))
 				return null;
 

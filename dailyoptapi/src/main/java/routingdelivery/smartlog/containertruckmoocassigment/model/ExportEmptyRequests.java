@@ -1,6 +1,7 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class ExportEmptyRequests {
+	private int id;
 	private boolean isBreakRomooc;
 	private String containerCategory;
 	private String containerCode;
@@ -18,9 +19,9 @@ public class ExportEmptyRequests {
 	private String depotContainerCode;
 	private String wareHouseCode;
 	private int linkContainerDuration;// thoi gian de dua cont. rong len mooc
+	private int rejectCode;
 	
-	
-	public ExportEmptyRequests(boolean isBreakRomooc, String containerCategory,
+	public ExportEmptyRequests(int id, boolean isBreakRomooc, String containerCategory,
 			String containerCode, String containerNo, String orderCode, String customerCode,
 			String customerName, String requestDate, String earlyDateTimePickupAtDepot,
 			String lateDateTimePickupAtDepot,
@@ -29,6 +30,7 @@ public class ExportEmptyRequests {
 			String depotContainerCode, String wareHouseCode,
 			int linkContainerDuration) {
 		super();
+		this.id = id;
 		this.isBreakRomooc = isBreakRomooc;
 		this.containerCategory = containerCategory;
 		this.containerCode = containerCode;
@@ -47,14 +49,23 @@ public class ExportEmptyRequests {
 		this.wareHouseCode = wareHouseCode;
 		this.linkContainerDuration = linkContainerDuration;
 	}
+	public int getId(){
+		return this.id;
+	}
+	public void setId(int id){
+		this.id = id;
+	}
 	public int getLinkContainerDuration() {
 		return linkContainerDuration;
 	}
 	public void setLinkContainerDuration(int linkContainerDuration) {
 		this.linkContainerDuration = linkContainerDuration;
 	}
-	public boolean isBreakRomooc() {
+	public boolean getIsBreakRomooc() {
 		return isBreakRomooc;
+	}
+	public void setIsBreakRomooc(boolean isBreakRomooc) {
+		this.isBreakRomooc = isBreakRomooc;
 	}
 	public void setBreakRomooc(boolean isBreakRomooc) {
 		this.isBreakRomooc = isBreakRomooc;
@@ -149,6 +160,13 @@ public class ExportEmptyRequests {
 	}
 	public void setWareHouseCode(String wareHouseCode) {
 		this.wareHouseCode = wareHouseCode;
+	}
+	
+	public int getRejectCode() {
+		return rejectCode;
+	}
+	public void setRejectCode(int rejectCode) {
+		this.rejectCode = rejectCode;
 	}
 	public ExportEmptyRequests(boolean isBreakRomooc, String containerCategory,
 			String containerCode, String containerNo, String orderCode, String customerCode,

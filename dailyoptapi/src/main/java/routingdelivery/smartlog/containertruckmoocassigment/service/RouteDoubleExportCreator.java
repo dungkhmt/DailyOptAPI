@@ -77,12 +77,20 @@ public class RouteDoubleExportCreator {
 		
 		
 		distance = combo.extraDistance;
-		
+		travelTime = solver.getTravelTime(lastLocationCode,
+				depotContainer_b.getLocationCode());
 		int arrivalTimeContainer = departureTime
-				+ solver.getTravelTime(lastLocationCode,
-						depotContainer_b.getLocationCode());
+				+ travelTime;
 		int timeContainer = solver.mContainer2LastTime.get(container_b);
-		departureTime = solver.MAX(arrivalTimeContainer, timeContainer)
+		startServiceTime = solver.MAX(arrivalTimeContainer, timeContainer);
+		extraTime += solver.MAX(0, timeContainer - arrivalTimeContainer);
+		if(combo.routeElement == null){
+			combo.startTime -= extraTime;
+			combo.startTimeOfMooc -= extraTime;
+			combo.startTimeOfTruck -= extraTime;
+			extraTime = 0;
+		}
+		departureTime = startServiceTime
 				+ solver.mContainer2LastDepot.get(container_b)
 						.getPickupContainerDuration();
 		distance += solver.getDistance(lastLocationCode,
@@ -101,7 +109,8 @@ public class RouteDoubleExportCreator {
 			travelTime = solver.getTravelTime(lastLocationCode, wh.getLocationCode());
 			arrivalTime = departureTime + travelTime;
 			// check time
-			if (arrivalTime > DateTimeUtils.dateTime2Int(req_a
+			if (req_a.getLateDateTimeLoadAtWarehouse() != null
+				&& arrivalTime > DateTimeUtils.dateTime2Int(req_a
 					.getLateDateTimeLoadAtWarehouse()))
 				return null;
 
@@ -122,6 +131,7 @@ public class RouteDoubleExportCreator {
 					}
 				}
 			}
+
 			distance += solver.getDistance(lastLocationCode, wh.getLocationCode());
 			int finishedServiceTime = startServiceTime
 					+ req_a.getLoadDuration();
@@ -226,7 +236,8 @@ public class RouteDoubleExportCreator {
 			travelTime = solver.getTravelTime(lastLocationCode, wh.getLocationCode());
 			arrivalTime = departureTime + travelTime;
 			// check time
-			if (arrivalTime > DateTimeUtils.dateTime2Int(req_b
+			if (req_b.getLateDateTimeLoadAtWarehouse() != null
+				&& arrivalTime > DateTimeUtils.dateTime2Int(req_b
 					.getLateDateTimeLoadAtWarehouse()))
 				return null;
 
@@ -587,7 +598,8 @@ public class RouteDoubleExportCreator {
 			travelTime = solver.getTravelTime(lastLocationCode, re[idx].getLocationCode());
 			arrivalTime = departureTime + travelTime;
 			// check time
-			if (arrivalTime > DateTimeUtils.dateTime2Int(sel_exReq_a
+			if (sel_exReq_a.getLateDateTimeLoadAtWarehouse() != null
+				&& arrivalTime > DateTimeUtils.dateTime2Int(sel_exReq_a
 					.getLateDateTimeLoadAtWarehouse()))
 				return null;
 
@@ -657,7 +669,8 @@ public class RouteDoubleExportCreator {
 			travelTime = solver.getTravelTime(lastLocationCode, re[idx].getLocationCode());
 			arrivalTime = departureTime + travelTime;
 			// check time
-			if (arrivalTime > DateTimeUtils.dateTime2Int(sel_exReq_b
+			if (sel_exReq_b.getLateDateTimeLoadAtWarehouse() != null
+				&& arrivalTime > DateTimeUtils.dateTime2Int(sel_exReq_b
 					.getLateDateTimeLoadAtWarehouse()))
 				return null;
 

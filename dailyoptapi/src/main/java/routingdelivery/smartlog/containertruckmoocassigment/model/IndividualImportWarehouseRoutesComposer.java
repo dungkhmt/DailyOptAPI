@@ -2,35 +2,34 @@ package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 import routingdelivery.smartlog.containertruckmoocassigment.service.InitGreedyImproveSpecialOperatorSolver;
 
-public class IndividualImportExportRoutesComposer implements RouteComposer {
+public class IndividualImportWarehouseRoutesComposer implements RouteComposer {
 	private InitGreedyImproveSpecialOperatorSolver solver;
-	private Measure msIm;
-	private Measure msEx;
+	private Measure ms1;
+	private Measure ms2;
 	private TruckRoute route1;
 	private TruckRoute route2;
+	private WarehouseContainerTransportRequest whReq;
 	private ImportContainerRequest imReq;
-	private ExportContainerRequest exReq;
 	private TruckRouteInfo4Request tri1;
 	private TruckRouteInfo4Request tri2;
 	private double distance;
 	
 	
-	
 
-	public IndividualImportExportRoutesComposer(
+	public IndividualImportWarehouseRoutesComposer(
 			InitGreedyImproveSpecialOperatorSolver solver,
-			Measure msIm, Measure msEx, TruckRoute route1,
-			TruckRoute route2, ImportContainerRequest imReq,
-			ExportContainerRequest exReq, TruckRouteInfo4Request tri1,
+			Measure ms1, Measure ms2,TruckRoute route1,
+			TruckRoute route2, WarehouseContainerTransportRequest whReq,
+			ImportContainerRequest imReq, TruckRouteInfo4Request tri1,
 			TruckRouteInfo4Request tri2, double distance) {
 		super();
 		this.solver = solver;
-		this.msIm = msIm;
-		this.msEx = msEx;
+		this.ms1 = ms1;
+		this.ms2 = ms2;
 		this.route1 = route1;
 		this.route2 = route2;
+		this.whReq = whReq;
 		this.imReq = imReq;
-		this.exReq = exReq;
 		this.tri1 = tri1;
 		this.tri2 = tri2;
 		this.distance = distance;
@@ -51,8 +50,8 @@ public class IndividualImportExportRoutesComposer implements RouteComposer {
 	@Override
 	public void acceptRoute() {
 		// TODO Auto-generated method stub
-		solver.markServed(exReq);
 		solver.markServed(imReq);
+		solver.markServed(whReq);
 		solver.addRoute(tri1.route, tri1.lastUsedIndex);
 		solver.addRoute(tri2.route, tri2.lastUsedIndex);
 		
@@ -85,14 +84,14 @@ public class IndividualImportExportRoutesComposer implements RouteComposer {
 		for(Container container: tri2.mContainer2LastDepot.keySet()){
 			solver.mContainer2LastDepot.put(container, tri2.getLastDepotContainer(container));
 			solver.mContainer2LastTime.put(container, tri2.getLastTimeContainer(container));
-			solver.updateContainerAtDepot(container);		
-		}		
-		solver.updateDriverAccessWarehouse(msIm.driverId, msIm.wh);
-		for(String key : msIm.srcdest.keySet())
-			solver.updateDriverIsBalance(msIm.driverId, key, msIm.srcdest.get(key));
-		solver.updateDriverAccessWarehouse(msEx.driverId, msEx.wh);
-		for(String key : msEx.srcdest.keySet())
-			solver.updateDriverIsBalance(msEx.driverId, key, msEx.srcdest.get(key));
+			solver.updateContainerAtDepot(container);
+		}
+		solver.updateDriverAccessWarehouse(ms1.driverId, ms1.wh);
+		for(String key : ms1.srcdest.keySet())
+			solver.updateDriverIsBalance(ms1.driverId, key, ms1.srcdest.get(key));
+		solver.updateDriverAccessWarehouse(ms2.driverId, ms2.wh);
+		for(String key : ms2.srcdest.keySet())
+			solver.updateDriverIsBalance(ms2.driverId, key, ms2.srcdest.get(key));
 	}
 
 }

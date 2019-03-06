@@ -6,6 +6,8 @@ public class ExportContainerRequest {
 	private String orderItemID;
 	private String orderID;
 	private String orderCode;
+	private boolean isSwap;
+	private String orderItemSwapID;
 	private String shipCompanyCode;
 	private String depotContainerCode;// depotContainer
 	private String containerCategory;// 20, 40, 45
@@ -33,8 +35,9 @@ public class ExportContainerRequest {
 	private String customerCode;
 	private String customerName;
 	
-	//private String planSegment;// "1","2","12","13","123",...
+	private int rejectCode;
 	
+	//private String planSegment;// "1","2","12","13","123",...
 	public String getLateDateTimeLoadAtWarehouse(){
 		String s = pickupWarehouses[0].getLateDateTimeLoadAtWarehouse();
 		for(int i = 1; i < pickupWarehouses.length; i++){
@@ -48,7 +51,7 @@ public class ExportContainerRequest {
 		// TODO Auto-generated constructor stub
 	}
 
-	public ExportContainerRequest(String orderItemID, String shipCompanyCode,
+	public ExportContainerRequest(String orderItemID, boolean isSwap, String orderItemSwapID, String shipCompanyCode,
 			String depotContainerCode, String containerCategory, 
 			String containerCode, String containerNo, double weight,
 			String earlyDateTimePickupAtDepot,
@@ -59,6 +62,8 @@ public class ExportContainerRequest {
 			int unloadDuration, String customerCode, String customerName) {
 		super();
 		this.orderItemID = orderItemID;
+		this.isSwap = isSwap;
+		this.orderItemSwapID = orderItemSwapID;
 		this.shipCompanyCode = shipCompanyCode;
 		this.depotContainerCode = depotContainerCode;
 		this.containerCategory = containerCategory;
@@ -105,6 +110,21 @@ public class ExportContainerRequest {
 		return shipCompanyCode;
 	}
 
+	public boolean getIsSwap(){
+		return this.isSwap;
+	}
+	public void setIsSwap(boolean isSwap){
+		this.isSwap = isSwap;
+	}
+	public String getOrderItemSwapID(){
+		return this.orderItemSwapID;
+	}
+	public void setSwap(boolean isSwap) {
+		this.isSwap = isSwap;
+	}
+	public void setOrderItemSwapID(String orderItemSwapID){
+		this.orderItemSwapID = orderItemSwapID;
+	}
 	public void setShipCompanyCode(String shipCompanyCode) {
 		this.shipCompanyCode = shipCompanyCode;
 	}
@@ -224,7 +244,12 @@ public class ExportContainerRequest {
 	public void setCustomerName(String customerName){
 		this.customerName = customerName;
 	}
-	
+	public int getRejectCode() {
+		return rejectCode;
+	}
+	public void setRejectCode(int rejectCode) {
+		this.rejectCode = rejectCode;
+	}
 	
 	
 }

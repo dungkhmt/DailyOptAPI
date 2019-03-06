@@ -4,6 +4,7 @@ import routingdelivery.smartlog.containertruckmoocassigment.service.InitGreedyIm
 
 public class TangboWarehouseExportRouteComposer implements RouteComposer {
 	private InitGreedyImproveSpecialOperatorSolver solver;
+	private Measure ms;
 	private Truck truck;
 	private Mooc mooc;
 	private Container container;
@@ -18,13 +19,14 @@ public class TangboWarehouseExportRouteComposer implements RouteComposer {
 	
 
 	public TangboWarehouseExportRouteComposer(
-			InitGreedyImproveSpecialOperatorSolver solver, Truck truck,
+			InitGreedyImproveSpecialOperatorSolver solver, Measure ms, Truck truck,
 			Mooc mooc, Container container, TruckRoute route,
 			WarehouseContainerTransportRequest whReq,
 			ExportContainerRequest exReq, TruckRouteInfo4Request tri,
 			double distance) {
 		super();
 		this.solver = solver;
+		this.ms = ms;
 		this.truck = truck;
 		this.mooc = mooc;
 		this.container = container;
@@ -57,15 +59,21 @@ public class TangboWarehouseExportRouteComposer implements RouteComposer {
 		for(Truck trk: tri.mTruck2LastDepot.keySet()){
 			solver.mTruck2LastDepot.put(trk, tri.getLastDepotTruck(trk));
 			solver.mTruck2LastTime.put(trk, tri.getLastTimeTruck(trk));
+			solver.updateTruckAtDepot(trk);
 		}
 		for(Mooc mooc: tri.mMooc2LastDepot.keySet()){
 			solver.mMooc2LastDepot.put(mooc, tri.getLastDepotMooc(mooc));
 			solver.mMooc2LastTime.put(mooc, tri.getLastTimeMooc(mooc));
+			solver.updateMoocAtDepot(mooc);
 		}
 		for(Container container: tri.mContainer2LastDepot.keySet()){
 			solver.mContainer2LastDepot.put(container, tri.getLastDepotContainer(container));
 			solver.mContainer2LastTime.put(container, tri.getLastTimeContainer(container));
-		}		
+			solver.updateContainerAtDepot(container);
+		}
+		solver.updateDriverAccessWarehouse(ms.driverId, ms.wh);
+		for(String key : ms.srcdest.keySet())
+			solver.updateDriverIsBalance(ms.driverId, key, ms.srcdest.get(key));
 	}
 	public String name(){
 		return "TangboWarehouseExportRouteComposer";

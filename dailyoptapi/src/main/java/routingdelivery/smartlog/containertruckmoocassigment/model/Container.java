@@ -8,6 +8,7 @@ public class Container {
 	private String depotContainerCode;
 	private String[] returnDepotCodes;// possible depots when finishing services
 	private boolean importedContainer;
+	private String shipCompanyCode;
 	
 	
 	public Container(String code, int weight, String categoryCode,
@@ -67,7 +68,12 @@ public class Container {
 		this.depotContainerCode = depotContainerCode;
 	}
 	
-	
+	public String getShipCompanyCode() {
+		return shipCompanyCode;
+	}
+	public void setShipCompanyCode(String shipCompanyCode) {
+		this.shipCompanyCode = shipCompanyCode;
+	}
 	
 	public Container() {
 		super();

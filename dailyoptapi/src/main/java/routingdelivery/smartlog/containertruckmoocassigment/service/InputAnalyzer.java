@@ -10,6 +10,8 @@ import routingdelivery.smartlog.containertruckmoocassigment.model.ImportContaine
 import routingdelivery.smartlog.containertruckmoocassigment.model.ImportEmptyRequests;
 import routingdelivery.smartlog.containertruckmoocassigment.model.ImportLadenRequests;
 import routingdelivery.smartlog.containertruckmoocassigment.model.Truck;
+import routingdelivery.smartlog.containertruckmoocassigment.model.WarehouseContainerTransportRequest;
+import routingdelivery.smartlog.containertruckmoocassigment.model.WarehouseTransportRequest;
 import utils.DateTimeUtils;
 
 public class InputAnalyzer {
@@ -82,14 +84,11 @@ public class InputAnalyzer {
 		if(input.getImEmptyRequests() != null){
 			for(int i = 0; i < input.getImEmptyRequests().length; i++){
 				ImportEmptyRequests r = input.getImEmptyRequests()[i];
-				if(r.getRequestDate() != null){
-					int dt = (int)DateTimeUtils.dateTime2Int(r.getRequestDate());
+				if(r.getEarlyDateTimeAttachAtWarehouse() != null){
+					int dt = (int)DateTimeUtils.dateTime2Int(r.getEarlyDateTimeAttachAtWarehouse());
 					if(dt < minDateTime) minDateTime = dt;
 				}
-				if(r.getLateDateTimeAttachAtWarehouse() != null){
-					int dt = (int)DateTimeUtils.dateTime2Int(r.getLateDateTimeAttachAtWarehouse());
-					if(dt < minDateTime) minDateTime = dt;
-				}
+
 				if(r.getLateDateTimeReturnEmptyAtDepot() != null){
 					int dt = (int)DateTimeUtils.dateTime2Int(r.getLateDateTimeReturnEmptyAtDepot());
 					if(dt < minDateTime) minDateTime = dt;
@@ -99,10 +98,10 @@ public class InputAnalyzer {
 		if(input.getImLadenRequests() != null){
 			for(int i= 0; i < input.getImLadenRequests().length; i++){
 				ImportLadenRequests r = input.getImLadenRequests()[i];
-				if(r.getRequestDate() != null){
-					int dt = (int)DateTimeUtils.dateTime2Int(r.getRequestDate());
-					if(dt < minDateTime) minDateTime = dt;
-				}
+//				if(r.getRequestDate() != null){
+//					int dt = (int)DateTimeUtils.dateTime2Int(r.getRequestDate());
+//					if(dt < minDateTime) minDateTime = dt;
+//				}
 				if(r.getLateDateTimePickupAtPort() != null){
 					int dt = (int)DateTimeUtils.dateTime2Int(r.getLateDateTimePickupAtPort());
 					if(dt < minDateTime) minDateTime = dt;
@@ -125,10 +124,10 @@ public class InputAnalyzer {
 		if(input.getExEmptyRequests() != null){
 			for(int i = 0; i < input.getExEmptyRequests().length; i++){
 				ExportEmptyRequests r = input.getExEmptyRequests()[i];
-				if(r.getRequestDate() != null){
-					int dt = (int)DateTimeUtils.dateTime2Int(r.getRequestDate());
-					if(dt < minDateTime) minDateTime = dt;
-				}
+//				if(r.getRequestDate() != null){
+//					int dt = (int)DateTimeUtils.dateTime2Int(r.getRequestDate());
+//					if(dt < minDateTime) minDateTime = dt;
+//				}
 				if(r.getEarlyDateTimeLoadAtWarehouse() != null){
 					int dt = (int)DateTimeUtils.dateTime2Int(r.getEarlyDateTimeLoadAtWarehouse());
 					if(dt < minDateTime) minDateTime = dt;
@@ -150,16 +149,16 @@ public class InputAnalyzer {
 		if(input.getExLadenRequests() != null){
 			for(int i = 0; i < input.getExLadenRequests().length; i++){
 				ExportLadenRequests r = input.getExLadenRequests()[i];
-				if(r.getRequestDate() != null){
-					int dt = (int)DateTimeUtils.dateTime2Int(r.getRequestDate());
-					if(dt < minDateTime) minDateTime = dt;
-				}
-				if(r.getEarlyDateTimeUnloadAtPort() != null){
-					int dt = (int)DateTimeUtils.dateTime2Int(r.getEarlyDateTimeUnloadAtPort());
-					if(dt < minDateTime) minDateTime = dt;
-				}
-				if(r.getLateDateTimeAttachAtWarehouse() != null){
-					int dt = (int)DateTimeUtils.dateTime2Int(r.getLateDateTimeAttachAtWarehouse());
+//				if(r.getRequestDate() != null){
+//					int dt = (int)DateTimeUtils.dateTime2Int(r.getRequestDate());
+//					if(dt < minDateTime) minDateTime = dt;
+//				}
+//				if(r.getEarlyDateTimeUnloadAtPort() != null){
+//					int dt = (int)DateTimeUtils.dateTime2Int(r.getEarlyDateTimeUnloadAtPort());
+//					if(dt < minDateTime) minDateTime = dt;
+//				}
+				if(r.getEarlyDateTimeAttachAtWarehouse() != null){
+					int dt = (int)DateTimeUtils.dateTime2Int(r.getEarlyDateTimeAttachAtWarehouse());
 					if(dt < minDateTime) minDateTime = dt;
 				}
 				if(r.getLateDateTimeUnloadAtPort() != null){
@@ -169,6 +168,32 @@ public class InputAnalyzer {
 			}
 		}
 		
+		if(input.getWarehouseRequests() != null){
+			for(int i = 0; i < input.getWarehouseRequests().length; i++){
+				WarehouseTransportRequest R = input.getWarehouseRequests()[i];
+				if(R.getWarehouseContainerTransportRequests() != null){
+					for(int j = 0; j< R.getWarehouseContainerTransportRequests().length; j++){
+						WarehouseContainerTransportRequest r = R.getWarehouseContainerTransportRequests()[j];
+						if(r.getEarlyDateTimeLoad() != null){
+							int dt = (int)DateTimeUtils.dateTime2Int(r.getEarlyDateTimeLoad());
+							if(dt < minDateTime) minDateTime = dt;
+						}
+						if(r.getEarlyDateTimeUnload() != null){
+							int dt = (int)DateTimeUtils.dateTime2Int(r.getEarlyDateTimeUnload());
+							if(dt < minDateTime) minDateTime = dt;
+						}
+						if(r.getLateDateTimeLoad() != null){
+							int dt = (int)DateTimeUtils.dateTime2Int(r.getLateDateTimeLoad());
+							if(dt < minDateTime) minDateTime = dt;
+						}
+						if(r.getLateDateTimeUnload() != null){
+							int dt = (int)DateTimeUtils.dateTime2Int(r.getLateDateTimeUnload());
+							if(dt < minDateTime) minDateTime = dt;
+						}
+					}
+				}
+			}
+		}
 		
 		if(input.getTrucks() != null){
 			for(int i = 0; i < input.getTrucks().length; i++){

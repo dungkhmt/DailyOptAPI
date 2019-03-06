@@ -45,6 +45,11 @@ public class TruckItinerary {
 			for(int j = 0; j <= idx; j++){
 				L.add(e[j]);
 			}
+			if(i == routes.size() - 1){
+				L.remove(L.size() - 1);
+				if(L.get(L.size() - 1).getAction().equals(ActionEnum.RELEASE_MOOC_AT_DEPOT))
+					L.remove(L.size() - 1);
+			}
 			TR[i] = new TruckRoute(null,L);
 			TR[i].setType(tr.getType());
 			distance += TR[i].getDistance();

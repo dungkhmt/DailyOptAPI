@@ -3,15 +3,22 @@ package routingdelivery.model;
 public class DistanceElement {
 	private String srcCode;
 	private String destCode;
+	private boolean isDriverBalance;
+	private int[] drivers;
 	private double distance;
 	private double travelTime;
 	
 	
-	public DistanceElement(String srcCode, String destCode, double distance,
+	public DistanceElement(String srcCode, String destCode, 
+			boolean isDriverBalance,
+			int[] drivers,
+			double distance,
 			double travelTime) {
 		super();
 		this.srcCode = srcCode;
 		this.destCode = destCode;
+		this.isDriverBalance = isDriverBalance;
+		this.drivers = drivers;
 		this.distance = distance;
 		this.travelTime = travelTime;
 	}
@@ -38,6 +45,21 @@ public class DistanceElement {
 	}
 	public void setDistance(double distance) {
 		this.distance = distance;
+	}
+	public boolean getIsDriverBalance(){
+		return isDriverBalance;
+	}
+	public void setDriverBalance(boolean isDriverBalance) {
+		this.isDriverBalance = isDriverBalance;
+	}
+	public void setIsDriverBalance(boolean isDriverBalance){
+		this.isDriverBalance = isDriverBalance;
+	}
+	public int[] getDrivers(){
+		return this.drivers;
+	}
+	public void setDrivers(int[] drivers){
+		this.drivers = drivers;
 	}
 	public DistanceElement(String srcCode, String destCode, double distance) {
 		super();

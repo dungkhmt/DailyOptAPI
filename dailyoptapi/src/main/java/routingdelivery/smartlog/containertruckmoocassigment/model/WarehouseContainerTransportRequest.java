@@ -2,7 +2,8 @@ package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class WarehouseContainerTransportRequest {
 	private String orderItemID;
-	
+	private String orderID;
+	private String orderCode;
 	// 1st segment (Depot to warehouse: empty)
 	private String containerCategory;
 	private String containerCode;
@@ -39,6 +40,11 @@ public class WarehouseContainerTransportRequest {
 								// "12": only 1st and 2nd, "23": only 2nd and 3th segments
 								// "123": both 1st, 2nd and 3th segments
 	
+	private String getDepotContainerCode;
+	private String returnDepotContainerCode;
+	
+	private int rejectCode;
+
 
 	public WarehouseContainerTransportRequest() {
 		super();
@@ -74,7 +80,9 @@ public class WarehouseContainerTransportRequest {
 										String[] returnDepotContainerCodes,
 										String levelRequest,
 										String customerCode,
-										String customerName) {
+										String customerName,
+										String getDepotContainerCode,
+										String returnDepotContainerCode) {
 									super();
 									this.orderItemID = orderItemID;
 									this.containerCategory = containerCategory;
@@ -102,6 +110,8 @@ public class WarehouseContainerTransportRequest {
 									this.levelRequest = levelRequest;
 									this.customerCode = customerCode;
 									this.customerName = customerName;
+									this.getDepotContainerCode = getDepotContainerCode;
+									this.returnDepotContainerCode = returnDepotContainerCode;
 								}
 
 
@@ -117,6 +127,22 @@ public class WarehouseContainerTransportRequest {
 	public void setReturnDepotContainerCodes(String[] returnDepotContainerCodes) {
 		this.returnDepotContainerCodes = returnDepotContainerCodes;
 	}
+	
+	public String getGetDepotContainerCode() {
+		return getDepotContainerCode;
+	}
+
+	public void setGetDepotContainerCode(String getDepotContainerCode) {
+		this.getDepotContainerCode = getDepotContainerCode;
+	}
+	
+	public String getReturnDepotContainerCode() {
+		return returnDepotContainerCode;
+	}
+
+	public void setReturnDepotContainerCode(String returnDepotContainerCode) {
+		this.returnDepotContainerCode = returnDepotContainerCode;
+	}
 
 
 
@@ -130,6 +156,21 @@ public class WarehouseContainerTransportRequest {
 		this.orderItemID = orderItemID;
 	}
 
+	public String getOrderID() {
+		return orderID;
+	}
+	
+	public void setOrderID(String orderID) {
+		this.orderID = orderID;
+	}
+	
+	public String getOrderCode() {
+		return orderCode;
+	}
+
+	public void setOrderCode(String orderCode) {
+		this.orderCode = orderCode;
+	}
 
 	public String getContainerCategory() {
 		return containerCategory;
@@ -364,5 +405,14 @@ public class WarehouseContainerTransportRequest {
 	public void setCustomerName(String customerName){
 		this.customerName = customerName;
 	}
+
+	public int getRejectCode() {
+		return rejectCode;
+	}
+
+	public void setRejectCode(int rejectCode) {
+		this.rejectCode = rejectCode;
+	}
+	
 	
 }

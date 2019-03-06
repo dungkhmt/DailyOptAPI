@@ -1,6 +1,7 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class ImportEmptyRequests {
+	private int id;
 	private boolean isBreakRomooc;
 	private String containerCategory;
 	private String containerCode;
@@ -9,22 +10,24 @@ public class ImportEmptyRequests {
 	private String customerCode;
 	private String customerName;
 	private String requestDate;
-	private String lateDateTimeAttachAtWarehouse;
+	private String earlyDateTimeAttachAtWarehouse;
 	private String lateDateTimeReturnEmptyAtDepot;
 	private String moocCode;
 	private double weight;
 	private String wareHouseCode;
 	private String depotContainerCode;
 	private int linkContainerDuration;// thoi gian dat cont. len mooc
+	private int rejectCode;
 	
 
-	public ImportEmptyRequests(boolean isBreakRomooc, String containerCategory,
+	public ImportEmptyRequests(int id, boolean isBreakRomooc, String containerCategory,
 			String containerCode, String containerNo, String orderCode, String customerCode,
-			String customerName, String requestDate, String lateDateTimeAttachAtWarehouse,
+			String customerName, String requestDate, String earlyDateTimeAttachAtWarehouse,
 			String lateDateTimeReturnEmptyAtDepot, String moocCode,
 			double weight, String wareHouseCode, String depotContainerCode,
 			int linkContainerDuration) {
 		super();
+		this.id = id;
 		this.isBreakRomooc = isBreakRomooc;
 		this.containerCategory = containerCategory;
 		this.containerCode = containerCode;
@@ -33,7 +36,7 @@ public class ImportEmptyRequests {
 		this.customerCode = customerCode;
 		this.customerName = customerName;
 		this.requestDate = requestDate;
-		this.lateDateTimeAttachAtWarehouse = lateDateTimeAttachAtWarehouse;
+		this.earlyDateTimeAttachAtWarehouse = earlyDateTimeAttachAtWarehouse;
 		this.lateDateTimeReturnEmptyAtDepot = lateDateTimeReturnEmptyAtDepot;
 		this.moocCode = moocCode;
 		this.weight = weight;
@@ -42,13 +45,23 @@ public class ImportEmptyRequests {
 		this.linkContainerDuration = linkContainerDuration;
 	}
 
+	public int getId(){
+		return this.id;
+	}
+	public void setId(int id){
+		this.id = id;
+	}
 
-	public boolean isBreakRomooc() {
+	public boolean getIsBreakRomooc() {
 		return isBreakRomooc;
 	}
 
 
 	public void setBreakRomooc(boolean isBreakRomooc) {
+		this.isBreakRomooc = isBreakRomooc;
+	}
+
+	public void setIsBreakRomooc(boolean isBreakRomooc) {
 		this.isBreakRomooc = isBreakRomooc;
 	}
 
@@ -118,14 +131,14 @@ public class ImportEmptyRequests {
 	}
 
 
-	public String getLateDateTimeAttachAtWarehouse() {
-		return lateDateTimeAttachAtWarehouse;
+	public String getEarlyDateTimeAttachAtWarehouse() {
+		return earlyDateTimeAttachAtWarehouse;
 	}
 
 
-	public void setLateDateTimeAttachAtWarehouse(
-			String lateDateTimeAttachAtWarehouse) {
-		this.lateDateTimeAttachAtWarehouse = lateDateTimeAttachAtWarehouse;
+	public void setEarlyDateTimeAttachAtWarehouse(
+			String earlyDateTimeAttachAtWarehouse) {
+		this.earlyDateTimeAttachAtWarehouse = earlyDateTimeAttachAtWarehouse;
 	}
 
 
@@ -186,6 +199,13 @@ public class ImportEmptyRequests {
 		this.linkContainerDuration = linkContainerDuration;
 	}
 
+	public int getRejectCode() {
+		return rejectCode;
+	}
+
+	public void setRejectCode(int rejectCode) {
+		this.rejectCode = rejectCode;
+	}
 
 	public ImportEmptyRequests() {
 		super();

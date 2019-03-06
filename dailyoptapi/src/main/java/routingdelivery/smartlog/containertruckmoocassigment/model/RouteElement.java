@@ -33,6 +33,12 @@ public class RouteElement {
 	private ImportLadenRequests importLadenRequestKep;
 	private ImportEmptyRequests importEmptyRequestKep;
 	
+	private String earliestArrivalTime;
+	private String latestArrivalTime;
+	private int serviceDuration;
+	private int index;
+	private boolean kep;
+	
 	
 	public RouteElement(DepotTruck depotTruck, DepotMooc depotMooc,
 			DepotContainer depotContainer, Warehouse warehouse, Port port,
@@ -262,6 +268,25 @@ public class RouteElement {
 			WarehouseContainerTransportRequest warehouseRequest) {
 		this.warehouseRequest = warehouseRequest;
 	}
+	public ExportContainerRequest getExportRequestKep() {
+		return exportRequestKep;
+	}
+	public void setExportRequestKep(ExportContainerRequest exportRequestKep) {
+		this.exportRequestKep = exportRequestKep;
+	}
+	public ImportContainerRequest getImportRequestKep() {
+		return importRequestKep;
+	}
+	public void setImportRequestKep(ImportContainerRequest importRequestKep) {
+		this.importRequestKep = importRequestKep;
+	}
+	public WarehouseContainerTransportRequest getWarehouseRequestKep() {
+		return warehouseRequestKep;
+	}
+	public void setWarehouseRequestKep(
+			WarehouseContainerTransportRequest warehouseRequestKep) {
+		this.warehouseRequestKep = warehouseRequestKep;
+	}
 	public double getDistance() {
 		return distance;
 	}
@@ -331,6 +356,36 @@ public class RouteElement {
 	}
 	public void setDepartureTime(String departureTime) {
 		this.departureTime = departureTime;
+	}
+	public String getEarliestArrivalTime() {
+		return earliestArrivalTime;
+	}
+	public void setEarliestArrivalTime(String earliestArrivalTime) {
+		this.earliestArrivalTime = earliestArrivalTime;
+	}
+	public String getLatestArrivalTime() {
+		return latestArrivalTime;
+	}
+	public void setLatestArrivalTime(String latestArrivalTime) {
+		this.latestArrivalTime = latestArrivalTime;
+	}
+	public int getServiceDuration() {
+		return serviceDuration;
+	}
+	public void setServiceDuration(int serviceDuration) {
+		this.serviceDuration = serviceDuration;
+	}
+	public int getIndex() {
+		return index;
+	}
+	public void setIndex(int index) {
+		this.index = index;
+	}
+	public boolean isKep() {
+		return kep;
+	}
+	public void setKepValue(boolean kep) {
+		this.kep = kep;
 	}
 	public RouteElement() {
 		super();

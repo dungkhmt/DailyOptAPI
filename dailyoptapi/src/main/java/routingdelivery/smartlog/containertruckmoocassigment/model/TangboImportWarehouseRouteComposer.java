@@ -1,14 +1,14 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
-import java.util.HashMap;
-
 import routingdelivery.smartlog.containertruckmoocassigment.service.InitGreedyImproveSpecialOperatorSolver;
 
-public class IndividualExportRouteComposer implements RouteComposer {
+public class TangboImportWarehouseRouteComposer implements RouteComposer {
 	private InitGreedyImproveSpecialOperatorSolver solver;
-	private Measure ms;
+	private Truck truck;
+	private Mooc mooc;
 	private TruckRoute route;
-	private ExportContainerRequest exReq;
+	private WarehouseContainerTransportRequest whReq;
+	private ImportContainerRequest imReq;
 	private TruckRouteInfo4Request tri;
 	private double distance;
 	
@@ -16,16 +16,19 @@ public class IndividualExportRouteComposer implements RouteComposer {
 
 	
 
-	public IndividualExportRouteComposer(
-			InitGreedyImproveSpecialOperatorSolver solver, 
-			Measure ms, TruckRoute route,
-			ExportContainerRequest exReq, TruckRouteInfo4Request tri,
+	public TangboImportWarehouseRouteComposer(
+			InitGreedyImproveSpecialOperatorSolver solver, Truck truck,
+			Mooc mooc, TruckRoute route,
+			WarehouseContainerTransportRequest whReq,
+			ImportContainerRequest imReq, TruckRouteInfo4Request tri,
 			double distance) {
 		super();
 		this.solver = solver;
-		this.ms = ms;
+		this.truck = truck;
+		this.mooc = mooc;
 		this.route = route;
-		this.exReq = exReq;
+		this.whReq = whReq;
+		this.imReq = imReq;
 		this.tri = tri;
 		this.distance = distance;
 	}
@@ -45,12 +48,10 @@ public class IndividualExportRouteComposer implements RouteComposer {
 	@Override
 	public void acceptRoute() {
 		// TODO Auto-generated method stub
-		Truck truck = tri.route.getTruck();
-		solver.markServed(exReq);
+		solver.markServed(whReq);
+		solver.markServed(imReq);
 		solver.addRoute(tri.route, tri.lastUsedIndex);
 		solver.logln(name() + "::acceptRoute " + tri.route.toString());
-		TruckItinerary I = solver.mTruck2Itinerary.get(truck);
-		solver.logln(name() + "::acceptRoute, Itinerary = " + I.toString());
 		for(Truck trk: tri.mTruck2LastDepot.keySet()){
 			solver.mTruck2LastDepot.put(trk, tri.getLastDepotTruck(trk));
 			solver.mTruck2LastTime.put(trk, tri.getLastTimeTruck(trk));
@@ -62,18 +63,12 @@ public class IndividualExportRouteComposer implements RouteComposer {
 			solver.updateMoocAtDepot(mooc);
 		}
 		for(Container container: tri.mContainer2LastDepot.keySet()){
-				solver.mContainer2LastDepot.put(container, tri.getLastDepotContainer(container));
-			//if(solver.mContainer2LastTime == null)
-			//	solver.mContainer2LastTime = new HashMap<Container, Integer>();
-			
-				solver.mContainer2LastTime.put(container, tri.getLastTimeContainer(container));
-				solver.updateContainerAtDepot(container);
-		}
-		solver.updateDriverAccessWarehouse(ms.driverId, ms.wh);
-		for(String key : ms.srcdest.keySet())
-			solver.updateDriverIsBalance(ms.driverId, key, ms.srcdest.get(key));
+			solver.mContainer2LastDepot.put(container, tri.getLastDepotContainer(container));
+			solver.mContainer2LastTime.put(container, tri.getLastTimeContainer(container));
+			solver.updateContainerAtDepot(container);
+		}		
 	}
 	public String name(){
-		return "IndividualExportRouteComposer";
+		return "TangboImportWarehouseRouteComposer";
 	}
 }

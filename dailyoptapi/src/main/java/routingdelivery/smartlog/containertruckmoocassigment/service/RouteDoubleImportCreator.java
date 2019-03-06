@@ -94,6 +94,14 @@ public class RouteDoubleImportCreator {
 		duration = req_a.getLoadDuration();
 		departureTime = startServiceTime + duration;
 		lastLocationCode = port_a.getLocationCode();
+		if(combo.routeElement == null){
+			int mooc2cont = combo.startTime - combo.startTimeOfMooc;
+			int truck2moocdepot = combo.startTimeOfMooc - combo.startTimeOfTruck;
+			combo.startTime = startServiceTime - travelTime;
+			combo.startTimeOfMooc = combo.startTime - mooc2cont;
+			combo.startTimeOfTruck = combo.startTimeOfMooc - truck2moocdepot;
+			extraTime = 0;
+		}
 		
 		//from port_a to port_b
 		distance += solver.getDistance(lastLocationCode, port_b.getLocationCode());

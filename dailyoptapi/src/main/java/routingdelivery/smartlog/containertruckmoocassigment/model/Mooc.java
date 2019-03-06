@@ -1,22 +1,31 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class Mooc {
+	private int id;
 	private String code;
 	private String category;// 20, 40, 45
+	private int categoryId;
 	private double weight;//20, 40, 45
 	private String status;
+	private int statusId;
 	private String depotMoocCode;
+	private String depotMoocLocationCode;
 	private String[] returnDepotCodes;// possible depots when finishing services
 	private Intervals[] intervals;
 	
-	public Mooc(String code, String category, double weight, String status,
-			String depotMoocCode, String[] returnDepotCodes, Intervals[] intervals) {
+	public Mooc(int id, String code, String category, int categoryId,
+			double weight, String status, int statusId,
+			String depotMoocCode, String depotMoocLocationCode, String[] returnDepotCodes, Intervals[] intervals) {
 		super();
+		this.id = id;
 		this.code = code;
 		this.category = category;
+		this.categoryId = categoryId;
 		this.weight = weight;
 		this.status = status;
+		this.statusId = statusId;
 		this.depotMoocCode = depotMoocCode;
+		this.depotMoocLocationCode = depotMoocLocationCode;
 		this.returnDepotCodes = returnDepotCodes;
 		this.intervals = intervals;
 	}
@@ -25,6 +34,12 @@ public class Mooc {
 	}
 	public void setReturnDepotCodes(String[] returnDepotCodes) {
 		this.returnDepotCodes = returnDepotCodes;
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
 	}
 	public String getCode() {
 		return code;
@@ -38,6 +53,12 @@ public class Mooc {
 	public void setCategory(String category) {
 		this.category = category;
 	}
+	public int getCategoryId() {
+		return categoryId;
+	}
+	public void setCategoryId(int categoryId) {
+		this.categoryId = categoryId;
+	}
 	public double getWeight() {
 		return weight;
 	}
@@ -50,13 +71,24 @@ public class Mooc {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	public int getStatusId() {
+		return statusId;
+	}
+	public void setStatusId(int statusId) {
+		this.statusId = statusId;
+	}
 	public String getDepotMoocCode() {
 		return depotMoocCode;
 	}
 	public void setDepotMoocCode(String depotMoocCode) {
 		this.depotMoocCode = depotMoocCode;
 	}
-	
+	public String getDepotMoocLocationCode() {
+		return depotMoocLocationCode;
+	}
+	public void setDepotMoocLocationCode(String depotMoocLocationCode) {
+		this.depotMoocLocationCode = depotMoocLocationCode;
+	}
 	public Intervals[] getIntervals() {
 		return intervals;
 	}

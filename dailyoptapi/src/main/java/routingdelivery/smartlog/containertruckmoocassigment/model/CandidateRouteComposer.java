@@ -23,10 +23,17 @@ public class CandidateRouteComposer {
 			RouteComposer cp = routeComposers.get(i);
 			if(cp.evaluation() < minD){
 				sel_i = i;
+				minD = cp.evaluation();
 			}
 		}
 		if(sel_i >= 0){
 			routeComposers.get(sel_i).acceptRoute();
+		}
+	}
+	
+	public void performRouteComposer(){
+		for(int i = 0; i < size(); i++){
+			routeComposers.get(i).acceptRoute();
 		}
 	}
 }

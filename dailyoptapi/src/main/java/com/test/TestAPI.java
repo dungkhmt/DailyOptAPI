@@ -66,6 +66,17 @@ public class TestAPI {
 		c = c * 1000;
 		return new TestSolution(c);
 	}
+	
+	@RequestMapping(value = "/accessPermission", method = RequestMethod.POST)
+	public AccessPermissionResult accessPermission(HttpServletRequest request,
+			@RequestBody AccessPermissionInput input) {
+		if(input.getA().equals("DailyOptAPI")
+			&& input.getB().equals("sml")){
+			AccessPermissionResult apr = new AccessPermissionResult("OK");
+			return apr;
+		}
+		return null;
+	}
 
 	public void writeGlobalRequest(SEMPickupDeliveryInput input) {
 		try {

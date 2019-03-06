@@ -1,12 +1,22 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class MoocGroup {
+	private int id;
 	private String code;
 	private MoocPacking[] packing;
 	
-	public MoocGroup(String code, MoocPacking[] packing){
+	public MoocGroup(int id, String code, MoocPacking[] packing){
+		this.id = id;
 		this.code = code;
 		this.packing = packing;
+	}
+	
+	public int getId(){
+		return this.id;
+	}
+	
+	public void setId(int id){
+		this.id = id;
 	}
 	
 	public String getCode(){

@@ -1,6 +1,7 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class ExportLadenRequests {
+	private int id;
 	private boolean isBreakRomooc;
 	private String containerCategory;
 	private String containerCode;
@@ -9,8 +10,7 @@ public class ExportLadenRequests {
 	private String customerCode;
 	private String customerName;
 	private String requestDate;
-	private String lateDateTimeAttachAtWarehouse;
-	private String earlyDateTimeUnloadAtPort;
+	private String earlyDateTimeAttachAtWarehouse;
 	private String lateDateTimeUnloadAtPort;
 	private String moocCode;
 	private double weight;
@@ -18,16 +18,18 @@ public class ExportLadenRequests {
 	private String portCode;
 	private int linkContainerAtWarehouseDuration;
 	private int releaseLoadedContainerAtPortDuration;
+	private int rejectCode;
 	
 
-	public ExportLadenRequests(boolean isBreakRomooc, String containerCategory,
+	public ExportLadenRequests(int id, boolean isBreakRomooc, String containerCategory,
 			String containerCode, String containerNo, String orderCode, String customerCode,
-			String customerName, String requestDate, String lateDateTimeAttachAtWarehouse,
-			String earlyDateTimeUnloadAtPort, String lateDateTimeUnloadAtPort,
+			String customerName, String requestDate, String earlyDateTimeAttachAtWarehouse,
+			String lateDateTimeUnloadAtPort,
 			String moocCode, double weight, String wareHouseCode,
 			String portCode, int linkContainerAtWarehouseDuration,
 			int releaseLoadedContainerAtPortDuration) {
 		super();
+		this.id = id;
 		this.isBreakRomooc = isBreakRomooc;
 		this.containerCategory = containerCategory;
 		this.containerCode = containerCode;
@@ -36,8 +38,7 @@ public class ExportLadenRequests {
 		this.customerCode = customerCode;
 		this.customerName = customerName;
 		this.requestDate = requestDate;
-		this.lateDateTimeAttachAtWarehouse = lateDateTimeAttachAtWarehouse;
-		this.earlyDateTimeUnloadAtPort = earlyDateTimeUnloadAtPort;
+		this.earlyDateTimeAttachAtWarehouse = earlyDateTimeAttachAtWarehouse;
 		this.lateDateTimeUnloadAtPort = lateDateTimeUnloadAtPort;
 		this.moocCode = moocCode;
 		this.weight = weight;
@@ -46,14 +47,24 @@ public class ExportLadenRequests {
 		this.linkContainerAtWarehouseDuration = linkContainerAtWarehouseDuration;
 		this.releaseLoadedContainerAtPortDuration = releaseLoadedContainerAtPortDuration;
 	}
+	
+	public int getId(){
+		return this.id;
+	}
+	public void setId(int id){
+		this.id = id;
+	}
 
-
-	public boolean isBreakRomooc() {
+	public boolean getIsBreakRomooc() {
 		return isBreakRomooc;
 	}
 
 
 	public void setBreakRomooc(boolean isBreakRomooc) {
+		this.isBreakRomooc = isBreakRomooc;
+	}
+
+	public void setIsBreakRomooc(boolean isBreakRomooc) {
 		this.isBreakRomooc = isBreakRomooc;
 	}
 
@@ -123,26 +134,15 @@ public class ExportLadenRequests {
 	}
 
 
-	public String getLateDateTimeAttachAtWarehouse() {
-		return lateDateTimeAttachAtWarehouse;
+	public String getEarlyDateTimeAttachAtWarehouse() {
+		return earlyDateTimeAttachAtWarehouse;
 	}
 
 
-	public void setLateDateTimeAttachAtWarehouse(
-			String lateDateTimeAttachAtWarehouse) {
-		this.lateDateTimeAttachAtWarehouse = lateDateTimeAttachAtWarehouse;
+	public void setEarlyDateTimeAttachAtWarehouse(
+			String earlyDateTimeAttachAtWarehouse) {
+		this.earlyDateTimeAttachAtWarehouse = earlyDateTimeAttachAtWarehouse;
 	}
-
-
-	public String getEarlyDateTimeUnloadAtPort() {
-		return earlyDateTimeUnloadAtPort;
-	}
-
-
-	public void setEarlyDateTimeUnloadAtPort(String earlyDateTimeUnloadAtPort) {
-		this.earlyDateTimeUnloadAtPort = earlyDateTimeUnloadAtPort;
-	}
-
 
 	public String getLateDateTimeUnloadAtPort() {
 		return lateDateTimeUnloadAtPort;
@@ -215,6 +215,13 @@ public class ExportLadenRequests {
 		this.releaseLoadedContainerAtPortDuration = releaseLoadedContainerAtPortDuration;
 	}
 
+	public int getRejectCode() {
+		return rejectCode;
+	}
+
+	public void setRejectCode(int rejectCode) {
+		this.rejectCode = rejectCode;
+	}
 
 	public ExportLadenRequests() {
 		super();

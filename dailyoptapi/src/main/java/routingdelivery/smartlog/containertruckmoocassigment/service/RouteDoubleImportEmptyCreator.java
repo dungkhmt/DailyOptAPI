@@ -79,11 +79,15 @@ public class RouteDoubleImportEmptyCreator {
 		distance += solver.getDistance(lastLocationCode, wh_a.getLocationCode());
 		
 		arrivalTime = departureTime + travelTime;
-		if (req_a.getLateDateTimeAttachAtWarehouse() != null)
-			if (arrivalTime > DateTimeUtils.dateTime2Int(req_a
-					.getLateDateTimeAttachAtWarehouse()))
-				return null;
-		startServiceTime = arrivalTime;
+//		if (req_a.getLateDateTimeAttachAtWarehouse() != null)
+//			if (arrivalTime > DateTimeUtils.dateTime2Int(req_a
+//					.getLateDateTimeAttachAtWarehouse()))
+//				return null;
+		startServiceTime = Utils.MAX(arrivalTime,
+				(int) DateTimeUtils.dateTime2Int(req_a
+						.getEarlyDateTimeAttachAtWarehouse()));
+		extraTime += Utils.MAX(0, (int) DateTimeUtils.dateTime2Int(req_a
+				.getEarlyDateTimeAttachAtWarehouse()) - arrivalTime);
 		if(wh_a.getBreaktimes() != null){
 			for(int k = 0; k < wh_a.getBreaktimes().length; k++){
 				Intervals interval = wh_a.getBreaktimes()[k];
@@ -95,6 +99,14 @@ public class RouteDoubleImportEmptyCreator {
 							dateTime2Int(interval.getDateEnd());
 				}
 			}
+		}
+		if(combo.routeElement == null){
+			int mooc2cont = combo.startTime - combo.startTimeOfMooc;
+			int truck2moocdepot = combo.startTimeOfMooc - combo.startTimeOfTruck;
+			combo.startTime = startServiceTime - travelTime;
+			combo.startTimeOfMooc = combo.startTime - mooc2cont;
+			combo.startTimeOfTruck = combo.startTimeOfMooc - truck2moocdepot;
+			extraTime = 0;
 		}
 		int finishedServiceTime = startServiceTime
 				+ solver.input.getParams().getLinkEmptyContainerDuration();
@@ -125,11 +137,15 @@ public class RouteDoubleImportEmptyCreator {
 		distance += solver.getDistance(lastLocationCode, wh_b.getLocationCode());
 		
 		arrivalTime = departureTime + travelTime;
-		if (req_b.getLateDateTimeAttachAtWarehouse() != null)
-			if (arrivalTime > DateTimeUtils.dateTime2Int(req_b
-					.getLateDateTimeAttachAtWarehouse()))
-				return null;
-		startServiceTime = arrivalTime;
+//		if (req_b.getLateDateTimeAttachAtWarehouse() != null)
+//			if (arrivalTime > DateTimeUtils.dateTime2Int(req_b
+//					.getLateDateTimeAttachAtWarehouse()))
+//				return null;
+		startServiceTime = Utils.MAX(arrivalTime,
+				(int) DateTimeUtils.dateTime2Int(req_b
+						.getEarlyDateTimeAttachAtWarehouse()));
+		extraTime += Utils.MAX(0, (int) DateTimeUtils.dateTime2Int(req_b
+				.getEarlyDateTimeAttachAtWarehouse()) - arrivalTime);
 		if(wh_b.getBreaktimes() != null){
 			for(int k = 0; k < wh_b.getBreaktimes().length; k++){
 				Intervals interval = wh_b.getBreaktimes()[k];
@@ -306,13 +322,14 @@ public class RouteDoubleImportEmptyCreator {
 		travelTime = solver.getTravelTime(lastElement, e2);
 		arrivalTime = departureTime + travelTime;
 		// check time
-		if (sel_imEmptyReq_a.getLateDateTimeAttachAtWarehouse() != null)
-			if (arrivalTime > DateTimeUtils.dateTime2Int(sel_imEmptyReq_a
-					.getLateDateTimeAttachAtWarehouse()))
-				return null;
+//		if (sel_imEmptyReq_a.getLateDateTimeAttachAtWarehouse() != null)
+//			if (arrivalTime > DateTimeUtils.dateTime2Int(sel_imEmptyReq_a
+//					.getLateDateTimeAttachAtWarehouse()))
+//				return null;
 
 		startServiceTime = solver.MAX(arrivalTime,
-				(int) DateTimeUtils.dateTime2Int(sel_imEmptyReq_a.getRequestDate()));
+				(int) DateTimeUtils.dateTime2Int(sel_imEmptyReq_a
+						.getEarlyDateTimeAttachAtWarehouse()));
 		distance = combo.extraDistance + solver.getDistance(lastElement, e2);
 
 		int finishedServiceTime = startServiceTime
@@ -335,13 +352,14 @@ public class RouteDoubleImportEmptyCreator {
 		travelTime = solver.getTravelTime(lastElement, e22);
 		arrivalTime = departureTime + travelTime;
 		// check time
-		if (sel_imEmptyReq_b.getLateDateTimeAttachAtWarehouse() != null)
-			if (arrivalTime > DateTimeUtils.dateTime2Int(sel_imEmptyReq_b
-					.getLateDateTimeAttachAtWarehouse()))
-				return null;
+//		if (sel_imEmptyReq_b.getLateDateTimeAttachAtWarehouse() != null)
+//			if (arrivalTime > DateTimeUtils.dateTime2Int(sel_imEmptyReq_b
+//					.getLateDateTimeAttachAtWarehouse()))
+//				return null;
 
 		startServiceTime = solver.MAX(arrivalTime,
-				(int) DateTimeUtils.dateTime2Int(sel_imEmptyReq_b.getRequestDate()));
+				(int) DateTimeUtils.dateTime2Int(sel_imEmptyReq_b
+						.getEarlyDateTimeAttachAtWarehouse()));
 		distance += solver.getDistance(lastElement, e22);
 
 		finishedServiceTime = startServiceTime

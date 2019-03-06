@@ -1,6 +1,7 @@
 package routingdelivery.smartlog.containertruckmoocassigment.model;
 
 public class ImportLadenRequests {
+	private int id;
 	private boolean isBreakRomooc;
 	private String containerCategory;
 	private String containerCode;
@@ -19,9 +20,10 @@ public class ImportLadenRequests {
 	private String wareHouseCode;
 	private int linkLoadedContainerAtPortDuration;
 	
+	private int rejectCode;
 	
-	
-	public ImportLadenRequests(boolean isBreakRomooc, String containerCategory,
+
+	public ImportLadenRequests(int id, boolean isBreakRomooc, String containerCategory,
 			String containerCode, String containerNo, String orderCode, String customerCode,
 			String customerName, String requestDate, String earlyDateTimePickupAtPort,
 			String lateDateTimePickupAtPort,
@@ -30,6 +32,7 @@ public class ImportLadenRequests {
 			double weight, String portCode, String wareHouseCode,
 			int linkLoadedContainerAtPortDuration) {
 		super();
+		this.id = id;
 		this.isBreakRomooc = isBreakRomooc;
 		this.containerCategory = containerCategory;
 		this.containerCode = containerCode;
@@ -49,15 +52,24 @@ public class ImportLadenRequests {
 		this.linkLoadedContainerAtPortDuration = linkLoadedContainerAtPortDuration;
 	}
 
+	public int getId(){
+		return this.id;
+	}
+	public void setId(int id){
+		this.id = id;
+	}
 
-
-	public boolean isBreakRomooc() {
+	public boolean getIsBreakRomooc() {
 		return isBreakRomooc;
 	}
 
 
 
 	public void setBreakRomooc(boolean isBreakRomooc) {
+		this.isBreakRomooc = isBreakRomooc;
+	}
+
+	public void setIsBreakRomooc(boolean isBreakRomooc) {
 		this.isBreakRomooc = isBreakRomooc;
 	}
 
@@ -244,7 +256,13 @@ public class ImportLadenRequests {
 		this.linkLoadedContainerAtPortDuration = linkLoadedContainerAtPortDuration;
 	}
 
+	public int getRejectCode() {
+		return rejectCode;
+	}
 
+	public void setRejectCode(int rejectCode) {
+		this.rejectCode = rejectCode;
+	}
 
 	public ImportLadenRequests() {
 		super();

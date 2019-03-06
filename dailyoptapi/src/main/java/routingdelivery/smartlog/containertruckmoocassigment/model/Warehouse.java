@@ -49,7 +49,7 @@ public class Warehouse {
 	public Checkin[] getCheckin(){
 		return checkin;
 	}
-	public void setChecking(Checkin[] checkin){
+	public void setCheckin(Checkin[] checkin){
 		this.checkin = checkin;
 	}
 	public Intervals[] getBreaktimes(){
